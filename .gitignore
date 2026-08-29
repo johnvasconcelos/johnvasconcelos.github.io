@@ -1,2 +1,23 @@
+# R / RStudio
+.Rproj.user/
+.Rhistory
+.RData
+.Ruserdata
+
+# Quarto internals
 /.quarto/
-**/*.quarto_ipynb
+/_site/
+
+# Secrets — NEVER commit
+.Renviron
+.env
+*_secret*
+*.pem
+
+# Large or private data
+data-raw/
+*.sav
+*.dta
+
+# NOTE: docs/ is deliberately NOT ignored — it is your 
+published website.
