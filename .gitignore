@@ -19,5 +19,6 @@ data-raw/
 *.sav
 *.dta
 
-# NOTE: docs/ is deliberately NOT ignored — it is your 
-published website.
+# NOTE: docs/ is deliberately NOT ignored — it is your published website.
+
+**/*.quarto_ipynb
