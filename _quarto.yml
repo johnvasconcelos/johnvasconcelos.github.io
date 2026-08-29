@@ -1,13 +1,25 @@
 project:
   type: website
+  output-dir: docs
 
 website:
   title: "johnvasconcelos.github.io"
+  description: "Public accountability and oversight"
   navbar:
     left:
       - href: index.qmd
         text: Home
-      - about.qmd
+      - href: research.qmd
+        text: Research
+      - href: teaching.qmd
+        text: Teaching
+      - href: cv.qmd
+        text: CV
+    right:
+    - icon: github
+      href: https://github.com/johnvasconcelos
+    - icon: envelope
+      href: mailto:you@utdallas.edu     
 
 format:
   html:
