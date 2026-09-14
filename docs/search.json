@@ -54,5 +54,40 @@
     "title": "johnvasconcelos.github.io",
     "section": "",
     "text": "Usage Notice\nAll content on this website is freely available for anyone to use, share, modify, or build upon in any way — no permission needed, no attribution required. This is my fourth personal academic website, and I believe in open access to knowledge and resources.\nIf you find something here useful, feel free to take it."
+  },
+  {
+    "objectID": "assign02.html",
+    "href": "assign02.html",
+    "title": "Assignment 02 - EPPS 6302",
+    "section": "",
+    "text": "This assignment addresses term searches on Google Trends\n\nThe following notes reproduce the scripts used for each search, an overview of the scraped data and the respective plots.\n\n\n\n\n\nlibrary(gtrendsR)\nlibrary(readr)\nlibrary(DT)\n\n\n\n\n\n\n\n\nTerms: Trump, Harris, election\nCountries: United States\nGroup: Web\nTime window: Last 5 years\nCategory: All categories (news, youtube, images etc)\n\n\nTrumpHarrisElection = gtrends(c(\"Trump\",\"Harris\",\"election\"), \n                              onlyInterest = TRUE, \n                              geo = \"US\", \n                              gprop = \"web\", \n                              time = \"today+5-y\", # last five years\n                              category = 0 \n) \ndf=TrumpHarrisElection$interest_over_time\nplot(TrumpHarrisElection)\n\n\n\n\n\n\n\nDT::datatable(TrumpHarrisElection$interest_over_time)\n\n\n\n\n\n\n\n\n\n\n\n\n\nTerms: immigration\nCountries: all\nGroup: alll\nTime window: alll\nCategory: all\n\n\nquery2 &lt;- gtrends(\"immigration\", time = \"all\")\nplot(query2)\n\n\n\n\n\n\n\nDT::datatable(query2$interest_over_time)\n\n\n\n\n\n\n\n\n\n\n\n\n\nTerms: immigration\nCountries: United States, Great Britain, Taiwan\nGroup: alll\nTime window: alll\nCategory: all\n\n\nquery3 &lt;- gtrends(\"immigration\", geo = c(\"US\", \"GB\", \"TW\"), time = \"all\")\nplot(query3)\n\n\n\n\n\n\n\nDT::datatable(query3$interest_over_time)"
+  },
+  {
+    "objectID": "assign02.html#assignment-02---epps-6302",
+    "href": "assign02.html#assignment-02---epps-6302",
+    "title": "johnvasconcelos.github.io",
+    "section": "",
+    "text": "This assignment addresses term searches on Google Trends\n\nThe following notes reproduce the scripts used for each search, an overview of the scraped data and the respective plots.\n\n\n\n\n\nlibrary(gtrendsR)\nlibrary(readr)\n\n\n\n\n\n\n\n\nTerms: Trump, Harris, election\nCountries: United States\nGroup: Web\nTime window: Last 5 years\nCategory: All categories (news, youtube, images etc)\n\n\nTrumpHarrisElection = gtrends(c(\"Trump\",\"Harris\",\"election\"), \n                              onlyInterest = TRUE, \n                              geo = \"US\", \n                              gprop = \"web\", \n                              time = \"today+5-y\", # last five years\n                              category = 0 \n) \ndf=TrumpHarrisElection$interest_over_time\nplot(TrumpHarrisElection)\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nTerms: immigration\nCountries: all\nGroup: alll\nTime window: alll\nCategory: all\n\n\nplot(gtrends(\"immigration\", time = \"all\"))\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nTerms: immigration\nCountries: United States, Great Britain, Taiwan\nGroup: alll\nTime window: alll\nCategory: all\n\n\nplot(gtrends(\"immigration\", geo = c(\"US\", \"GB\", \"TW\"), time = \"all\"))"
+  },
+  {
+    "objectID": "assign02.html#initial-search",
+    "href": "assign02.html#initial-search",
+    "title": "Assignment 02 - EPPS 6302",
+    "section": "",
+    "text": "Terms: Trump, Harris, election\nCountries: United States\nGroup: Web\nTime window: Last 5 years\nCategory: All categories (news, youtube, images etc)\n\n\nTrumpHarrisElection = gtrends(c(\"Trump\",\"Harris\",\"election\"), \n                              onlyInterest = TRUE, \n                              geo = \"US\", \n                              gprop = \"web\", \n                              time = \"today+5-y\", # last five years\n                              category = 0 \n) \ndf=TrumpHarrisElection$interest_over_time\nplot(TrumpHarrisElection)\n\n\n\n\n\n\n\nDT::datatable(TrumpHarrisElection$interest_over_time)"
+  },
+  {
+    "objectID": "assign02.html#updated-search",
+    "href": "assign02.html#updated-search",
+    "title": "Assignment 02 - EPPS 6302",
+    "section": "",
+    "text": "Terms: immigration\nCountries: all\nGroup: alll\nTime window: alll\nCategory: all\n\n\nquery2 &lt;- gtrends(\"immigration\", time = \"all\")\nplot(query2)\n\n\n\n\n\n\n\nDT::datatable(query2$interest_over_time)"
+  },
+  {
+    "objectID": "assign02.html#updated-search-1",
+    "href": "assign02.html#updated-search-1",
+    "title": "Assignment 02 - EPPS 6302",
+    "section": "",
+    "text": "Terms: immigration\nCountries: United States, Great Britain, Taiwan\nGroup: alll\nTime window: alll\nCategory: all\n\n\nquery3 &lt;- gtrends(\"immigration\", geo = c(\"US\", \"GB\", \"TW\"), time = \"all\")\nplot(query3)\n\n\n\n\n\n\n\nDT::datatable(query3$interest_over_time)"
   }
 ]

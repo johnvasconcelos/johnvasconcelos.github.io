@@ -1,0 +1,96 @@
+---
+format: html
+editor: visual
+execute: 
+  warning: false
+  message: false
+---
+
+# Assignment 02 - EPPS 6302
+
+This assignment addresses term searches on Google Trends
+
+> The following notes reproduce the scripts used for each search, an overview of the scraped data and the respective plots.
+
+------------------------------------------------------------------------
+
+#### Installing needed packages
+
+```{r}
+library(gtrendsR)
+library(readr)
+library(DT)
+```
+
+------------------------------------------------------------------------
+
+## Initial search
+
+##### Query record
+
+- Terms: Trump, Harris, election
+
+- Countries: United States
+
+- Group: Web
+
+- Time window: Last 5 years
+
+- Category: All categories (news, youtube, images etc)
+
+```{r}
+TrumpHarrisElection = gtrends(c("Trump","Harris","election"), 
+                              onlyInterest = TRUE, 
+                              geo = "US", 
+                              gprop = "web", 
+                              time = "today+5-y", # last five years
+                              category = 0 
+) 
+df=TrumpHarrisElection$interest_over_time
+plot(TrumpHarrisElection)
+DT::datatable(TrumpHarrisElection$interest_over_time)
+```
+
+------------------------------------------------------------------------
+
+## Updated Search
+
+##### Query record
+
+- Terms: immigration
+
+- Countries: all
+
+- Group: alll
+
+- Time window: alll
+
+- Category: all
+
+```{r}
+query2 <- gtrends("immigration", time = "all")
+plot(query2)
+DT::datatable(query2$interest_over_time)
+```
+
+------------------------------------------------------------------------
+
+## Updated Search
+
+##### Query record
+
+- Terms: immigration
+
+- Countries: United States, Great Britain, Taiwan
+
+- Group: alll
+
+- Time window: alll
+
+- Category: all
+
+```{r}
+query3 <- gtrends("immigration", geo = c("US", "GB", "TW"), time = "all")
+plot(query3)
+DT::datatable(query3$interest_over_time)
+```
