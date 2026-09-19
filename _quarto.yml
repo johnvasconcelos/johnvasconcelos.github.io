@@ -15,10 +15,12 @@ website:
         text: Teaching
       - href: cv.qmd
         text: CV
-      - href: assign02.qmd
-        text: Assig 02 Data Collection
       - href: assign01_Data_Visualization.qmd
-        text: Assig 01 Data Visualization       
+        text: Assig 01 Data Visualization
+      - href: assign02_Data_Collection.qmd
+        text: Assig 02 Data Collection  
+      - href: assign03_Data_Collection.qmd
+        text: Assig 03 Data Collection       
     right:
     - icon: github
       href: https://github.com/johnvasconcelos

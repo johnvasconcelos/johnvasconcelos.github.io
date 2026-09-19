@@ -158,4 +158,4 @@ The following chart was collected from <https://viz.wtf/> and reprdduces a chart
 
 The graph is a total mess. First, the timeline is represented as a spiral, which is not natural for humans. A straight timeline on the x-axis, in ascending order would be much more intuitive. Also, the intervals are confusing. The graph shows years, months and days on the same timeline, making it hard to distinguish what the metrics are effectivelly attempting to communicate. The numeric legend is also confusing. The user does not know immediately if the legend intends to be read as a color or as a triangular shape.
 
-![Bad chart by The New York Times](badchart.jpg){width=70%}
+![Bad chart by The New York Times](badchart.jpg){width="70%"}
