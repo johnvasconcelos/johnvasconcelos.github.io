@@ -17,6 +17,8 @@ website:
         text: CV
       - href: assign01_Data_Visualization.qmd
         text: Assig 01 Data Visualization
+      - href: assign02_Data_Visualization
+        text: Assig 02 Data Visualization
       - href: assign02_Data_Collection.qmd
         text: Assig 02 Data Collection  
       - href: assign03_Data_Collection.qmd
