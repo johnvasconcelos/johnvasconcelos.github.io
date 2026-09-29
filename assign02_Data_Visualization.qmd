@@ -1,5 +1,5 @@
 ---
-title: "assign02_Data_Visualization"
+title: "Assignment 2 - EPPS 6356"
 format: html
 editor: visual
 execute:

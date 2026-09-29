@@ -1,5 +1,5 @@
 ---
-title: "census_download_scripts"
+title: "Assignment 03 - EPPS 6302"
 format: html
 editor: visual
 execute: 

@@ -15,19 +15,23 @@ website:
         text: Teaching
       - href: cv.qmd
         text: CV
-      - href: assign01_Data_Visualization.qmd
-        text: Assig 01 Data Visualization
-      - href: assign02_Data_Visualization
-        text: Assig 02 Data Visualization
-      - href: assign02_Data_Collection.qmd
-        text: Assig 02 Data Collection  
-      - href: assign03_Data_Collection.qmd
-        text: Assig 03 Data Collection       
+      - text: EPPS 6356
+        menu:
+          - href: assign01_Data_Visualization.qmd
+            text: Assignment 01
+          - href: assign02_Data_Visualization.qmd
+            text: Assignment 02
+      - text: EPPS 6302
+        menu:
+          - href: assign02_Data_Collection.qmd
+            text: Assignment 02
+          - href: assign03_Data_Collection.qmd
+            text: Assignment 03
     right:
-    - icon: github
-      href: https://github.com/johnvasconcelos
-    - icon: envelope
-      href: mailto:you@utdallas.edu     
+      - icon: github
+        href: https://github.com/johnvasconcelos
+      - icon: envelope
+        href: mailto:you@utdallas.edu
 
 format:
   html:
@@ -38,4 +42,3 @@ format:
     toc: true
 
 editor: visual
-
