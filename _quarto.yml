@@ -3,9 +3,10 @@ project:
   output-dir: docs
 
 website:
-  title: "johnvasconcelos.github.io"
+  title: "John Vasconcelos"
   description: "Public accountability and oversight"
   navbar:
+    title: false
     left:
       - href: index.qmd
         text: Home
@@ -21,6 +22,8 @@ website:
             text: Assignment 01
           - href: assign02_Data_Visualization.qmd
             text: Assignment 02
+          - href: assign03_Data_Visualization.qmd
+            text: Assignment 03
       - text: EPPS 6302
         menu:
           - href: assign02_Data_Collection.qmd
@@ -36,9 +39,11 @@ website:
 format:
   html:
     theme:
-      - cosmo
-      - brand
+      darkly	      
     css: styles.css
     toc: true
+
+execute:
+  freeze: auto
 
 editor: visual

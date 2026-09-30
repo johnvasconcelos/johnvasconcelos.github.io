@@ -9,12 +9,19 @@ about:
     - icon: envelope
       text: Email
       href: mailto:you@utdallas.edu
+    - icon: linkedin
+      text: LinkedIn
+      href: https://www.linkedin.com/in/johnvasconcelos
     - icon: github
       text: GitHub
-      href: https://github.com/USERNAME
+      href: https://github.com/johnvasconcelos
+    - icon: person-vcard
+      text: ORCID
+      href: https://orcid.org/0009-0004-2983-0670
     - icon: mortarboard
       text: Google Scholar
       href: https://scholar.google.com/citations?user=XXXX
+      
 ---
 
 I am a PhD student in Public and Nonprofit Management at the University of Texas at Dallas. My research interests cover topics associated with public financial and performance accountability oversight, such as public sector auditing and financial compliance, utilizing advanced statistics and artificial intelligence.

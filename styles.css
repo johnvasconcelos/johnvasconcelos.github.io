@@ -1,1 +1,6 @@
 /* css styles */
+
+.quarto-about-trestles .about-entity {
+  border-right: none !important;
+  border-bottom: none !important;
+}
