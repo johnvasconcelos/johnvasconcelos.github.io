@@ -1,0 +1,226 @@
+---
+title: "Assignment 4: Webscraping 1"
+subtitle: "EPPS 6302 Methods of Data Collection and Production"
+format: html
+editor: visual
+execute:
+  warning: false
+  message: false
+---
+
+## Setup
+
+```{r}
+library(rvest)
+library(dplyr)
+library(stringr)
+library(readr)
+library(tidyr)
+library(purrr)
+library(robotstxt)
+library(WDI)
+library(countrycode)
+```
+
+------------------------------------------------------------------------
+
+## 0. Permission
+
+*All three paths return `TRUE`*
+
+```{r}
+paths_allowed(paste0("https://en.wikipedia.org/wiki/",
+                     "List_of_countries_by_foreign-exchange_reserves"))
+paths_allowed(paste0("https://en.wikipedia.org/wiki/",
+                     "List_of_countries_by_GDP_(nominal)"))
+paths_allowed("https://books.toscrape.com/catalogue/page-1.html")
+```
+
+------------------------------------------------------------------------
+
+## 1. Warm-up: books.toscrape.com
+
+```{r}
+scrape_books <- function(url) {
+  pg <- read_html(url)
+  tibble(
+    title  = pg |> html_elements("article.product_pod h3 a") |> html_attr("title"),
+    price  = pg |> html_elements("article.product_pod p.price_color") |> html_text2(),
+    rating = pg |> html_elements("article.product_pod p.star-rating") |>
+               html_attr("class") |> str_remove("star-rating ")
+  ) |>
+    mutate(price_gbp = parse_number(price),
+           stars     = match(rating, c("One", "Two", "Three", "Four", "Five")))
+}
+
+# One page first
+head(scrape_books("https://books.toscrape.com/catalogue/page-1.html"))
+
+# Five pages, one second apart, bound into one dataframe
+urls  <- paste0("https://books.toscrape.com/catalogue/page-", 1:5, ".html")
+books <- map(urls, \(u) { Sys.sleep(1); scrape_books(u) }) |> list_rbind()
+
+nrow(books)   # 100 = 20 books x 5 pages
+```
+
+------------------------------------------------------------------------
+
+## 2. Scraping Wikipedia
+
+### a) Wikipedia: Foreign Exchange Reserves
+
+```{r}
+wiki_url <- paste0("https://en.wikipedia.org/wiki/",
+                   "List_of_countries_by_foreign-exchange_reserves")
+
+wiki_pg <- read_html(wiki_url)
+
+tabs <- wiki_pg |> html_elements("table.wikitable")
+length(tabs)
+tabs |> html_table() |> lapply(\(x) dim(x))
+
+reserves_raw <- tabs[[1]] |> html_table()
+
+# 3-row header: rows 1-2 of the data are the 2nd and 3rd header levels
+nm <- pmap_chr(
+  list(names(reserves_raw),
+       as.character(unlist(reserves_raw[1, ])),
+       as.character(unlist(reserves_raw[2, ]))),
+  \(a, b, c) paste(unique(c(a, b, c)), collapse = " ")
+)
+names(reserves_raw) <- nm
+reserves_raw <- reserves_raw[-(1:2), ]
+
+reserves <- reserves_raw |>
+  janitor::clean_names() |>
+  rename(country     = starts_with("country"),
+         incl_gold   = matches("including_gold_us"),
+         date_raw    = starts_with("last_reported")) |>
+  mutate(across(where(is.character),
+                ~ .x |>
+                  str_remove_all("\\[.*?\\]") |>
+                  str_replace_all("[\u00a0\u2009\u202f]", " ") |>
+                  str_squish())) |>
+  filter(!str_detect(country, regex("total|world", ignore_case = TRUE))) |>
+  transmute(country,
+            reserves_wiki = parse_number(incl_gold) * 1e6,   # US$ million -> US$
+            date_wiki = as.Date(lubridate::parse_date_time(
+              date_raw, orders = c("dmy", "mdy", "my", "y"), quiet = TRUE)))
+
+glimpse(reserves)
+count(reserves, wiki_year = lubridate::year(date_wiki))   # Wikipedia vintages
+```
+
+### b) Wikipedia: Scraping my own table (GDP nominal)
+
+```{r}
+gdp_url <- paste0("https://en.wikipedia.org/wiki/",
+                  "List_of_countries_by_GDP_(nominal)")
+
+gdp_pg   <- read_html(gdp_url)
+gdp_tabs <- gdp_pg |> html_elements("table.wikitable")
+length(gdp_tabs)
+gdp_tabs |> html_table() |> lapply(\(x) dim(x))
+
+# Pick the largest table (countries), not the regional-groupings one
+gdp_raw <- gdp_tabs[[which.max(sapply(html_table(gdp_tabs), nrow))]] |> html_table()
+glimpse(gdp_raw)
+
+# The year lives in the header ("IMF (2026)") -- save it before clean_names() erases it
+# Order assumed: country, IMF, World Bank, UN
+header_year <- names(gdp_raw) |> str_extract("\\d{4}") |> as.integer()
+names(header_year) <- c("country", "imf", "world_bank", "un")
+
+gdp <- gdp_raw |>
+  janitor::clean_names() |>
+  rename(country    = starts_with("country"),
+         imf        = starts_with("imf"),
+         world_bank = starts_with("world_bank"),
+         un         = starts_with("united_nations")) |>
+  mutate(across(everything(),
+                ~ .x |>
+                  str_remove_all("\\[.*?\\]") |>
+                  str_squish())) |>
+  filter(!str_detect(country, regex("^world$", ignore_case = TRUE)))
+
+# Tidy format: one row per country x source, with value and reference year
+gdp_long <- gdp |>
+  pivot_longer(c(imf, world_bank, un),
+               names_to = "source", values_to = "value") |>
+  mutate(
+    gdp_musd = suppressWarnings(parse_number(value)),                    # "—N/a" -> NA
+    year     = as.integer(str_extract(value, "(?<=\\()\\d{4}(?=\\))")),  # "(2024)" in the cell
+    year     = coalesce(year, header_year[source]),                      # otherwise, the column year
+    year     = if_else(is.na(gdp_musd), NA_integer_, year)
+  ) |>
+  select(country, source, year, gdp_musd)
+
+head(gdp_long, 12)
+```
+
+------------------------------------------------------------------------
+
+## 3. The World Bank API
+
+```{r}
+# One call. start = 1960 so countries whose last report is old (e.g. Iran) still appear
+reserves_api <- WDI(indicator = c(reserves_wb = "FI.RES.TOTL.CD"),
+                    start = 1960, end = 2025, extra = TRUE)
+
+# Latest available year per country, without regional aggregates
+wb_latest <- reserves_api |>
+  filter(region != "Aggregates", !is.na(reserves_wb)) |>
+  group_by(iso3c) |>
+  slice_max(year, n = 1, with_ties = FALSE) |>
+  ungroup() |>
+  select(iso3c, country_wb = country, year_wb = year, reserves_wb)
+
+count(wb_latest, year_wb)        # World Bank vintages
+
+# Join by ISO code (names differ: "Russia" vs "Russian Federation")
+comp <- reserves |>
+  mutate(iso3c = countrycode(country, "country.name", "iso3c",
+                             custom_match = c(Kosovo = "XKX"))) |>
+  full_join(wb_latest, by = "iso3c") |>
+  mutate(diff_pct = 100 * (reserves_wiki - reserves_wb) / reserves_wb,
+         year_gap = lubridate::year(date_wiki) - year_wb)
+
+# Only in Wikipedia / only in the World Bank
+comp |> filter(is.na(reserves_wb))   |> select(country, reserves_wiki, date_wiki)
+comp |> filter(is.na(reserves_wiki)) |> select(country_wb, reserves_wb, year_wb)
+
+# Largest gaps among the 25 biggest holders
+comp |>
+  filter(!is.na(reserves_wiki), !is.na(reserves_wb)) |>
+  slice_max(reserves_wb, n = 25) |>
+  arrange(desc(abs(diff_pct))) |>
+  transmute(country,
+            wiki_bn  = round(reserves_wiki / 1e9, 1),
+            wb_bn    = round(reserves_wb / 1e9, 1),
+            diff_pct = round(diff_pct, 1), date_wiki, year_wb) |>
+  knitr::kable()
+```
+
+### b) Comparing results
+
+The two datasets are not completely the same, with several discrepancies, such as:
+
+- The two sources are not measuring the same moment. The World Bank series is annual and end-of-year: most economies report 2025, a smaller group stops at 2024, and a few are much older - Most of the gap for large holders is time, not disagreement. For example, the World Bank reports India at US\$700.1 bn for end-2025, while Wikipedia reports.
+- The country list is no the same, ofr example Taiwan appears on Wikipedia but has no World Bank series
+
+
+### c) When is scraping the right tool?
+
+Scraping is a great tool when the data are publicly visible but are not available via API for mass download. Here it was the wrong choice because the World Bank had a better documented and API-available source.
+
+------------------------------------------------------------------------
+
+## 4. Data plan
+
+As a PhD Student in Public and Nonprofit Management, my main research topic is public sector auditing and financial oversight. The main agency in the United States that conducts public sector auditing is the Government Accountability Office. My research includes text analysis to identify the main topics and government areas that encompass the most anomalies (errors, fraud etc). To perform my intended research, I depend on the availablity of an API suitble for mass download of GAO reports and recommendations.
+
+However, the agency does not provide an open API for recent data, only for the reports from 1994 to 2008, which is not as relevant as the most recent reports. After reaching out directly to the GAO, I was referred to a research department in the agency, which I expect to be able to provide some solution for direct access to the data.
+
+As of now, I don't see how a robots.txt would affect my research since the needed API is not available. Since the data exists, but is not easily available to the public, I can not indicate what the rate limits, and cache issues I would have encountered.
+
+I am looking forward to finding alternative ways after I can complete a conversation with their research department.
