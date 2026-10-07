@@ -23,7 +23,9 @@ website:
           - href: assign02_Data_Visualization.qmd
             text: Assignment 02
           - href: assign03_Data_Visualization.qmd
-            text: Assignment 03          
+            text: Assignment 03    
+          - href: assign04_2_Data_Visualization.qmd
+            text: Note on Grammar of Graphics      
       - text: EPPS 6302
         menu:
           - href: assign02_Data_Collection.qmd
@@ -31,7 +33,7 @@ website:
           - href: assign03_Data_Collection.qmd
             text: Assignment 03
           - href: assign04_Data_Collection.qmd
-            text: Assignment 04
+            text: Assignment 04 
     right:
       - icon: github
         href: https://github.com/johnvasconcelos

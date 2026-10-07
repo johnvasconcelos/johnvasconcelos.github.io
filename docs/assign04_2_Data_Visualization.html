@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>license – John Vasconcelos</title>
+<title>assign04_2_data_visualization – John Vasconcelos</title>
 <style>
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -168,8 +168,19 @@ ul.task-list li input[type="checkbox"] {
 <div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
 <!-- sidebar -->
 <!-- margin-sidebar -->
-    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
-        
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#assignment-epps-6355---grammar-of-graphics" id="toc-assignment-epps-6355---grammar-of-graphics" class="nav-link active" data-scroll-target="#assignment-epps-6355---grammar-of-graphics">Assignment EPPS 6355 - Grammar of Graphics</a>
+  <ul class="collapse">
+  <li><a href="#big-data-analytics-pitfalls" id="toc-big-data-analytics-pitfalls" class="nav-link" data-scroll-target="#big-data-analytics-pitfalls">Big data analytics pitfalls</a></li>
+  <li><a href="#overfitting-and-overparameterization" id="toc-overfitting-and-overparameterization" class="nav-link" data-scroll-target="#overfitting-and-overparameterization">Overfitting and overparameterization</a></li>
+  <li><a href="#wickham-talk-summary" id="toc-wickham-talk-summary" class="nav-link" data-scroll-target="#wickham-talk-summary">Wickham talk summary</a></li>
+  </ul></li>
+  </ul>
+</nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content"><header id="title-block-header" class="quarto-title-block"></header>
@@ -177,11 +188,29 @@ ul.task-list li input[type="checkbox"] {
 
 
 
-<p><strong>Usage Notice</strong></p>
-<p>All content on this website is freely available for anyone to use, share, modify, or build upon in any way — no permission needed, no attribution required. This is my fourth personal academic website, and I believe in open access to knowledge and resources.</p>
-<p>If you find something here useful, feel free to take it.</p>
+<section id="assignment-epps-6355---grammar-of-graphics" class="level1">
+<h1>Assignment EPPS 6355 - Grammar of Graphics</h1>
+<hr>
+<section id="big-data-analytics-pitfalls" class="level2">
+<h2 class="anchored" data-anchor-id="big-data-analytics-pitfalls">Big data analytics pitfalls</h2>
+<p>Google Flu Trends (GFT) sought to detect surges of flu about one to two weeks brefore CDC, based on searches associated with this disease. The model in the beginning followed the CDC data very closely and was very successful. However, the expectation of continuously representing the data with accuracy never became real. GFT did not detect the 2009 H1N1 pandemic and overstimaed the incidence of flu by more than 199 weeds, and predicted more than double the medical appointments recorded by CDC for the 2012-2 seasons.</p>
+<p>The failure is supposed to be due to a few factors. The “big data rubris” is the false presumption that big data can ultimately replace traditional monitoring. Google searches may reflect the concern of users regarding the sickness but not the sickness itself. Also, Google keeps changing its algorithms continuously, which must have caused relevant change to the way data is collected and classified. Also, one of the major problmes is that Google was not transparent and never published the terms it used for prediction, making it harder for researchers to validate the consistency of the method.</p>
+<p>One example based on my own professional background as a former public sector auditor, is that our whitleblower line received a massive number of manifestations everyday, but most of them were not useful for auditing and fraud detection since most of the files were just citizens complaining about the government or services providade, never giving any useful information on whether there was some kind of fraud, where it was happening, who performed it etc. We had big data, but the data and its collection procedures were not designed to model the data according to our analytical needs.</p>
+<hr>
+</section>
+<section id="overfitting-and-overparameterization" class="level2">
+<h2 class="anchored" data-anchor-id="overfitting-and-overparameterization">Overfitting and overparameterization</h2>
+<p>In my understanding, overfitting occurs whenever a model learns not only the pattern but also the noice of the data in the training dataset. It is good to describe the current data, but bad to predict new ones. Overparametrization is when the model has so many tentative parameters that almost any series can be explained. GFT shows both concepts. With so many parameters, some terms will inevitably correlate with flu by chance. The model ends up trying to explain even what should not be explained.</p>
+<hr>
+</section>
+<section id="wickham-talk-summary" class="level2">
+<h2 class="anchored" data-anchor-id="wickham-talk-summary">Wickham talk summary</h2>
+<p>The lecture titled Data Visualization and data Science, by Hadley Wickham, discussed the importance of visualizing data in any modern data workflow. Wickham addresses the data analysis cycle (loading data, cleansing data, transofrming, visualizing, modeling and reporting) and emphasizes that data viz should not only be used for final reporting but it is a crucial stage for exploratory analysis itself. It allows for the user to find patterns and anomalies, and to see the strucuture of the data that can not be seen from tabular data. Ascombe’s quartet is a classic example of it.</p>
+<p>He also discussed the importance of the availability of tools such as R and the Tidyverse and Ggplot2 libraries, that are efficient and easy to implement, which relieves the cognitive toll on analysts, allowing for closer focus on problem resolution instead of worrying about handlingthe software and other implementations issues.</p>
 
 
+</section>
+</section>
 
 </main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
