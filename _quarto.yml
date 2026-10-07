@@ -1,6 +1,9 @@
 project:
   type: website
   output-dir: docs
+  execute-dir: project
+  resources:
+    - files/cv.pdf
 
 website:
   title: "John Vasconcelos"
@@ -10,40 +13,46 @@ website:
     left:
       - href: index.qmd
         text: Home
-      - href: research.qmd
+      - href: pages/research.qmd
         text: Research
-      - href: teaching.qmd
+      - href: pages/teaching.qmd
         text: Teaching
-      - href: cv.qmd
+      - href: pages/cv.qmd
         text: CV
+      - text: Portfolio
+        menu:
+          - href: pages/apps.qmd
+            text: Apps  
+          - href: pages/powerbi.qmd
+            text: Power BI      
       - text: EPPS 6356
         menu:
-          - href: assign01_Data_Visualization.qmd
+          - href: pages_epps_6356/assign01_Data_Visualization.qmd
             text: Assignment 01
-          - href: assign02_Data_Visualization.qmd
+          - href: pages_epps_6356/assign02_Data_Visualization.qmd
             text: Assignment 02
-          - href: assign03_Data_Visualization.qmd
+          - href: pages_epps_6356/assign03_Data_Visualization.qmd
             text: Assignment 03    
-          - href: assign04_2_Data_Visualization.qmd
+          - href: pages_epps_6356/assign04_2_Data_Visualization.qmd
             text: Note on Grammar of Graphics      
       - text: EPPS 6302
         menu:
-          - href: assign02_Data_Collection.qmd
+          - href: pages_epps_6302/assign02_Data_Collection.qmd
             text: Assignment 02
-          - href: assign03_Data_Collection.qmd
+          - href: pages_epps_6302/assign03_Data_Collection.qmd
             text: Assignment 03
-          - href: assign04_Data_Collection.qmd
+          - href: pages_epps_6302/assign04_Data_Collection.qmd
             text: Assignment 04 
     right:
       - icon: github
         href: https://github.com/johnvasconcelos
       - icon: envelope
-        href: mailto:you@utdallas.edu
+        href: mailto:john.vasconcelos@utdallas.edu
 
 format:
   html:
     theme:
-      darkly	      
+      darkly
     css: styles.css
     toc: true
 

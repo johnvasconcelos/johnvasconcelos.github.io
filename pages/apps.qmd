@@ -1,0 +1,65 @@
+---
+title: "Apps"
+format: html
+editor: visual
+---
+
+---
+title: "Apps"
+page-layout: full
+---
+
+**Effect of extreve values on the Mean and the Median**
+
+```{=html}
+<div style="width: 100%; height: 460px; overflow: hidden;">
+  <iframe title="Effect of extreme values on the mean and the median"
+          src="https://jvascanalytics.shinyapps.io/1_mean_and_median/"
+          style="width: 142.86%; height: 800px; border: 0;
+                 transform: scale(0.7); transform-origin: top left;"
+          loading="lazy"></iframe>
+</div>
+```
+
+___
+
+**Binomial Distribution Simulations**
+
+```{=html}
+<div style="width: 100%; height: 350px; overflow: hidden;">
+  <iframe title="Binomial Distribution Simulations"
+          src="https://jvascanalytics.shinyapps.io/binomial/"
+          style="width: 142.86%; height: 800px; border: 0;
+                 transform: scale(0.7); transform-origin: top left;"
+          loading="lazy"></iframe>
+</div>
+```
+
+___
+
+**Normal Distribution Simulations**
+
+```{=html}
+<div style="width: 100%; height: 350px; overflow: hidden;">
+  <iframe title="Normal Distribution Simulations"
+          src="https://jvascanalytics.shinyapps.io/3_simulating_normal_distributions/"
+          style="width: 142.86%; height: 800px; border: 0;
+                 transform: scale(0.7); transform-origin: top left;"
+          loading="lazy"></iframe>
+</div>
+```
+
+___
+
+**Hypothesis Tests**
+
+```{=html}
+<div style="width: 100%; height: 530px; overflow: hidden;">
+  <iframe title="Hypothesis Tests"
+          src="https://johnvasconcelos.shinyapps.io/one-tail-hypothesis-test/"
+          style="width: 142.86%; height: 800px; border: 0;
+                 transform: scale(0.7); transform-origin: top left;"
+          loading="lazy"></iframe>
+</div>
+```
+

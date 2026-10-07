@@ -1,6 +1,6 @@
 ---
 title: "John Vasconcelos"
-image: headshot.jpg
+image: images/headshot.jpg
 about:
   template: trestles
   image-shape: round
@@ -8,7 +8,7 @@ about:
   links:
     - icon: envelope
       text: Email
-      href: mailto:you@utdallas.edu
+      href: mailto:john.vasconcelos@utdallas.edu
     - icon: linkedin
       text: LinkedIn
       href: https://www.linkedin.com/in/johnvasconcelos
@@ -21,7 +21,6 @@ about:
     - icon: mortarboard
       text: Google Scholar
       href: https://scholar.google.com/citations?user=XXXX
-      
 ---
 
 I am a PhD student in Public and Nonprofit Management at the University of Texas at Dallas. My research interests cover topics associated with public financial and performance accountability oversight, such as public sector auditing and financial compliance, utilizing advanced statistics and artificial intelligence.

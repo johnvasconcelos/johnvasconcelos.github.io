@@ -1,0 +1,80 @@
+---
+title: "Power BI"
+page-layout: full
+---
+
+**Financial Statments and Index Analysis Multiple Companies**
+
+```{=html}
+<div style="width: 56%; margin: 0 auto;">
+  <div style="position: relative; height: 0; padding-bottom: calc(56.25% + 60px);">
+    <iframe title="Meu dashboard"
+            src="https://app.powerbi.com/view?r=eyJrIjoiNGViMGRlZTEtMGE2ZC00ODE4LWE4N2YtYTk1NTU4ZWZjOGQwIiwidCI6ImUyOTFjOTBmLThhZTAtNGE0NS1iNTdiLWFiZTQyOWNjNWEyNCJ9"
+            style="position: absolute; inset: 0; width: 100%; height: 100%; border: 0;"
+            allowfullscreen="true"></iframe>
+  </div>
+</div>
+```
+
+___
+
+**Financial Indicators Dashboard**
+
+```{=html}
+<div style="width: 56%; margin: 0 auto;">
+  <div style="position: relative; height: 0; padding-bottom: calc(56.25% + 60px);">
+    <iframe title="Meu dashboard"
+            src="https://app.powerbi.com/view?r=eyJrIjoiZWVhNTEzMmYtY2Y4Yy00NTAyLWJmOWYtNjBiYzVhNGQxNDFhIiwidCI6ImUyOTFjOTBmLThhZTAtNGE0NS1iNTdiLWFiZTQyOWNjNWEyNCJ9"
+            style="position: absolute; inset: 0; width: 100%; height: 100%; border: 0;"
+            allowfullscreen="true"></iframe>
+  </div>
+</div>
+```
+
+___
+
+**HR & Payroll Analysis**
+
+```{=html}
+<div style="width: 56%; margin: 0 auto;">
+  <div style="position: relative; height: 0; padding-bottom: calc(56.25% + 60px);">
+    <iframe title="Meu dashboard"
+            src="https://app.powerbi.com/view?r=eyJrIjoiNjY5M2UwMjMtZGU2Yi00Yzc4LTllZTEtNTA4NjEwMzEyZTg2IiwidCI6ImUyOTFjOTBmLThhZTAtNGE0NS1iNTdiLWFiZTQyOWNjNWEyNCJ9"
+            style="position: absolute; inset: 0; width: 100%; height: 100%; border: 0;"
+            allowfullscreen="true"></iframe>
+  </div>
+</div>
+```
+
+
+___
+
+**US Elections**
+\
+*Final data for 2024 to be updated*
+
+```{=html}
+<div style="width: 56%; margin: 0 auto;">
+  <div style="position: relative; height: 0; padding-bottom: calc(56.25% + 60px);">
+    <iframe title="Meu dashboard"
+            src="https://app.powerbi.com/view?r=eyJrIjoiYzJmMWUyODgtMDE1OS00OWJkLWI3ZWQtOWMyNjY4M2ZjYTkyIiwidCI6ImUyOTFjOTBmLThhZTAtNGE0NS1iNTdiLWFiZTQyOWNjNWEyNCJ9"
+            style="position: absolute; inset: 0; width: 100%; height: 100%; border: 0;"
+            allowfullscreen="true"></iframe>
+  </div>
+</div>
+```
+
+___
+
+**Summarized Financial Reports**
+
+```{=html}
+<div style="width: 56%; margin: 0 auto;">
+  <div style="position: relative; height: 0; padding-bottom: calc(56.25% + 60px);">
+    <iframe title="Meu dashboard"
+            src="https://app.powerbi.com/view?r=eyJrIjoiZDJlMGZmODItZWZiOC00YWNkLTllYzAtMGJmMjcwMmEyYjJmIiwidCI6ImUyOTFjOTBmLThhZTAtNGE0NS1iNTdiLWFiZTQyOWNjNWEyNCJ9"
+            style="position: absolute; inset: 0; width: 100%; height: 100%; border: 0;"
+            allowfullscreen="true"></iframe>
+  </div>
+</div>
+```

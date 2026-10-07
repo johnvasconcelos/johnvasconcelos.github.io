@@ -1,0 +1,329 @@
+---
+format: html
+editor: visual
+execute:
+  warning: false
+  message: false
+---
+
+# Assignment 3 - EPPS 6355 - Data Visualization
+
+## 1. Document a Chart
+
+```{r}
+
+library(ggplot2)
+
+# Creating the data frame with the data: proportion of prefered pie flavors)
+sales <- data.frame(
+  flavor = c("Blueberry", "Cherry", "Apple", "Boston Cream", "Other", "Vanilla"),
+  prop  = c(0.12, 0.3, 0.26, 0.16, 0.04, 0.12)
+)
+
+# Keeping the original order of the flavores (to keep ggplot from sorting 
+# alphabetically)
+sales$sabor <- factor(sales$flavor, levels = sales$flavor)
+
+# Plotting
+# Ggplot2 has no pie chart. We need to create a col chart and roll it in
+ggplot(sales, aes(x = 1, y = prop, fill = flavor)) +
+# Plotting a single stacked bar
+  geom_col(width = 1, color = "black",
+           position = position_stack(reverse = TRUE)) +
+# Placing each flavor's name on the outside and middle of each slice
+  geom_text(aes(x = 1.7, label = sabor),
+            position = position_stack(vjust = 0.5, reverse = TRUE), size = 3) +
+  # Wrapping the bar in a circle, from 3 o'clock and spinning anti-clock
+  coord_polar(theta = "y", start = pi / 2, direction = -1) +
+  # Using 6 shades of gray from 0.3 to 1 where 1 is totally white
+  scale_fill_manual(values = gray(seq(0.3, 1.0, length = 6))) +
+  # Removes the axes, the background and legends
+  theme_void() +
+  theme(legend.position = "none")
+
+```
+
+## 2. Anscombe's quartet
+
+Anscombe's quartet shows that different data sets can lead to the same modeled outcomes even though the data sets behave completely differently. From the previous exercise on Anscombe's quartet, we have the following plots (I added the slope, y-intercept, Rsquare and Residual Standard Error for better comparison).
+
+```{r}
+## Anscombe (1973) Quartlet
+data(anscombe)  # Load Anscombe's data
+summary(anscombe)
+
+## Regression models
+lm1 <- lm(y1 ~ x1, data=anscombe)
+summary(lm1)
+
+lm2 <- lm(y2 ~ x2, data=anscombe)
+summary(lm2)
+
+lm3 <- lm(y3 ~ x3, data=anscombe)
+summary(lm3)
+
+lm4 <- lm(y4 ~ x4, data=anscombe)
+summary(lm4)
+
+## Plotting the regressions
+ff <- y ~ x
+mods <- setNames(as.list(1:4), paste0("lm", 1:4))
+
+# Plot using for loop
+for(i in 1:4) {
+  ff[2:3] <- lapply(paste0(c("y","x"), i), as.name)
+  ## or   ff[[2]] <- as.name(paste0("y", i))
+  ##      ff[[3]] <- as.name(paste0("x", i))
+  mods[[i]] <- lmi <- lm(ff, data = anscombe)
+  print(anova(lmi))
+}
+
+sapply(mods, coef)  # Note the use of this function
+lapply(mods, function(fm) coef(summary(fm)))
+
+# Extracting coefficients, R-squared, and Residual Standard Error (RSE)
+intercepts <- sapply(mods, function(fm) coef(fm)[1])
+slopes     <- sapply(mods, function(fm) coef(fm)[2])
+r2_vals    <- sapply(mods, function(fm) summary(fm)$r.squared) # R2
+rse_vals   <- sapply(mods, function(fm) summary(fm)$sigma)     # Residual Standard Error
+
+# Preparing for the plots
+op <- par(mfrow = c(2, 2), mar = 0.1+c(4,4,1,1), oma =  c(0, 0, 2, 0))
+
+# Plot charts using for loop with parameters printed on each plot
+for(i in 1:4) {
+  ff[2:3] <- lapply(paste0(c("y","x"), i), as.name)
+  plot(ff, data = anscombe, col = "red", pch = 21, bg = "tomato", cex = 1.2,
+       xlim = c(3, 19), ylim = c(3, 13))
+  abline(mods[[i]], col = "blue")
+  
+  # Print Intercept, Slope, R2, and RSE inside each plot window
+  text(x = 3.5, y = 12.5, labels = paste0("Intercept = ", round(intercepts[i], 3)), pos = 4, cex = 0.85)
+  text(x = 3.5, y = 11.7, labels = paste0("Slope = ", round(slopes[i], 3)), pos = 4, cex = 0.85)
+  text(x = 3.5, y = 10.9, labels = paste0("R2 = ", round(r2_vals[i], 3)), pos = 4, cex = 0.85)
+  text(x = 3.5, y = 10.1, labels = paste0("RSE = ", round(rse_vals[i], 3)), pos = 4, cex = 0.85)
+}
+mtext("Anscombe's 4 Regression data sets", outer = TRUE, cex = 1.5)
+
+
+```
+
+> We can see that the values for the slope, the intercept, the R2 and the RSE are the same for all four models. That reveals that without visualizing the data, an analyst could make serious modeling mistakes. Plotting the data, however reveals that each data set behaves very differently from the others. Data set 2 and data set 4, for example, are clearly nonlinear, which is prohibitive for regressions.
+
+Another way to see the regressions is using confidence intervals. Once again, a different visualization proves that the data sets are different, regardless of the equivalent metrics:
+
+```{r}
+
+library(ggplot2)
+library(patchwork)
+
+data(anscombe)
+
+plot_anscombe <- function(dataset_num) {
+  x_col <- paste0("x", dataset_num)
+  y_col <- paste0("y", dataset_num)
+  formula <- as.formula(paste(y_col, "~", x_col))
+  mod <- lm(formula, data = anscombe)
+  intercept <- round(coef(mod)[1], 3)
+  slope     <- round(coef(mod)[2], 3)
+  r2        <- round(summary(mod)$r.squared, 3)
+  rse       <- round(summary(mod)$sigma, 3)
+  stats_label <- paste0(
+    "Intercept = ", intercept, "\n",
+    "Slope = ", slope, "\n",
+    "R² = ", r2, "\n",
+    "RSE = ", rse
+  )
+  
+  # Building confidence bands
+  ggplot(anscombe, aes_string(x = x_col, y = y_col)) +
+    geom_smooth(method = "lm", formula = y ~ x, se = TRUE, 
+                color = "blue", fill = "lightblue", alpha = 0.4) +
+    geom_point(fill = "tomato", color = "red", shape = 21, size = 3) +
+    annotate("text", x = 3.5, y = 11.5, label = stats_label, 
+             hjust = 0, size = 3.2, family = "sans") +
+    scale_x_continuous(limits = c(3, 19)) +
+    scale_y_continuous(limits = c(3, 13)) +
+    labs(title = paste("Dataset", dataset_num), x = paste0("x", dataset_num), y = paste0("y", dataset_num)) +
+    theme_bw()
+}
+
+p1 <- plot_anscombe(1)
+p2 <- plot_anscombe(2)
+p3 <- plot_anscombe(3)
+p4 <- plot_anscombe(4)
+
+(p1 | p2) / (p3 | p4) + 
+  plot_annotation(
+    title = "Anscombe's 4 Regression Data Sets (with 95% CI Bands)",
+    theme = theme(plot.title = element_text(size = 16, face = "bold", hjust = 0.5))
+  )
+
+```
+
+## 3. Finetune without leaving base R
+
+Importing data and running regression with data set 1 from
+
+```{r}
+
+## Stacked Barplot (VADeaths) - Custom Styled
+
+data(VADeaths)
+
+# Set serif font family globally
+par(family = "serif", mar = c(3, 4, 3, 2))
+
+# Non-default color palette for the 5 age categories
+custom_cols <- c("#2B5C8F", "#4682B4", "#68BB68", "#E69F00", "#D55E00")
+
+# Draw stacked barplot
+midpts <- barplot(VADeaths, 
+                  col = custom_cols, 
+                  names = rep("", 4),
+                  main = "Death Rates in Virginia (1940)",
+                  ylab = "Deaths per 1000",
+                  col.main = "darkblue",
+                  col.lab = "gray10",
+                  col.axis = "gray20",
+                  ylim = c(0, 225))
+
+# Add x-axis labels
+mtext(sub(" ", "\n", colnames(VADeaths)),
+      at = midpts, side = 1, line = 1, cex = 0.8)
+
+# Add numeric text inside the stacked segments
+text(rep(midpts, each = 5), 
+     apply(VADeaths, 2, cumsum) - VADeaths / 2,
+     VADeaths, 
+     col = "white", 
+     font = 2,
+     cex = 0.8)
+
+# Custom plotting character (pch = 23: filled diamond) placed at total bar heights
+total_heights <- colSums(VADeaths)
+points(midpts, total_heights + 6, 
+       pch = 23, bg = "#D55E00", col = "black", cex = 1.4, lwd = 1.2)
+
+```
+
+## 4. Now in ggplot2
+
+```{r}
+
+library(ggplot2)
+library(tidyr)
+library(dplyr)
+
+# 1. Preparação dos dados em formato longo (tidy format)
+data(VADeaths)
+
+df_vadeaths <- as.data.frame(VADeaths) %>%
+  mutate(Age = rownames(VADeaths)) %>%
+  pivot_longer(cols = -Age, names_to = "Group", values_to = "Deaths") %>%
+  mutate(
+    Age = factor(Age, levels = rev(rownames(VADeaths))), # Mantém a ordem do empilhamento
+    Group = sub(" ", "\n", Group)
+  )
+
+# Totais por grupo para posicionar o caracter de plotagem no topo de cada barra
+df_totals <- df_vadeaths %>%
+  group_by(Group) %>%
+  summarise(Total = sum(Deaths))
+
+# Paleta de cores personalizada (não padrão)
+custom_cols <- c("#D55E00", "#E69F00", "#68BB68", "#4682B4", "#2B5C8F")
+
+# 2. Plotagem com ggplot2
+ggplot(df_vadeaths, aes(x = Group, y = Deaths, fill = Age)) +
+  # Barras empilhadas com borda fina
+  geom_bar(stat = "identity", position = "stack", color = "white", width = 0.6) +
+  # Texto numérico dentro dos segmentos das barras
+  geom_text(aes(label = Deaths), 
+            position = position_stack(vjust = 0.5), 
+            color = "white", fontface = "bold", size = 3.5, family = "serif") +
+  # c. Own plotting character (Diamantes/pch=23 no topo das barras)
+  geom_point(data = df_totals, aes(x = Group, y = Total + 6, fill = NULL), 
+             shape = 23, fill = "#D55E00", color = "black", size = 3.5, stroke = 1) +
+  # b. Non-default colours
+  scale_fill_manual(values = custom_cols) +
+  scale_y_continuous(limits = c(0, 225)) +
+  labs(
+    title = "Death Rates in Virginia (1940)",
+    x = NULL,
+    y = "Deaths per 1000",
+    fill = "Age Group"
+  ) +
+  theme_minimal() +
+  # a. Use a serif font globally
+  theme(
+    text = element_text(family = "serif"),
+    plot.title = element_text(face = "bold", size = 14, color = "darkblue", hjust = 0.5),
+    axis.title.y = element_text(size = 11, color = "gray10"),
+    axis.text = element_text(size = 10, color = "gray20"),
+    legend.position = "right"
+  )
+
+```
+
+## 5. Pre‑hackathon — team task
+
+#### Setting up libraries and downloading Daily COVID counts, Our World in Data.
+
+```{r}
+library(ggplot2)
+library(tidyverse)
+
+# Daily COVID counts, Our World in Data.
+url <- paste0("https://raw.githubusercontent.com/owid/covid-19-data/",
+              "master/public/data/owid-covid-data.csv")
+download.file(url, "files/owid-covid-data.csv")
+owidall <- read.csv("files/owid-covid-data.csv")
+
+# Drop OWID aggregate rows (continents, income groups, World)
+owidall <- owidall[!grepl("^OWID", owidall$iso_code), ]
+
+# Subset by continent
+owideu <- subset(owidall, continent == "Europe")
+owideu$date <- as.Date(owideu$date)
+
+# Removing Russia since it seems to be absent in the graph template
+df <- dplyr::filter(owideu,
+                    !is.na(new_deaths),
+                    location != "Russia")
+```
+
+#### Calculating the quartiles and IQR for outliers
+
+```{r}
+
+q3 <- quantile(df$new_deaths, 0.75, na.rm=T)
+iqr <- IQR(df$new_deaths)
+sup <- q3 + 1.5*iqr
+df$outliers <- ifelse(df$new_deaths > sup, df$location, NA)
+
+```
+
+#### Plotting
+
+```{r}
+
+ggplot(df)+
+  aes(x=date, y=new_deaths)+
+  geom_point(col='#E7298A')+
+  #geom_text(aes(label=outliers), na.rm=T)+
+  scale_x_date(
+    date_breaks = "2 months",
+    date_labels = "%Y-%m"
+    )+
+  labs(title = "Daily COVID deaths in Europe",
+       y = "COVID Deaths in Europe (Daily)",
+       x = "Date")+
+  #scale_y_continuous(limits=c(0,6600))+
+  theme_bw()+
+  theme(
+    axis.text.x = element_text(angle=90, vjust=0.5, hjust=1),
+    panel.grid = element_blank()
+  )
+
+```
