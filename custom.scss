@@ -1,0 +1,99 @@
+/*-- scss:defaults --*/
+// Identidade extraída dos slides W02–W07 (Methods of Quantitative Analysis).
+// Georgia vem instalada no Windows e no macOS; Gelasio (Google Fonts) tem as
+// mesmas métricas e entra como reserva em Linux / navegadores sem Georgia.
+@import url('https://fonts.googleapis.com/css2?family=Gelasio:ital,wght@0,400;0,700;1,400&display=swap');
+
+// ---- Paleta da marca --------------------------------------------------------
+$verde:          #154734;  // fundo da capa e das seções, títulos
+$laranja:        #ED7D31;  // títulos em destaque, barras, filetes
+$laranja-escuro: #E87500;  // laranja de destaque
+$menta:          #5FE0B7;  // "Week 07", números de seção (só sobre fundo verde)
+$tinta:          #171B18;  // texto principal
+$cinza-1:        #3A413C;
+$cinza-2:        #636B64;
+$cinza-3:        #9AA199;
+$cinza-4:        #D8DBD4;
+$verde-claro:    #EEF5F0;  // fundo dos cartões
+$laranja-claro:  #FDF1E3;  // linhas alternadas das tabelas
+
+// ---- Variáveis do Bootstrap / Quarto ---------------------------------------
+$font-family-sans-serif: Georgia, "Gelasio", "Times New Roman", serif;
+$font-family-monospace:  "SFMono-Regular", Menlo, Consolas, monospace;
+$body-bg:                #FFFFFF;
+$body-color:             $tinta;
+$primary:                $verde;
+$secondary:              $cinza-2;
+$link-color:             #14805A;
+$headings-color:         $verde;
+$headings-font-weight:   700;
+$border-color:           $cinza-4;
+$code-color:             $verde;
+$code-bg:                $verde-claro;
+
+// ---- Site: menu e rodapé --------------------------------------------------
+$navbar-bg:              $verde;
+$navbar-fg:              #FFFFFF;
+$navbar-hl:              $menta;
+$footer-bg:              $verde-claro;
+$footer-fg:              $cinza-2;
+
+$title-banner-bg:        $verde;
+$title-banner-color:     #FFFFFF;
+
+$callout-color-note:     $verde;
+$callout-color-tip:      #14805A;
+$callout-color-important:$laranja-escuro;
+$callout-color-warning:  $laranja;
+
+/*-- scss:rules --*/
+// Faixa de título como a capa: título branco, subtítulo menta, filete laranja
+.quarto-title-banner {
+  .title { color: #FFFFFF; }
+  .subtitle { color: $menta; font-weight: 700; }
+  .quarto-title::after {
+    content: ""; display: block; width: 3rem; height: 3px;
+    background: $laranja; margin-top: .75rem;
+  }
+}
+
+// Títulos de seção: verde com filete laranja curto, como nos slides
+h2 {
+  margin-top: 2.2rem;
+  &::after {
+    content: ""; display: block; width: 2.5rem; height: 3px;
+    background: $laranja; margin-top: .4rem;
+  }
+}
+h3 { color: $laranja; }
+
+// "REVIEW:" / destaque em laranja dentro de um título:  ## [Revisão:]{.destaque} ...
+.destaque { color: $laranja; }
+
+// Cartões verde-claro dos slides (Discrete / Continuous)
+.cartao {
+  background: $verde-claro; border-radius: 6px; padding: 1.1rem 1.3rem; margin: 1rem 0;
+  > :first-child { margin-top: 0; }
+  h3, h4, strong:first-child { color: $laranja; }
+}
+
+// Tabelas markdown: linhas alternadas em laranja-claro, sem grade pesada
+.table {
+  --bs-table-striped-bg: #{$laranja-claro};
+  border-top: 2px solid $verde;
+  thead th { color: $verde; border-bottom: 2px solid $laranja !important; }
+  td, th { border-color: $cinza-4; }
+}
+.table > tbody > tr:nth-of-type(odd) > * { background-color: $laranja-claro; }
+
+// Listas com marcador laranja, como em "Properties of Normal Distribution"
+main ul > li::marker { color: $laranja; }
+
+// Figuras e legendas
+.figure-caption, figcaption { color: $cinza-2; font-size: .9rem; }
+
+// "Let's do it in Excel" — instrução de atividade
+.atividade { color: #1F4FD1; font-weight: 700; font-style: italic; text-align: center; }
+
+// Figuras nunca maiores que a coluna de texto
+.cell-output-display img, .figure-img { max-width: 100%; height: auto; }

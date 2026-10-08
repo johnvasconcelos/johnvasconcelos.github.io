@@ -1,0 +1,7 @@
+```{python}
+#| include: false
+# Carrega o tema Python. Inclua em cada documento com:  {{< include /_setup.qmd >}}
+from helpers import CORES, PALETA, aplicar_tema, tabela, rotular_fim_linha
+import matplotlib.pyplot as plt
+aplicar_tema()
+```

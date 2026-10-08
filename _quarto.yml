@@ -51,9 +51,9 @@ website:
 
 format:
   html:
-    theme:
-      darkly
+    theme: [default, custom.scss]   # tema dos slides (verde, laranja, Georgia)
     css: styles.css
+    title-block-banner: true        # faixa verde com o título de cada página
     toc: true
 
 execute:

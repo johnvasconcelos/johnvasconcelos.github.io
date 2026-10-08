@@ -1,6 +1,6 @@
 /* css styles */
 
-/* DT tables: follow the dark theme */
+/* DT tables: seguem o tema claro (cores do custom.scss) */
 .dataTables_wrapper,
 table.dataTable,
 table.dataTable th,
@@ -12,6 +12,12 @@ table.dataTable td,
   color: var(--bs-body-color) !important;
 }
 
+/* Cabeçalho verde com filete laranja, como as tabelas do tema */
+table.dataTable thead th {
+  color: #154734 !important;
+  border-bottom: 2px solid #ED7D31 !important;
+}
+
 /* Search box and "Show N entries" selector */
 .dataTables_wrapper input,
 .dataTables_wrapper select {
@@ -20,22 +26,23 @@ table.dataTable td,
   border: 1px solid var(--bs-border-color) !important;
 }
 
-/* Rows: transparent background, subtle stripes and hover */
+/* Rows: linhas alternadas em laranja-claro, hover em verde-claro */
 table.dataTable tbody tr {
   background-color: transparent !important;
 }
 table.dataTable.stripe > tbody > tr.odd > *,
 table.dataTable.display > tbody > tr.odd > * {
-  box-shadow: inset 0 0 0 9999px rgba(255, 255, 255, 0.04) !important;
+  box-shadow: inset 0 0 0 9999px #FDF1E3 !important;
 }
 table.dataTable.hover > tbody > tr:hover > *,
 table.dataTable.display > tbody > tr:hover > * {
-  box-shadow: inset 0 0 0 9999px rgba(255, 255, 255, 0.10) !important;
+  box-shadow: inset 0 0 0 9999px #EEF5F0 !important;
 }
 
 /* Current page button */
 .dataTables_wrapper .dataTables_paginate .paginate_button.current,
 .dataTables_wrapper .dataTables_paginate .paginate_button.current:hover {
-  background: rgba(255, 255, 255, 0.15) !important;
-  border-color: var(--bs-border-color) !important;
+  background: #154734 !important;
+  color: #FFFFFF !important;
+  border-color: #154734 !important;
 }
