@@ -1,0 +1,1652 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.9.38">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>assign05_data_visualization – John Vasconcelos</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<script src="../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-daee3dbc31499a3618572225bd8afd09.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-e105d00954a15e2758bc79b9bf356532.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<link href="../site_libs/htmltools-fill-0.5.9/fill.css" rel="stylesheet">
+
+<script src="../site_libs/htmlwidgets-1.6.4/htmlwidgets.js"></script>
+
+<link href="../site_libs/datatables-css-0.0.0/datatables-crosstalk.css" rel="stylesheet">
+
+<script src="../site_libs/datatables-binding-0.34.0/datatables.js"></script>
+
+<script src="../site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+
+<link href="../site_libs/dt-core-1.13.6/css/jquery.dataTables.min.css" rel="stylesheet">
+
+<link href="../site_libs/dt-core-1.13.6/css/jquery.dataTables.extra.css" rel="stylesheet">
+
+<script src="../site_libs/dt-core-1.13.6/js/jquery.dataTables.min.js"></script>
+
+<link href="../site_libs/crosstalk-1.2.2/css/crosstalk.min.css" rel="stylesheet">
+
+<script src="../site_libs/crosstalk-1.2.2/js/crosstalk.min.js"></script>
+
+
+
+<link rel="stylesheet" href="../styles.css">
+</head>
+
+<body class="nav-fixed quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top quarto-banner">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../index.html"> 
+<span class="menu-text">Home</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../pages/research.html"> 
+<span class="menu-text">Research</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../pages/teaching.html"> 
+<span class="menu-text">Teaching</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../pages/cv.html"> 
+<span class="menu-text">CV</span></a>
+  </li>  
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-portfolio" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Portfolio</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-portfolio">    
+        <li>
+    <a class="dropdown-item" href="../pages/apps.html">
+ <span class="dropdown-text">Apps</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../pages/powerbi.html">
+ <span class="dropdown-text">Power BI</span></a>
+  </li>  
+    </ul>
+  </li>
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-epps-6356" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">EPPS 6356</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-epps-6356">    
+        <li>
+    <a class="dropdown-item" href="../pages_epps_6356/assign01_Data_Visualization.html">
+ <span class="dropdown-text">Assignment 01</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../pages_epps_6356/assign02_Data_Visualization.html">
+ <span class="dropdown-text">Assignment 02</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../pages_epps_6356/assign03_Data_Visualization.html">
+ <span class="dropdown-text">Assignment 03</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../pages_epps_6356/assign04_2_Data_Visualization.html">
+ <span class="dropdown-text">Note on Grammar of Graphics</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../pages_epps_6356/assign05_Data_Visualization.html">
+ <span class="dropdown-text">Assignment 05</span></a>
+  </li>  
+    </ul>
+  </li>
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-epps-6302" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">EPPS 6302</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-epps-6302">    
+        <li>
+    <a class="dropdown-item" href="../pages_epps_6302/assign02_Data_Collection.html">
+ <span class="dropdown-text">Assignment 02</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../pages_epps_6302/assign03_Data_Collection.html">
+ <span class="dropdown-text">Assignment 03</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../pages_epps_6302/assign04_Data_Collection.html">
+ <span class="dropdown-text">Assignment 04</span></a>
+  </li>  
+    </ul>
+  </li>
+</ul>
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/johnvasconcelos"> <i class="bi bi-github" role="img">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="mailto:john.vasconcelos@utdallas.edu"> <i class="bi bi-envelope" role="img">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<header id="title-block-header" class="quarto-title-block"></header><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#assignment-5---epps-6355---data-visualization" id="toc-assignment-5---epps-6355---data-visualization" class="nav-link active" data-scroll-target="#assignment-5---epps-6355---data-visualization">Assignment 5 - EPPS 6355 - Data Visualization</a></li>
+  <li><a href="#setup-data-import-and-display" id="toc-setup-data-import-and-display" class="nav-link" data-scroll-target="#setup-data-import-and-display">Setup, data import and display</a></li>
+  <li><a href="#part-1.-base-graphics" id="toc-part-1.-base-graphics" class="nav-link" data-scroll-target="#part-1.-base-graphics">Part 1. Base Graphics</a>
+  <ul class="collapse">
+  <li><a href="#theme" id="toc-theme" class="nav-link" data-scroll-target="#theme">Theme</a></li>
+  <li><a href="#a-histogram" id="toc-a-histogram" class="nav-link" data-scroll-target="#a-histogram">a) Histogram</a></li>
+  <li><a href="#b-bar-chart" id="toc-b-bar-chart" class="nav-link" data-scroll-target="#b-bar-chart">b) Bar Chart</a></li>
+  <li><a href="#c-pie-chart" id="toc-c-pie-chart" class="nav-link" data-scroll-target="#c-pie-chart">c) Pie Chart</a></li>
+  <li><a href="#d-boxplot" id="toc-d-boxplot" class="nav-link" data-scroll-target="#d-boxplot">d) Boxplot</a></li>
+  <li><a href="#e-scatterplot" id="toc-e-scatterplot" class="nav-link" data-scroll-target="#e-scatterplot">e) Scatterplot</a></li>
+  </ul></li>
+  <li><a href="#part-2.-ggplot2" id="toc-part-2.-ggplot2" class="nav-link" data-scroll-target="#part-2.-ggplot2">Part 2. ggplot2</a>
+  <ul class="collapse">
+  <li><a href="#theme-1" id="toc-theme-1" class="nav-link" data-scroll-target="#theme-1">Theme</a></li>
+  <li><a href="#a-histogram-1" id="toc-a-histogram-1" class="nav-link" data-scroll-target="#a-histogram-1">a) Histogram</a></li>
+  <li><a href="#b-bar-chart-1" id="toc-b-bar-chart-1" class="nav-link" data-scroll-target="#b-bar-chart-1">b) Bar Chart</a></li>
+  <li><a href="#c-pie-chart-1" id="toc-c-pie-chart-1" class="nav-link" data-scroll-target="#c-pie-chart-1">c) Pie Chart</a></li>
+  <li><a href="#d-boxplot-1" id="toc-d-boxplot-1" class="nav-link" data-scroll-target="#d-boxplot-1">d) Boxplot</a></li>
+  <li><a href="#e-scatterplot-1" id="toc-e-scatterplot-1" class="nav-link" data-scroll-target="#e-scatterplot-1">e) Scatterplot</a></li>
+  </ul></li>
+  <li><a href="#part-3.-output-formats" id="toc-part-3.-output-formats" class="nav-link" data-scroll-target="#part-3.-output-formats">Part 3. Output Formats</a></li>
+  <li><a href="#report" id="toc-report" class="nav-link" data-scroll-target="#report">Report</a>
+  <ul class="collapse">
+  <li><a href="#comparing-export-formats" id="toc-comparing-export-formats" class="nav-link" data-scroll-target="#comparing-export-formats">Comparing export formats</a>
+  <ul class="collapse">
+  <li><a href="#file-characteristics" id="toc-file-characteristics" class="nav-link" data-scroll-target="#file-characteristics">File characteristics</a></li>
+  <li><a href="#zooming-in-to-400" id="toc-zooming-in-to-400" class="nav-link" data-scroll-target="#zooming-in-to-400">Zooming in to 400%</a></li>
+  <li><a href="#which-format-for-each-destination" id="toc-which-format-for-each-destination" class="nav-link" data-scroll-target="#which-format-for-each-destination">Which format for each destination</a></li>
+  </ul></li>
+  </ul></li>
+  <li><a href="#reflections" id="toc-reflections" class="nav-link" data-scroll-target="#reflections">Reflections</a></li>
+  <li><a href="#ai-prompts-used" id="toc-ai-prompts-used" class="nav-link" data-scroll-target="#ai-prompts-used">AI prompts used</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content quarto-banner-title-block" id="quarto-document-content">
+
+
+
+
+<section id="assignment-5---epps-6355---data-visualization" class="level1">
+<h1>Assignment 5 - EPPS 6355 - Data Visualization</h1>
+</section>
+<section id="setup-data-import-and-display" class="level1">
+<h1>Setup, data import and display</h1>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(readxl)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(DT)</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>df <span class="ot">&lt;-</span> <span class="fu">read_xlsx</span>(here<span class="sc">::</span><span class="fu">here</span>(<span class="st">"files/Happy-Planet-Index-2006-2025-public-data-set.xlsx"</span>),</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>                <span class="at">sheet =</span> <span class="dv">2</span>, <span class="at">skip =</span> <span class="dv">8</span>)</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Keep only ranked countries (rows with an HPI score) and label the continent codes</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>hpi <span class="ot">&lt;-</span> df[<span class="sc">!</span><span class="fu">is.na</span>(df<span class="sc">$</span>HPI), ]</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>regions <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"Latin America"</span>, <span class="st">"N. America &amp; Oceania"</span>, <span class="st">"Western Europe"</span>,</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>             <span class="st">"Middle East &amp; N. Africa"</span>, <span class="st">"Africa"</span>, <span class="st">"South Asia"</span>,</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>             <span class="st">"E. Europe &amp; Central Asia"</span>, <span class="st">"East Asia"</span>)</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>hpi<span class="sc">$</span>region <span class="ot">&lt;-</span> <span class="fu">factor</span>(regions[hpi<span class="sc">$</span>Continent], <span class="at">levels =</span> regions)</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a><span class="co"># HPI performance bands (used by the pie chart and the scatterplot)</span></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>hpi<span class="sc">$</span>band <span class="ot">&lt;-</span> <span class="fu">cut</span>(hpi<span class="sc">$</span>HPI, <span class="at">breaks =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="cn">Inf</span>, <span class="dv">40</span>, <span class="dv">50</span>, <span class="dv">60</span>, <span class="cn">Inf</span>), <span class="at">right =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>                <span class="at">labels =</span> <span class="fu">c</span>(<span class="st">"Below 40"</span>, <span class="st">"40 to 49.9"</span>, <span class="st">"50 to 59.9"</span>, <span class="st">"60 or more"</span>))</span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a><span class="fu">datatable</span>(<span class="fu">head</span>(hpi, <span class="dv">10</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div class="datatables html-widget html-fill-item" id="htmlwidget-875ee38484339b032118" style="width:100%;height:auto;"></div>
+<script type="application/json" data-for="htmlwidget-875ee38484339b032118">{"x":{"filter":"none","vertical":false,"data":[["1","2","3","4","5","6","7","8","9","10"],[1,2,3,4,5,6,7,8,9,10],["Costa Rica","Guatemala","Tajikistan","Spain","Colombia","Switzerland","Ecuador","Nicaragua","Mexico","Brazil"],["CRI","GTM","TJK","ESP","COL","CHE","ECU","NIC","MEX","BRA"],["2025CRI","2025GTM","2025TJK","2025ESP","2025COL","2025CHE","2025ECU","2025NIC","2025MEX","2025BRA"],[1,1,7,3,1,3,1,1,1,1],[5152.95,18687.881,10786.734,47889.958,53425.635,8967.406999999999,18289.896,7007.502,131946.9,212812.405],[81.191,72.895,72.05200000000001,83.95999999999999,78.09399999999999,84.229,77.75700000000001,75.267,75.446,76.2],[7.571658248901368,6.663331497192384,5.951000000000001,6.558902141571046,5.999712188720704,7.13284437561035,6.424132167816165,6.171091144561785,7.017368701934814,6.677079601287844],[2.619999885559082,1.78506064414978,1.029999971389771,3.180000066757202,1.850000023841858,3.869999885559082,2.262537479400635,1.799425005912781,2.650000095367432,2.440000057220459],[68.31979744457527,60.71186624655609,60.67057594514491,60.59678433915015,60.57329581949567,60.3561299307143,60.32626102755562,59.59090249493531,59.54904209398421,59.44380469729072],[1.48,1.48,1.48,1.48,1.48,1.48,1.48,1.48,1.48,1.48],[26973.44,12640.89,4755.93,48460.29,18477.21,82286.17999999999,13935.54,7661.6,22039.63,19652.37],["Latin America","Latin America","E. Europe &amp; Central Asia","Western Europe","Latin America","Western Europe","Latin America","Latin America","Latin America","Latin America"],["60 or more","60 or more","60 or more","60 or more","60 or more","60 or more","60 or more","50 to 59.9","50 to 59.9","50 to 59.9"]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>HPI rank<\/th>\n      <th>Country<\/th>\n      <th>ISO<\/th>\n      <th>...4<\/th>\n      <th>Continent<\/th>\n      <th>Population<\/th>\n      <th>Life Expectancy<\/th>\n      <th>Life satisfaction<\/th>\n      <th>Ecological Footprint<\/th>\n      <th>HPI<\/th>\n      <th>EF  threshold for year<\/th>\n      <th>GDP per capita<\/th>\n      <th>region<\/th>\n      <th>band<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"columnDefs":[{"className":"dt-right","targets":[1,5,6,7,8,9,10,11,12]},{"orderable":false,"targets":0},{"name":" ","targets":0},{"name":"HPI rank","targets":1},{"name":"Country","targets":2},{"name":"ISO","targets":3},{"name":"...4","targets":4},{"name":"Continent","targets":5},{"name":"Population","targets":6},{"name":"Life Expectancy","targets":7},{"name":"Life satisfaction","targets":8},{"name":"Ecological Footprint","targets":9},{"name":"HPI","targets":10},{"name":"EF  threshold for year","targets":11},{"name":"GDP per capita","targets":12},{"name":"region","targets":13},{"name":"band","targets":14}],"order":[],"autoWidth":false,"orderClasses":false}},"evals":[],"jsHooks":[]}</script>
+</div>
+</div>
+<hr>
+</section>
+<section id="part-1.-base-graphics" class="level1">
+<h1>Part 1. Base Graphics</h1>
+<section id="theme" class="level3">
+<h3 class="anchored" data-anchor-id="theme">Theme</h3>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Project colours (same as R/tema.R and custom.scss)</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>pal <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="at">green =</span> <span class="st">"#154734"</span>, <span class="at">orange =</span> <span class="st">"#E87500"</span>, <span class="at">blue =</span> <span class="st">"#3F6DD0"</span>,</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>         <span class="at">ink =</span> <span class="st">"#171B18"</span>, <span class="at">grey =</span> <span class="st">"#636B64"</span>, <span class="at">light_grey =</span> <span class="st">"#D8DBD4"</span>)</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>seq_green <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"#B5DEC4"</span>, <span class="st">"#6DBB8E"</span>, <span class="st">"#2E8B5E"</span>, <span class="st">"#154734"</span>)  <span class="co"># light -&gt; dark, for ordered bands</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Georgia on Windows needs to be registered once; elsewhere fall back to "serif"</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (.Platform<span class="sc">$</span>OS.type <span class="sc">==</span> <span class="st">"windows"</span>) <span class="fu">windowsFonts</span>(<span class="at">Georgia =</span> <span class="fu">windowsFont</span>(<span class="st">"Georgia"</span>))</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>base_font <span class="ot">&lt;-</span> <span class="cf">if</span> (.Platform<span class="sc">$</span>OS.type <span class="sc">==</span> <span class="st">"windows"</span>) <span class="st">"Georgia"</span> <span class="cf">else</span> <span class="st">"serif"</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Applies the custom style and returns the previous state, so it can be restored:</span></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a><span class="co">#   op &lt;- theme_base();  ...plot...;  par(op)</span></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>theme_base <span class="ot">&lt;-</span> <span class="cf">function</span>(<span class="at">mar =</span> <span class="fu">c</span>(<span class="fl">5.5</span>, <span class="dv">5</span>, <span class="dv">4</span>, <span class="dv">2</span>), ...) {</span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">par</span>(<span class="at">family   =</span> base_font,</span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>      <span class="at">cex      =</span> <span class="fl">0.95</span>,              <span class="co"># base text size</span></span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>      <span class="at">cex.main =</span> <span class="fl">1.25</span>, <span class="at">font.main =</span> <span class="dv">2</span>, <span class="at">col.main =</span> pal[[<span class="st">"green"</span>]],</span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>      <span class="at">cex.lab  =</span> <span class="fl">1.0</span>,  <span class="at">col.lab  =</span> pal[[<span class="st">"ink"</span>]],</span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>      <span class="at">cex.axis =</span> <span class="fl">0.85</span>, <span class="at">col.axis =</span> pal[[<span class="st">"grey"</span>]],</span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>      <span class="at">fg       =</span> pal[[<span class="st">"grey"</span>]],     <span class="co"># axis lines and ticks</span></span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>      <span class="at">las      =</span> <span class="dv">1</span>,                  <span class="co"># horizontal axis labels</span></span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>      <span class="at">bty      =</span> <span class="st">"l"</span>,                <span class="co"># L-shaped box</span></span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>      <span class="at">tcl      =</span> <span class="sc">-</span><span class="fl">0.25</span>,              <span class="co"># short ticks pointing out</span></span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a>      <span class="at">mgp      =</span> <span class="fu">c</span>(<span class="dv">3</span>, <span class="fl">0.6</span>, <span class="dv">0</span>),       <span class="co"># title, labels, line distances</span></span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a>      <span class="at">mar      =</span> mar,                <span class="co"># bottom, left, top, right (lines)</span></span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a>      <span class="at">lwd      =</span> <span class="fl">1.2</span>,</span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a>      ...)</span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a><span class="co"># Light reference grid drawn behind the data</span></span>
+<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a>add_grid <span class="ot">&lt;-</span> <span class="cf">function</span>(<span class="at">h =</span> <span class="cn">TRUE</span>, <span class="at">v =</span> <span class="cn">FALSE</span>) {</span>
+<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (h) <span class="fu">abline</span>(<span class="at">h =</span> <span class="fu">axTicks</span>(<span class="dv">2</span>), <span class="at">col =</span> pal[[<span class="st">"light_grey"</span>]], <span class="at">lwd =</span> <span class="fl">0.8</span>, <span class="at">lty =</span> <span class="st">"dotted"</span>)</span>
+<span id="cb2-31"><a href="#cb2-31" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (v) <span class="fu">abline</span>(<span class="at">v =</span> <span class="fu">axTicks</span>(<span class="dv">1</span>), <span class="at">col =</span> pal[[<span class="st">"light_grey"</span>]], <span class="at">lwd =</span> <span class="fl">0.8</span>, <span class="at">lty =</span> <span class="st">"dotted"</span>)</span>
+<span id="cb2-32"><a href="#cb2-32" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb2-33"><a href="#cb2-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-34"><a href="#cb2-34" aria-hidden="true" tabindex="-1"></a><span class="co"># Source note, bottom-left of the figure</span></span>
+<span id="cb2-35"><a href="#cb2-35" aria-hidden="true" tabindex="-1"></a>source_note <span class="ot">&lt;-</span> <span class="cf">function</span>(txt) {</span>
+<span id="cb2-36"><a href="#cb2-36" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mtext</span>(txt, <span class="at">side =</span> <span class="dv">1</span>, <span class="at">line =</span> <span class="fu">par</span>(<span class="st">"mar"</span>)[<span class="dv">1</span>] <span class="sc">-</span> <span class="dv">1</span>, <span class="at">adj =</span> <span class="dv">0</span>,</span>
+<span id="cb2-37"><a href="#cb2-37" aria-hidden="true" tabindex="-1"></a>        <span class="at">cex =</span> <span class="fl">0.75</span>, <span class="at">font =</span> <span class="dv">3</span>, <span class="at">col =</span> pal[[<span class="st">"grey"</span>]])</span>
+<span id="cb2-38"><a href="#cb2-38" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section>
+<section id="a-histogram" class="level3">
+<h3 class="anchored" data-anchor-id="a-histogram">a) Histogram</h3>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>plot_title  <span class="ot">&lt;-</span> <span class="st">"Distribution of Happy Planet Index scores, 2025"</span>    <span class="co"># PLACEHOLDER</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>x_label     <span class="ot">&lt;-</span> <span class="st">"HPI score (0-100 points)"</span>                           <span class="co"># PLACEHOLDER</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>y_label     <span class="ot">&lt;-</span> <span class="st">"Number of countries"</span>                                <span class="co"># PLACEHOLDER</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>source_text <span class="ot">&lt;-</span> <span class="st">"Source: Happy Planet Index 2006-2025 public data set (happyplanetindex.org)."</span>  <span class="co"># PLACEHOLDER</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>op <span class="ot">&lt;-</span> <span class="fu">theme_base</span>()</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="fu">hist</span>(hpi<span class="sc">$</span>HPI, <span class="at">breaks =</span> <span class="fu">seq</span>(<span class="dv">30</span>, <span class="dv">70</span>, <span class="at">by =</span> <span class="fl">2.5</span>),</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>     <span class="at">col =</span> pal[[<span class="st">"green"</span>]], <span class="at">border =</span> <span class="st">"white"</span>, <span class="at">lwd =</span> <span class="dv">2</span>,</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>     <span class="at">main =</span> plot_title, <span class="at">xlab =</span> x_label, <span class="at">ylab =</span> y_label,</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>     <span class="at">xlim =</span> <span class="fu">c</span>(<span class="dv">30</span>, <span class="dv">70</span>), <span class="at">axes =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a><span class="fu">axis</span>(<span class="dv">1</span>, <span class="at">at =</span> <span class="fu">seq</span>(<span class="dv">30</span>, <span class="dv">70</span>, <span class="dv">5</span>))</span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a><span class="fu">axis</span>(<span class="dv">2</span>)</span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>median_hpi <span class="ot">&lt;-</span> <span class="fu">median</span>(hpi<span class="sc">$</span>HPI)</span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a><span class="fu">abline</span>(<span class="at">v =</span> median_hpi, <span class="at">col =</span> pal[[<span class="st">"orange"</span>]], <span class="at">lty =</span> <span class="st">"dashed"</span>, <span class="at">lwd =</span> <span class="fl">2.5</span>)        <span class="co"># annotation</span></span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a><span class="fu">text</span>(median_hpi, <span class="fu">par</span>(<span class="st">"usr"</span>)[<span class="dv">4</span>] <span class="sc">*</span> <span class="fl">0.95</span>, <span class="fu">paste</span>(<span class="st">"Median ="</span>, <span class="fu">round</span>(median_hpi, <span class="dv">1</span>)),</span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>     <span class="at">pos =</span> <span class="dv">2</span>, <span class="at">col =</span> pal[[<span class="st">"ink"</span>]], <span class="at">cex =</span> <span class="fl">0.85</span>)                               <span class="co"># annotation</span></span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a><span class="fu">legend</span>(<span class="st">"topright"</span>, <span class="at">legend =</span> <span class="st">"Median score"</span>, <span class="at">col =</span> pal[[<span class="st">"orange"</span>]],</span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>       <span class="at">lty =</span> <span class="st">"dashed"</span>, <span class="at">lwd =</span> <span class="fl">2.5</span>, <span class="at">bty =</span> <span class="st">"n"</span>, <span class="at">cex =</span> <span class="fl">0.85</span>)</span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a><span class="fu">source_note</span>(source_text)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="assign05_Data_Visualization_files/figure-html/histogram-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(op)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section>
+<section id="b-bar-chart" class="level3">
+<h3 class="anchored" data-anchor-id="b-bar-chart">b) Bar Chart</h3>
+<section id="vertical" class="level4">
+<h4 class="anchored" data-anchor-id="vertical">Vertical</h4>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>plot_title  <span class="ot">&lt;-</span> <span class="st">"Average HPI score by region, 2025"</span>                 <span class="co"># PLACEHOLDER</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>x_label     <span class="ot">&lt;-</span> <span class="st">"Region"</span>                                            <span class="co"># PLACEHOLDER</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>y_label     <span class="ot">&lt;-</span> <span class="st">"Mean HPI score (points)"</span>                           <span class="co"># PLACEHOLDER</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>source_text <span class="ot">&lt;-</span> <span class="st">"Source: Happy Planet Index 2006-2025 public data set (happyplanetindex.org)."</span>  <span class="co"># PLACEHOLDER</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>mean_region <span class="ot">&lt;-</span> <span class="fu">sort</span>(<span class="fu">tapply</span>(hpi<span class="sc">$</span>HPI, hpi<span class="sc">$</span>region, mean), <span class="at">decreasing =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>region_labels   <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"Latin</span><span class="sc">\n</span><span class="st">America"</span>, <span class="st">"N. America</span><span class="sc">\n</span><span class="st">&amp; Oceania"</span>, <span class="st">"Western</span><span class="sc">\n</span><span class="st">Europe"</span>,</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>               <span class="st">"Middle East</span><span class="sc">\n</span><span class="st">&amp; N. Africa"</span>, <span class="st">"Africa"</span>, <span class="st">"South</span><span class="sc">\n</span><span class="st">Asia"</span>,</span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>               <span class="st">"E. Europe &amp;</span><span class="sc">\n</span><span class="st">Central Asia"</span>, <span class="st">"East</span><span class="sc">\n</span><span class="st">Asia"</span>)[<span class="fu">match</span>(<span class="fu">names</span>(mean_region), regions)]   <span class="co"># wrapped names</span></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>op <span class="ot">&lt;-</span> <span class="fu">theme_base</span>(<span class="at">mar =</span> <span class="fu">c</span>(<span class="fl">7.5</span>, <span class="dv">5</span>, <span class="dv">4</span>, <span class="dv">2</span>))</span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>pos <span class="ot">&lt;-</span> <span class="fu">barplot</span>(mean_region, <span class="at">names.arg =</span> <span class="fu">rep</span>(<span class="st">""</span>, <span class="fu">length</span>(mean_region)),</span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>               <span class="at">col =</span> pal[[<span class="st">"green"</span>]], <span class="at">border =</span> <span class="cn">NA</span>, <span class="at">space =</span> <span class="fl">0.35</span>,</span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>               <span class="at">ylim =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">70</span>), <span class="at">main =</span> plot_title, <span class="at">ylab =</span> y_label, <span class="at">axes =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a><span class="fu">add_grid</span>()</span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a><span class="fu">barplot</span>(mean_region, <span class="at">names.arg =</span> <span class="fu">rep</span>(<span class="st">""</span>, <span class="fu">length</span>(mean_region)), <span class="at">col =</span> pal[[<span class="st">"green"</span>]],</span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a>        <span class="at">border =</span> <span class="cn">NA</span>, <span class="at">space =</span> <span class="fl">0.35</span>, <span class="at">axes =</span> <span class="cn">FALSE</span>, <span class="at">add =</span> <span class="cn">TRUE</span>)                  <span class="co"># bars over grid</span></span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a><span class="fu">axis</span>(<span class="dv">2</span>, <span class="at">at =</span> <span class="fu">seq</span>(<span class="dv">0</span>, <span class="dv">70</span>, <span class="dv">10</span>))</span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a><span class="fu">text</span>(pos, <span class="sc">-</span><span class="dv">2</span>, region_labels, <span class="at">xpd =</span> <span class="cn">TRUE</span>, <span class="at">adj =</span> <span class="fu">c</span>(<span class="fl">0.5</span>, <span class="dv">1</span>), <span class="at">cex =</span> <span class="fl">0.72</span>, <span class="at">col =</span> pal[[<span class="st">"grey"</span>]])</span>
+<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a><span class="fu">mtext</span>(x_label, <span class="at">side =</span> <span class="dv">1</span>, <span class="at">line =</span> <span class="dv">5</span>, <span class="at">col =</span> pal[[<span class="st">"ink"</span>]])</span>
+<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a>overall_mean <span class="ot">&lt;-</span> <span class="fu">mean</span>(hpi<span class="sc">$</span>HPI)</span>
+<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a><span class="fu">abline</span>(<span class="at">h =</span> overall_mean, <span class="at">col =</span> pal[[<span class="st">"orange"</span>]], <span class="at">lty =</span> <span class="st">"longdash"</span>, <span class="at">lwd =</span> <span class="dv">2</span>)   <span class="co"># annotation</span></span>
+<span id="cb5-23"><a href="#cb5-23" aria-hidden="true" tabindex="-1"></a><span class="fu">text</span>(pos, <span class="dv">3</span>, <span class="fu">sprintf</span>(<span class="st">"%.1f"</span>, mean_region), <span class="at">cex =</span> <span class="fl">0.75</span>, <span class="at">col =</span> <span class="st">"white"</span>)   <span class="co"># values at the bar base</span></span>
+<span id="cb5-24"><a href="#cb5-24" aria-hidden="true" tabindex="-1"></a><span class="fu">legend</span>(<span class="st">"topright"</span>, <span class="at">legend =</span> <span class="fu">paste0</span>(<span class="st">"Average of all countries ("</span>, <span class="fu">round</span>(overall_mean, <span class="dv">1</span>), <span class="st">")"</span>),</span>
+<span id="cb5-25"><a href="#cb5-25" aria-hidden="true" tabindex="-1"></a>       <span class="at">col =</span> pal[[<span class="st">"orange"</span>]], <span class="at">lty =</span> <span class="st">"longdash"</span>, <span class="at">lwd =</span> <span class="dv">2</span>, <span class="at">bty =</span> <span class="st">"n"</span>, <span class="at">cex =</span> <span class="fl">0.8</span>)</span>
+<span id="cb5-26"><a href="#cb5-26" aria-hidden="true" tabindex="-1"></a><span class="fu">source_note</span>(source_text)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="assign05_Data_Visualization_files/figure-html/bar_vertical-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(op)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>plot_title  <span class="ot">&lt;-</span> <span class="st">"Top 10 countries on the Happy Planet Index, 2025"</span>  <span class="co"># PLACEHOLDER</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>x_label     <span class="ot">&lt;-</span> <span class="st">"HPI score (points)"</span>                                <span class="co"># PLACEHOLDER</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>source_text <span class="ot">&lt;-</span> <span class="st">"Source: Happy Planet Index 2006-2025 public data set (happyplanetindex.org)."</span>  <span class="co"># PLACEHOLDER</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>top10 <span class="ot">&lt;-</span> <span class="fu">head</span>(hpi[<span class="fu">order</span>(<span class="sc">-</span>hpi<span class="sc">$</span>HPI), <span class="fu">c</span>(<span class="st">"Country"</span>, <span class="st">"HPI"</span>)], <span class="dv">10</span>)</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>top10 <span class="ot">&lt;-</span> top10[<span class="fu">nrow</span>(top10)<span class="sc">:</span><span class="dv">1</span>, ]                    <span class="co"># highest at the top</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>bar_colors <span class="ot">&lt;-</span> <span class="fu">ifelse</span>(top10<span class="sc">$</span>Country <span class="sc">==</span> <span class="st">"Costa Rica"</span>, pal[[<span class="st">"orange"</span>]], pal[[<span class="st">"green"</span>]])</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>op <span class="ot">&lt;-</span> <span class="fu">theme_base</span>(<span class="at">mar =</span> <span class="fu">c</span>(<span class="fl">5.5</span>, <span class="fl">8.5</span>, <span class="dv">4</span>, <span class="dv">3</span>))</span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>pos <span class="ot">&lt;-</span> <span class="fu">barplot</span>(top10<span class="sc">$</span>HPI, <span class="at">names.arg =</span> top10<span class="sc">$</span>Country, <span class="at">horiz =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>               <span class="at">col =</span> bar_colors, <span class="at">border =</span> <span class="cn">NA</span>, <span class="at">space =</span> <span class="fl">0.4</span>,</span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>               <span class="at">xlim =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">100</span>), <span class="at">main =</span> plot_title, <span class="at">xlab =</span> x_label,</span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>               <span class="at">axes =</span> <span class="cn">FALSE</span>, <span class="at">cex.names =</span> <span class="fl">0.85</span>)</span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a><span class="fu">axis</span>(<span class="dv">1</span>, <span class="at">at =</span> <span class="fu">seq</span>(<span class="dv">0</span>, <span class="dv">75</span>, <span class="dv">15</span>))</span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a><span class="fu">text</span>(top10<span class="sc">$</span>HPI, pos, <span class="fu">sprintf</span>(<span class="st">"%.1f"</span>, top10<span class="sc">$</span>HPI), <span class="at">pos =</span> <span class="dv">4</span>, <span class="at">cex =</span> <span class="fl">0.75</span>, <span class="at">col =</span> pal[[<span class="st">"ink"</span>]])</span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a><span class="fu">legend</span>(<span class="st">"bottomright"</span>, <span class="at">legend =</span> <span class="fu">c</span>(<span class="st">"Ranked 1st"</span>, <span class="st">"Other top-10 countries"</span>),</span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a>       <span class="at">fill =</span> <span class="fu">c</span>(pal[[<span class="st">"orange"</span>]], pal[[<span class="st">"green"</span>]]), <span class="at">border =</span> <span class="cn">NA</span>, <span class="at">bty =</span> <span class="st">"n"</span>, <span class="at">cex =</span> <span class="fl">0.8</span>)</span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a><span class="fu">source_note</span>(source_text)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="assign05_Data_Visualization_files/figure-html/bar_horizontal-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(op)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section>
+</section>
+<section id="c-pie-chart" class="level3">
+<h3 class="anchored" data-anchor-id="c-pie-chart">c) Pie Chart</h3>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>plot_title  <span class="ot">&lt;-</span> <span class="st">"Countries by HPI score band, 2025"</span>                 <span class="co"># PLACEHOLDER</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>source_text <span class="ot">&lt;-</span> <span class="st">"Source: Happy Planet Index 2006-2025 public data set (happyplanetindex.org)."</span>  <span class="co"># PLACEHOLDER</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>n_band <span class="ot">&lt;-</span> <span class="fu">table</span>(hpi<span class="sc">$</span>band)</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>pct    <span class="ot">&lt;-</span> <span class="fu">round</span>(<span class="dv">100</span> <span class="sc">*</span> n_band <span class="sc">/</span> <span class="fu">sum</span>(n_band))</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>op <span class="ot">&lt;-</span> <span class="fu">theme_base</span>(<span class="at">mar =</span> <span class="fu">c</span>(<span class="dv">3</span>, <span class="dv">1</span>, <span class="dv">4</span>, <span class="dv">1</span>))</span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a><span class="fu">pie</span>(n_band, <span class="at">labels =</span> <span class="fu">paste0</span>(pct, <span class="st">"%</span><span class="sc">\n</span><span class="st">("</span>, n_band, <span class="st">")"</span>), <span class="at">col =</span> seq_green,</span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">border =</span> <span class="st">"white"</span>, <span class="at">lwd =</span> <span class="dv">2</span>, <span class="at">clockwise =</span> <span class="cn">TRUE</span>, <span class="at">init.angle =</span> <span class="dv">90</span>,</span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">radius =</span> <span class="fl">0.85</span>, <span class="at">cex =</span> <span class="fl">0.85</span>, <span class="at">main =</span> plot_title)</span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a><span class="fu">legend</span>(<span class="st">"topleft"</span>, <span class="at">title =</span> <span class="st">"HPI score"</span>, <span class="at">legend =</span> <span class="fu">names</span>(n_band),</span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>       <span class="at">fill =</span> seq_green, <span class="at">border =</span> <span class="cn">NA</span>, <span class="at">bty =</span> <span class="st">"n"</span>, <span class="at">cex =</span> <span class="fl">0.8</span>)</span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a><span class="fu">mtext</span>(<span class="fu">paste</span>(<span class="st">"Total:"</span>, <span class="fu">sum</span>(n_band), <span class="st">"ranked countries"</span>), <span class="at">side =</span> <span class="dv">3</span>, <span class="at">line =</span> <span class="fl">0.2</span>,</span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a>      <span class="at">cex =</span> <span class="fl">0.85</span>, <span class="at">col =</span> pal[[<span class="st">"grey"</span>]])                                       <span class="co"># annotation</span></span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a><span class="fu">source_note</span>(source_text)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="assign05_Data_Visualization_files/figure-html/pie-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(op)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section>
+<section id="d-boxplot" class="level3">
+<h3 class="anchored" data-anchor-id="d-boxplot">d) Boxplot</h3>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>plot_title  <span class="ot">&lt;-</span> <span class="st">"HPI scores by region, 2025"</span>                        <span class="co"># PLACEHOLDER</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>x_label     <span class="ot">&lt;-</span> <span class="st">"HPI score (points)"</span>                                <span class="co"># PLACEHOLDER</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>source_text <span class="ot">&lt;-</span> <span class="st">"Source: Happy Planet Index 2006-2025 public data set (happyplanetindex.org)."</span>  <span class="co"># PLACEHOLDER</span></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>region_order <span class="ot">&lt;-</span> <span class="fu">names</span>(<span class="fu">sort</span>(<span class="fu">tapply</span>(hpi<span class="sc">$</span>HPI, hpi<span class="sc">$</span>region, median)))     <span class="co"># lowest median at the bottom</span></span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>hpi<span class="sc">$</span>region_ord <span class="ot">&lt;-</span> <span class="fu">factor</span>(hpi<span class="sc">$</span>region, <span class="at">levels =</span> region_order)</span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>op <span class="ot">&lt;-</span> <span class="fu">theme_base</span>(<span class="at">mar =</span> <span class="fu">c</span>(<span class="fl">5.5</span>, <span class="dv">11</span>, <span class="dv">4</span>, <span class="dv">2</span>))</span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a><span class="fu">boxplot</span>(HPI <span class="sc">~</span> region_ord, <span class="at">data =</span> hpi, <span class="at">horizontal =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a>        <span class="at">col =</span> <span class="st">"#B5DEC4"</span>, <span class="at">border =</span> pal[[<span class="st">"green"</span>]], <span class="at">lwd =</span> <span class="fl">1.3</span>,</span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a>        <span class="at">boxwex =</span> <span class="fl">0.6</span>, <span class="at">staplewex =</span> <span class="fl">0.4</span>, <span class="at">outline =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a>        <span class="at">main =</span> plot_title, <span class="at">xlab =</span> x_label, <span class="at">ylab =</span> <span class="st">""</span>, <span class="at">ylim =</span> <span class="fu">c</span>(<span class="dv">30</span>, <span class="dv">70</span>),</span>
+<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a>        <span class="at">axes =</span> <span class="cn">FALSE</span>, <span class="at">frame.plot =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb11-14"><a href="#cb11-14" aria-hidden="true" tabindex="-1"></a><span class="fu">axis</span>(<span class="dv">1</span>, <span class="at">at =</span> <span class="fu">seq</span>(<span class="dv">30</span>, <span class="dv">70</span>, <span class="dv">10</span>))</span>
+<span id="cb11-15"><a href="#cb11-15" aria-hidden="true" tabindex="-1"></a><span class="fu">axis</span>(<span class="dv">2</span>, <span class="at">at =</span> <span class="fu">seq_along</span>(region_order), <span class="at">labels =</span> region_order, <span class="at">cex.axis =</span> <span class="fl">0.8</span>, <span class="at">lwd =</span> <span class="dv">0</span>)</span>
+<span id="cb11-16"><a href="#cb11-16" aria-hidden="true" tabindex="-1"></a><span class="fu">stripchart</span>(HPI <span class="sc">~</span> region_ord, <span class="at">data =</span> hpi, <span class="at">method =</span> <span class="st">"jitter"</span>, <span class="at">jitter =</span> <span class="fl">0.15</span>,</span>
+<span id="cb11-17"><a href="#cb11-17" aria-hidden="true" tabindex="-1"></a>           <span class="at">pch =</span> <span class="dv">21</span>, <span class="at">bg =</span> <span class="fu">adjustcolor</span>(pal[[<span class="st">"green"</span>]], <span class="fl">0.6</span>), <span class="at">col =</span> <span class="st">"white"</span>,</span>
+<span id="cb11-18"><a href="#cb11-18" aria-hidden="true" tabindex="-1"></a>           <span class="at">cex =</span> <span class="fl">0.9</span>, <span class="at">add =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb11-19"><a href="#cb11-19" aria-hidden="true" tabindex="-1"></a><span class="fu">abline</span>(<span class="at">v =</span> <span class="fu">median</span>(hpi<span class="sc">$</span>HPI), <span class="at">col =</span> pal[[<span class="st">"orange"</span>]], <span class="at">lty =</span> <span class="st">"dotdash"</span>, <span class="at">lwd =</span> <span class="dv">2</span>)  <span class="co"># annotation</span></span>
+<span id="cb11-20"><a href="#cb11-20" aria-hidden="true" tabindex="-1"></a><span class="fu">legend</span>(<span class="st">"bottomright"</span>, <span class="at">legend =</span> <span class="fu">c</span>(<span class="st">"Country"</span>, <span class="st">"Median of all countries"</span>),</span>
+<span id="cb11-21"><a href="#cb11-21" aria-hidden="true" tabindex="-1"></a>       <span class="at">pch =</span> <span class="fu">c</span>(<span class="dv">21</span>, <span class="cn">NA</span>), <span class="at">pt.bg =</span> <span class="fu">c</span>(pal[[<span class="st">"green"</span>]], <span class="cn">NA</span>), <span class="at">col =</span> <span class="fu">c</span>(<span class="st">"white"</span>, pal[[<span class="st">"orange"</span>]]),</span>
+<span id="cb11-22"><a href="#cb11-22" aria-hidden="true" tabindex="-1"></a>       <span class="at">lty =</span> <span class="fu">c</span>(<span class="cn">NA</span>, <span class="st">"dotdash"</span>), <span class="at">lwd =</span> <span class="fu">c</span>(<span class="cn">NA</span>, <span class="dv">2</span>), <span class="at">bty =</span> <span class="st">"n"</span>, <span class="at">cex =</span> <span class="fl">0.8</span>)</span>
+<span id="cb11-23"><a href="#cb11-23" aria-hidden="true" tabindex="-1"></a><span class="fu">source_note</span>(source_text)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="assign05_Data_Visualization_files/figure-html/boxplot-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(op)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section>
+<section id="e-scatterplot" class="level3">
+<h3 class="anchored" data-anchor-id="e-scatterplot">e) Scatterplot</h3>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>plot_title  <span class="ot">&lt;-</span> <span class="st">"Life satisfaction vs. ecological footprint, 2025"</span>  <span class="co"># PLACEHOLDER</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>x_label     <span class="ot">&lt;-</span> <span class="st">"Ecological footprint (global hectares per person)"</span> <span class="co"># PLACEHOLDER</span></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>y_label     <span class="ot">&lt;-</span> <span class="st">"Life satisfaction (0-10 scale)"</span>                    <span class="co"># PLACEHOLDER</span></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>source_text <span class="ot">&lt;-</span> <span class="st">"Source: Happy Planet Index 2006-2025 public data set (happyplanetindex.org)."</span>  <span class="co"># PLACEHOLDER</span></span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>band_pch <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">25</span>, <span class="dv">22</span>, <span class="dv">21</span>, <span class="dv">24</span>)                     <span class="co"># one pch per band (shape + colour)</span></span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>band_idx      <span class="ot">&lt;-</span> <span class="fu">as.integer</span>(hpi<span class="sc">$</span>band)</span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>ef_limit   <span class="ot">&lt;-</span> <span class="fl">1.48</span>                                  <span class="co"># sustainable footprint for 2025 (gha)</span></span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>op <span class="ot">&lt;-</span> <span class="fu">theme_base</span>()</span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(hpi<span class="sc">$</span><span class="st">`</span><span class="at">Ecological Footprint</span><span class="st">`</span>, hpi<span class="sc">$</span><span class="st">`</span><span class="at">Life satisfaction</span><span class="st">`</span>, <span class="at">type =</span> <span class="st">"n"</span>,</span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a>     <span class="at">main =</span> plot_title, <span class="at">xlab =</span> x_label, <span class="at">ylab =</span> y_label,</span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a>     <span class="at">xlim =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">12</span>), <span class="at">ylim =</span> <span class="fu">c</span>(<span class="dv">3</span>, <span class="fl">8.3</span>), <span class="at">axes =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a><span class="fu">axis</span>(<span class="dv">1</span>, <span class="at">at =</span> <span class="fu">seq</span>(<span class="dv">0</span>, <span class="dv">12</span>, <span class="dv">2</span>)); <span class="fu">axis</span>(<span class="dv">2</span>, <span class="at">at =</span> <span class="dv">3</span><span class="sc">:</span><span class="dv">8</span>)</span>
+<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a><span class="fu">add_grid</span>(<span class="at">h =</span> <span class="cn">TRUE</span>, <span class="at">v =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a><span class="fu">abline</span>(<span class="at">v =</span> ef_limit, <span class="at">col =</span> pal[[<span class="st">"orange"</span>]], <span class="at">lty =</span> <span class="st">"dashed"</span>, <span class="at">lwd =</span> <span class="dv">2</span>)          <span class="co"># annotation</span></span>
+<span id="cb13-17"><a href="#cb13-17" aria-hidden="true" tabindex="-1"></a><span class="fu">text</span>(ef_limit, <span class="fl">3.15</span>, <span class="fu">paste</span>(<span class="st">"Sustainable limit:"</span>, ef_limit, <span class="st">"gha"</span>), <span class="at">pos =</span> <span class="dv">4</span>,</span>
+<span id="cb13-18"><a href="#cb13-18" aria-hidden="true" tabindex="-1"></a>     <span class="at">cex =</span> <span class="fl">0.75</span>, <span class="at">col =</span> pal[[<span class="st">"ink"</span>]])</span>
+<span id="cb13-19"><a href="#cb13-19" aria-hidden="true" tabindex="-1"></a><span class="fu">points</span>(hpi<span class="sc">$</span><span class="st">`</span><span class="at">Ecological Footprint</span><span class="st">`</span>, hpi<span class="sc">$</span><span class="st">`</span><span class="at">Life satisfaction</span><span class="st">`</span>,</span>
+<span id="cb13-20"><a href="#cb13-20" aria-hidden="true" tabindex="-1"></a>       <span class="at">pch =</span> band_pch[band_idx], <span class="at">bg =</span> seq_green[band_idx], <span class="at">col =</span> pal[[<span class="st">"green"</span>]], <span class="at">cex =</span> <span class="fl">1.2</span>, <span class="at">lwd =</span> <span class="fl">0.8</span>)</span>
+<span id="cb13-21"><a href="#cb13-21" aria-hidden="true" tabindex="-1"></a>cr <span class="ot">&lt;-</span> hpi[hpi<span class="sc">$</span>Country <span class="sc">==</span> <span class="st">"Costa Rica"</span>, ]</span>
+<span id="cb13-22"><a href="#cb13-22" aria-hidden="true" tabindex="-1"></a><span class="fu">arrows</span>(<span class="fl">4.2</span>, <span class="fl">8.15</span>, cr<span class="sc">$</span><span class="st">`</span><span class="at">Ecological Footprint</span><span class="st">`</span> <span class="sc">+</span> <span class="fl">0.15</span>, cr<span class="sc">$</span><span class="st">`</span><span class="at">Life satisfaction</span><span class="st">`</span> <span class="sc">+</span> <span class="fl">0.05</span>,</span>
+<span id="cb13-23"><a href="#cb13-23" aria-hidden="true" tabindex="-1"></a>       <span class="at">length =</span> <span class="fl">0.08</span>, <span class="at">col =</span> pal[[<span class="st">"ink"</span>]], <span class="at">lwd =</span> <span class="fl">1.2</span>)                       <span class="co"># annotation</span></span>
+<span id="cb13-24"><a href="#cb13-24" aria-hidden="true" tabindex="-1"></a><span class="fu">text</span>(<span class="fl">4.2</span>, <span class="fl">8.15</span>, <span class="st">"Costa Rica: highest HPI"</span>, <span class="at">pos =</span> <span class="dv">4</span>, <span class="at">cex =</span> <span class="fl">0.8</span>, <span class="at">col =</span> pal[[<span class="st">"ink"</span>]])</span>
+<span id="cb13-25"><a href="#cb13-25" aria-hidden="true" tabindex="-1"></a><span class="fu">legend</span>(<span class="st">"bottomright"</span>, <span class="at">title =</span> <span class="st">"HPI score"</span>, <span class="at">legend =</span> <span class="fu">levels</span>(hpi<span class="sc">$</span>band),</span>
+<span id="cb13-26"><a href="#cb13-26" aria-hidden="true" tabindex="-1"></a>       <span class="at">pch =</span> band_pch, <span class="at">pt.bg =</span> seq_green, <span class="at">col =</span> pal[[<span class="st">"green"</span>]],</span>
+<span id="cb13-27"><a href="#cb13-27" aria-hidden="true" tabindex="-1"></a>       <span class="at">pt.cex =</span> <span class="fl">1.2</span>, <span class="at">bty =</span> <span class="st">"n"</span>, <span class="at">cex =</span> <span class="fl">0.8</span>)</span>
+<span id="cb13-28"><a href="#cb13-28" aria-hidden="true" tabindex="-1"></a><span class="fu">source_note</span>(source_text)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="assign05_Data_Visualization_files/figure-html/scatter-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(op)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<hr>
+</section>
+</section>
+<section id="part-2.-ggplot2" class="level1">
+<h1>Part 2. ggplot2</h1>
+<section id="theme-1" class="level3">
+<h3 class="anchored" data-anchor-id="theme-1">Theme</h3>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>pal <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="at">green =</span> <span class="st">"#154734"</span>, <span class="at">orange =</span> <span class="st">"#E87500"</span>, <span class="at">blue =</span> <span class="st">"#3F6DD0"</span>,</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>         <span class="at">ink =</span> <span class="st">"#171B18"</span>, <span class="at">grey =</span> <span class="st">"#636B64"</span>, <span class="at">light_grey =</span> <span class="st">"#D8DBD4"</span>)</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>seq_green <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"#B5DEC4"</span>, <span class="st">"#6DBB8E"</span>, <span class="st">"#2E8B5E"</span>, <span class="st">"#154734"</span>)  <span class="co"># light -&gt; dark, for ordered bands</span></span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Georgia on Windows needs to be registered once; elsewhere fall back to "serif"</span></span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (.Platform<span class="sc">$</span>OS.type <span class="sc">==</span> <span class="st">"windows"</span>) <span class="fu">windowsFonts</span>(<span class="at">Georgia =</span> <span class="fu">windowsFont</span>(<span class="st">"Georgia"</span>))</span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>base_font <span class="ot">&lt;-</span> <span class="cf">if</span> (.Platform<span class="sc">$</span>OS.type <span class="sc">==</span> <span class="st">"windows"</span>) <span class="st">"Georgia"</span> <span class="cf">else</span> <span class="st">"serif"</span></span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Custom theme built on a complete theme (theme_classic); applied to every chart below.</span></span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Same font, colours, L-shaped axes, short ticks and dotted grid as theme_base() in Part 1.</span></span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a>theme_mine <span class="ot">&lt;-</span> <span class="cf">function</span>(<span class="at">base_size =</span> <span class="dv">11</span>) {</span>
+<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_classic</span>(<span class="at">base_size =</span> base_size, <span class="at">base_family =</span> base_font) <span class="sc">+</span></span>
+<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a>    <span class="fu">theme</span>(</span>
+<span id="cb15-14"><a href="#cb15-14" aria-hidden="true" tabindex="-1"></a>      <span class="at">plot.title          =</span> <span class="fu">element_text</span>(<span class="at">face =</span> <span class="st">"bold"</span>, <span class="at">colour =</span> pal[[<span class="st">"green"</span>]],</span>
+<span id="cb15-15"><a href="#cb15-15" aria-hidden="true" tabindex="-1"></a>                                         <span class="at">size =</span> <span class="fu">rel</span>(<span class="fl">1.3</span>), <span class="at">hjust =</span> <span class="fl">0.5</span>,</span>
+<span id="cb15-16"><a href="#cb15-16" aria-hidden="true" tabindex="-1"></a>                                         <span class="at">margin =</span> <span class="fu">margin</span>(<span class="at">b =</span> <span class="dv">8</span>)),</span>
+<span id="cb15-17"><a href="#cb15-17" aria-hidden="true" tabindex="-1"></a>      <span class="at">plot.subtitle       =</span> <span class="fu">element_text</span>(<span class="at">colour =</span> pal[[<span class="st">"grey"</span>]], <span class="at">hjust =</span> <span class="fl">0.5</span>),</span>
+<span id="cb15-18"><a href="#cb15-18" aria-hidden="true" tabindex="-1"></a>      <span class="at">plot.caption        =</span> <span class="fu">element_text</span>(<span class="at">face =</span> <span class="st">"italic"</span>, <span class="at">colour =</span> pal[[<span class="st">"grey"</span>]],</span>
+<span id="cb15-19"><a href="#cb15-19" aria-hidden="true" tabindex="-1"></a>                                         <span class="at">size =</span> <span class="fu">rel</span>(<span class="fl">0.75</span>), <span class="at">hjust =</span> <span class="dv">0</span>,</span>
+<span id="cb15-20"><a href="#cb15-20" aria-hidden="true" tabindex="-1"></a>                                         <span class="at">margin =</span> <span class="fu">margin</span>(<span class="at">t =</span> <span class="dv">12</span>)),</span>
+<span id="cb15-21"><a href="#cb15-21" aria-hidden="true" tabindex="-1"></a>      <span class="at">plot.caption.position =</span> <span class="st">"plot"</span>,</span>
+<span id="cb15-22"><a href="#cb15-22" aria-hidden="true" tabindex="-1"></a>      <span class="at">axis.title          =</span> <span class="fu">element_text</span>(<span class="at">colour =</span> pal[[<span class="st">"ink"</span>]]),</span>
+<span id="cb15-23"><a href="#cb15-23" aria-hidden="true" tabindex="-1"></a>      <span class="at">axis.title.x        =</span> <span class="fu">element_text</span>(<span class="at">margin =</span> <span class="fu">margin</span>(<span class="at">t =</span> <span class="dv">10</span>)),</span>
+<span id="cb15-24"><a href="#cb15-24" aria-hidden="true" tabindex="-1"></a>      <span class="at">axis.title.y        =</span> <span class="fu">element_text</span>(<span class="at">margin =</span> <span class="fu">margin</span>(<span class="at">r =</span> <span class="dv">10</span>)),</span>
+<span id="cb15-25"><a href="#cb15-25" aria-hidden="true" tabindex="-1"></a>      <span class="at">axis.text           =</span> <span class="fu">element_text</span>(<span class="at">colour =</span> pal[[<span class="st">"grey"</span>]], <span class="at">size =</span> <span class="fu">rel</span>(<span class="fl">0.85</span>)),</span>
+<span id="cb15-26"><a href="#cb15-26" aria-hidden="true" tabindex="-1"></a>      <span class="at">axis.line           =</span> <span class="fu">element_line</span>(<span class="at">colour =</span> pal[[<span class="st">"grey"</span>]], <span class="at">linewidth =</span> <span class="fl">0.5</span>),  <span class="co"># L-shaped box</span></span>
+<span id="cb15-27"><a href="#cb15-27" aria-hidden="true" tabindex="-1"></a>      <span class="at">axis.ticks          =</span> <span class="fu">element_line</span>(<span class="at">colour =</span> pal[[<span class="st">"grey"</span>]], <span class="at">linewidth =</span> <span class="fl">0.5</span>),</span>
+<span id="cb15-28"><a href="#cb15-28" aria-hidden="true" tabindex="-1"></a>      <span class="at">axis.ticks.length   =</span> <span class="fu">unit</span>(<span class="dv">3</span>, <span class="st">"pt"</span>),                                         <span class="co"># short ticks</span></span>
+<span id="cb15-29"><a href="#cb15-29" aria-hidden="true" tabindex="-1"></a>      <span class="at">panel.grid.major.y  =</span> <span class="fu">element_line</span>(<span class="at">colour =</span> pal[[<span class="st">"light_grey"</span>]],</span>
+<span id="cb15-30"><a href="#cb15-30" aria-hidden="true" tabindex="-1"></a>                                         <span class="at">linewidth =</span> <span class="fl">0.4</span>, <span class="at">linetype =</span> <span class="st">"dotted"</span>),</span>
+<span id="cb15-31"><a href="#cb15-31" aria-hidden="true" tabindex="-1"></a>      <span class="at">legend.background   =</span> <span class="fu">element_blank</span>(),</span>
+<span id="cb15-32"><a href="#cb15-32" aria-hidden="true" tabindex="-1"></a>      <span class="at">legend.key          =</span> <span class="fu">element_blank</span>(),</span>
+<span id="cb15-33"><a href="#cb15-33" aria-hidden="true" tabindex="-1"></a>      <span class="at">legend.text         =</span> <span class="fu">element_text</span>(<span class="at">colour =</span> pal[[<span class="st">"grey"</span>]], <span class="at">size =</span> <span class="fu">rel</span>(<span class="fl">0.8</span>)),</span>
+<span id="cb15-34"><a href="#cb15-34" aria-hidden="true" tabindex="-1"></a>      <span class="at">legend.title        =</span> <span class="fu">element_text</span>(<span class="at">colour =</span> pal[[<span class="st">"grey"</span>]], <span class="at">size =</span> <span class="fu">rel</span>(<span class="fl">0.8</span>)),</span>
+<span id="cb15-35"><a href="#cb15-35" aria-hidden="true" tabindex="-1"></a>      <span class="at">plot.margin         =</span> <span class="fu">margin</span>(<span class="dv">12</span>, <span class="dv">16</span>, <span class="dv">10</span>, <span class="dv">12</span>)</span>
+<span id="cb15-36"><a href="#cb15-36" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb15-37"><a href="#cb15-37" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb15-38"><a href="#cb15-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-39"><a href="#cb15-39" aria-hidden="true" tabindex="-1"></a><span class="co"># Places the legend inside the panel (x, y from 0 to 1); works in ggplot2 &lt; 3.5 and &gt;= 3.5</span></span>
+<span id="cb15-40"><a href="#cb15-40" aria-hidden="true" tabindex="-1"></a>legend_inside <span class="ot">&lt;-</span> <span class="cf">function</span>(x, y) {</span>
+<span id="cb15-41"><a href="#cb15-41" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="fu">packageVersion</span>(<span class="st">"ggplot2"</span>) <span class="sc">&gt;=</span> <span class="st">"3.5.0"</span>) {</span>
+<span id="cb15-42"><a href="#cb15-42" aria-hidden="true" tabindex="-1"></a>    <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">"inside"</span>, <span class="at">legend.position.inside =</span> <span class="fu">c</span>(x, y),</span>
+<span id="cb15-43"><a href="#cb15-43" aria-hidden="true" tabindex="-1"></a>          <span class="at">legend.justification =</span> <span class="fu">c</span>(x, y))</span>
+<span id="cb15-44"><a href="#cb15-44" aria-hidden="true" tabindex="-1"></a>  } <span class="cf">else</span> {</span>
+<span id="cb15-45"><a href="#cb15-45" aria-hidden="true" tabindex="-1"></a>    <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="fu">c</span>(x, y), <span class="at">legend.justification =</span> <span class="fu">c</span>(x, y))</span>
+<span id="cb15-46"><a href="#cb15-46" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb15-47"><a href="#cb15-47" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section>
+<section id="a-histogram-1" class="level3">
+<h3 class="anchored" data-anchor-id="a-histogram-1">a) Histogram</h3>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>plot_title  <span class="ot">&lt;-</span> <span class="st">"Distribution of Happy Planet Index scores, 2025"</span>    <span class="co"># PLACEHOLDER</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>x_label     <span class="ot">&lt;-</span> <span class="st">"HPI score (0-100 points)"</span>                           <span class="co"># PLACEHOLDER</span></span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>y_label     <span class="ot">&lt;-</span> <span class="st">"Number of countries"</span>                                <span class="co"># PLACEHOLDER</span></span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>source_text <span class="ot">&lt;-</span> <span class="st">"Source: Happy Planet Index 2006-2025 public data set (happyplanetindex.org)."</span>  <span class="co"># PLACEHOLDER</span></span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>median_hpi <span class="ot">&lt;-</span> <span class="fu">median</span>(hpi<span class="sc">$</span>HPI)</span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(hpi, <span class="fu">aes</span>(<span class="at">x =</span> HPI)) <span class="sc">+</span></span>
+<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_histogram</span>(<span class="at">breaks =</span> <span class="fu">seq</span>(<span class="dv">30</span>, <span class="dv">70</span>, <span class="at">by =</span> <span class="fl">2.5</span>), <span class="at">fill =</span> pal[[<span class="st">"green"</span>]],</span>
+<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a>                 <span class="at">colour =</span> <span class="st">"white"</span>, <span class="at">linewidth =</span> <span class="fl">0.8</span>) <span class="sc">+</span></span>
+<span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_vline</span>(<span class="fu">aes</span>(<span class="at">xintercept =</span> median_hpi, <span class="at">linetype =</span> <span class="st">"Median score"</span>),</span>
+<span id="cb16-12"><a href="#cb16-12" aria-hidden="true" tabindex="-1"></a>             <span class="at">colour =</span> pal[[<span class="st">"orange"</span>]], <span class="at">linewidth =</span> <span class="dv">1</span>, <span class="at">key_glyph =</span> <span class="st">"path"</span>) <span class="sc">+</span>                       <span class="co"># annotation</span></span>
+<span id="cb16-13"><a href="#cb16-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">annotate</span>(<span class="st">"text"</span>, <span class="at">x =</span> median_hpi, <span class="at">y =</span> <span class="fl">18.5</span>, <span class="at">label =</span> <span class="fu">paste</span>(<span class="st">"Median ="</span>, <span class="fu">round</span>(median_hpi, <span class="dv">1</span>)),</span>
+<span id="cb16-14"><a href="#cb16-14" aria-hidden="true" tabindex="-1"></a>           <span class="at">hjust =</span> <span class="fl">1.08</span>, <span class="at">size =</span> <span class="fl">3.2</span>, <span class="at">family =</span> base_font, <span class="at">colour =</span> pal[[<span class="st">"ink"</span>]]) <span class="sc">+</span>  <span class="co"># annotation</span></span>
+<span id="cb16-15"><a href="#cb16-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_linetype_manual</span>(<span class="at">values =</span> <span class="st">"dashed"</span>, <span class="at">name =</span> <span class="cn">NULL</span>) <span class="sc">+</span></span>
+<span id="cb16-16"><a href="#cb16-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_x_continuous</span>(<span class="at">limits =</span> <span class="fu">c</span>(<span class="dv">30</span>, <span class="dv">70</span>), <span class="at">breaks =</span> <span class="fu">seq</span>(<span class="dv">30</span>, <span class="dv">70</span>, <span class="dv">5</span>)) <span class="sc">+</span></span>
+<span id="cb16-17"><a href="#cb16-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_y_continuous</span>(<span class="at">expand =</span> <span class="fu">expansion</span>(<span class="at">mult =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="fl">0.05</span>))) <span class="sc">+</span></span>
+<span id="cb16-18"><a href="#cb16-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> plot_title, <span class="at">x =</span> x_label, <span class="at">y =</span> y_label, <span class="at">caption =</span> source_text) <span class="sc">+</span></span>
+<span id="cb16-19"><a href="#cb16-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_mine</span>() <span class="sc">+</span></span>
+<span id="cb16-20"><a href="#cb16-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">panel.grid.major.y =</span> <span class="fu">element_blank</span>()) <span class="sc">+</span></span>
+<span id="cb16-21"><a href="#cb16-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">legend_inside</span>(<span class="dv">1</span>, <span class="dv">1</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="assign05_Data_Visualization_files/figure-html/gg_histogram-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="b-bar-chart-1" class="level3">
+<h3 class="anchored" data-anchor-id="b-bar-chart-1">b) Bar Chart</h3>
+<section id="vertical-1" class="level4">
+<h4 class="anchored" data-anchor-id="vertical-1">Vertical</h4>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>plot_title  <span class="ot">&lt;-</span> <span class="st">"Average HPI score by region, 2025"</span>                 <span class="co"># PLACEHOLDER</span></span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>x_label     <span class="ot">&lt;-</span> <span class="st">"Region"</span>                                            <span class="co"># PLACEHOLDER</span></span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>y_label     <span class="ot">&lt;-</span> <span class="st">"Mean HPI score (points)"</span>                           <span class="co"># PLACEHOLDER</span></span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>source_text <span class="ot">&lt;-</span> <span class="st">"Source: Happy Planet Index 2006-2025 public data set (happyplanetindex.org)."</span>  <span class="co"># PLACEHOLDER</span></span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>mean_region <span class="ot">&lt;-</span> <span class="fu">aggregate</span>(HPI <span class="sc">~</span> region, <span class="at">data =</span> hpi, <span class="at">FUN =</span> mean)</span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a>mean_region<span class="sc">$</span>region <span class="ot">&lt;-</span> <span class="fu">reorder</span>(mean_region<span class="sc">$</span>region, <span class="sc">-</span>mean_region<span class="sc">$</span>HPI)        <span class="co"># highest first</span></span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a>overall_mean <span class="ot">&lt;-</span> <span class="fu">mean</span>(hpi<span class="sc">$</span>HPI)</span>
+<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a>region_labels <span class="ot">&lt;-</span> <span class="fu">setNames</span>(</span>
+<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">c</span>(<span class="st">"Latin</span><span class="sc">\n</span><span class="st">America"</span>, <span class="st">"N. America</span><span class="sc">\n</span><span class="st">&amp; Oceania"</span>, <span class="st">"Western</span><span class="sc">\n</span><span class="st">Europe"</span>,</span>
+<span id="cb17-11"><a href="#cb17-11" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Middle East</span><span class="sc">\n</span><span class="st">&amp; N. Africa"</span>, <span class="st">"Africa"</span>, <span class="st">"South</span><span class="sc">\n</span><span class="st">Asia"</span>,</span>
+<span id="cb17-12"><a href="#cb17-12" aria-hidden="true" tabindex="-1"></a>    <span class="st">"E. Europe &amp;</span><span class="sc">\n</span><span class="st">Central Asia"</span>, <span class="st">"East</span><span class="sc">\n</span><span class="st">Asia"</span>), regions)              <span class="co"># wrapped names</span></span>
+<span id="cb17-13"><a href="#cb17-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-14"><a href="#cb17-14" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(mean_region, <span class="fu">aes</span>(<span class="at">x =</span> region, <span class="at">y =</span> HPI)) <span class="sc">+</span></span>
+<span id="cb17-15"><a href="#cb17-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_col</span>(<span class="at">fill =</span> pal[[<span class="st">"green"</span>]], <span class="at">width =</span> <span class="fl">0.74</span>) <span class="sc">+</span></span>
+<span id="cb17-16"><a href="#cb17-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_text</span>(<span class="fu">aes</span>(<span class="at">y =</span> <span class="dv">3</span>, <span class="at">label =</span> <span class="fu">sprintf</span>(<span class="st">"%.1f"</span>, HPI)), <span class="at">colour =</span> <span class="st">"white"</span>,</span>
+<span id="cb17-17"><a href="#cb17-17" aria-hidden="true" tabindex="-1"></a>            <span class="at">size =</span> <span class="dv">3</span>, <span class="at">family =</span> base_font) <span class="sc">+</span>                                     <span class="co"># values at the bar base</span></span>
+<span id="cb17-18"><a href="#cb17-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_hline</span>(<span class="fu">aes</span>(<span class="at">yintercept =</span> overall_mean,</span>
+<span id="cb17-19"><a href="#cb17-19" aria-hidden="true" tabindex="-1"></a>                 <span class="at">linetype =</span> <span class="fu">paste0</span>(<span class="st">"Average of all countries ("</span>, <span class="fu">round</span>(overall_mean, <span class="dv">1</span>), <span class="st">")"</span>)),</span>
+<span id="cb17-20"><a href="#cb17-20" aria-hidden="true" tabindex="-1"></a>             <span class="at">colour =</span> pal[[<span class="st">"orange"</span>]], <span class="at">linewidth =</span> <span class="fl">0.9</span>) <span class="sc">+</span>                       <span class="co"># annotation</span></span>
+<span id="cb17-21"><a href="#cb17-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_linetype_manual</span>(<span class="at">values =</span> <span class="st">"longdash"</span>, <span class="at">name =</span> <span class="cn">NULL</span>) <span class="sc">+</span></span>
+<span id="cb17-22"><a href="#cb17-22" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_x_discrete</span>(<span class="at">labels =</span> region_labels) <span class="sc">+</span></span>
+<span id="cb17-23"><a href="#cb17-23" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_y_continuous</span>(<span class="at">limits =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">70</span>), <span class="at">breaks =</span> <span class="fu">seq</span>(<span class="dv">0</span>, <span class="dv">70</span>, <span class="dv">10</span>),</span>
+<span id="cb17-24"><a href="#cb17-24" aria-hidden="true" tabindex="-1"></a>                     <span class="at">expand =</span> <span class="fu">expansion</span>(<span class="at">mult =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">0</span>))) <span class="sc">+</span></span>
+<span id="cb17-25"><a href="#cb17-25" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> plot_title, <span class="at">x =</span> x_label, <span class="at">y =</span> y_label, <span class="at">caption =</span> source_text) <span class="sc">+</span></span>
+<span id="cb17-26"><a href="#cb17-26" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_mine</span>() <span class="sc">+</span></span>
+<span id="cb17-27"><a href="#cb17-27" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">axis.text.x =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="fu">rel</span>(<span class="fl">0.75</span>), <span class="at">lineheight =</span> <span class="fl">0.9</span>),</span>
+<span id="cb17-28"><a href="#cb17-28" aria-hidden="true" tabindex="-1"></a>        <span class="at">axis.ticks.x =</span> <span class="fu">element_blank</span>()) <span class="sc">+</span></span>
+<span id="cb17-29"><a href="#cb17-29" aria-hidden="true" tabindex="-1"></a>  <span class="fu">legend_inside</span>(<span class="dv">1</span>, <span class="dv">1</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="assign05_Data_Visualization_files/figure-html/gg_bar_vertical-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>plot_title  <span class="ot">&lt;-</span> <span class="st">"Top 10 countries on the Happy Planet Index, 2025"</span>  <span class="co"># PLACEHOLDER</span></span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>x_label     <span class="ot">&lt;-</span> <span class="st">"HPI score (points)"</span>                                <span class="co"># PLACEHOLDER</span></span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>source_text <span class="ot">&lt;-</span> <span class="st">"Source: Happy Planet Index 2006-2025 public data set (happyplanetindex.org)."</span>  <span class="co"># PLACEHOLDER</span></span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>top10 <span class="ot">&lt;-</span> <span class="fu">head</span>(hpi[<span class="fu">order</span>(<span class="sc">-</span>hpi<span class="sc">$</span>HPI), <span class="fu">c</span>(<span class="st">"Country"</span>, <span class="st">"HPI"</span>)], <span class="dv">10</span>)</span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a>top10<span class="sc">$</span>Country  <span class="ot">&lt;-</span> <span class="fu">factor</span>(top10<span class="sc">$</span>Country, <span class="at">levels =</span> <span class="fu">rev</span>(top10<span class="sc">$</span>Country))  <span class="co"># highest at the top</span></span>
+<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a>top10<span class="sc">$</span>highlight <span class="ot">&lt;-</span> <span class="fu">ifelse</span>(top10<span class="sc">$</span>Country <span class="sc">==</span> <span class="st">"Costa Rica"</span>, <span class="st">"Ranked 1st"</span>, <span class="st">"Other top-10 countries"</span>)</span>
+<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(top10, <span class="fu">aes</span>(<span class="at">x =</span> HPI, <span class="at">y =</span> Country, <span class="at">fill =</span> highlight)) <span class="sc">+</span></span>
+<span id="cb18-10"><a href="#cb18-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_col</span>(<span class="at">width =</span> <span class="fl">0.7</span>) <span class="sc">+</span></span>
+<span id="cb18-11"><a href="#cb18-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_text</span>(<span class="fu">aes</span>(<span class="at">label =</span> <span class="fu">sprintf</span>(<span class="st">"%.1f"</span>, HPI)), <span class="at">hjust =</span> <span class="sc">-</span><span class="fl">0.25</span>, <span class="at">size =</span> <span class="fl">2.9</span>,</span>
+<span id="cb18-12"><a href="#cb18-12" aria-hidden="true" tabindex="-1"></a>            <span class="at">family =</span> base_font, <span class="at">colour =</span> pal[[<span class="st">"ink"</span>]]) <span class="sc">+</span></span>
+<span id="cb18-13"><a href="#cb18-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_manual</span>(<span class="at">values =</span> <span class="fu">c</span>(<span class="st">"Ranked 1st"</span> <span class="ot">=</span> pal[[<span class="st">"orange"</span>]],</span>
+<span id="cb18-14"><a href="#cb18-14" aria-hidden="true" tabindex="-1"></a>                               <span class="st">"Other top-10 countries"</span> <span class="ot">=</span> pal[[<span class="st">"green"</span>]]),</span>
+<span id="cb18-15"><a href="#cb18-15" aria-hidden="true" tabindex="-1"></a>                    <span class="at">breaks =</span> <span class="fu">c</span>(<span class="st">"Ranked 1st"</span>, <span class="st">"Other top-10 countries"</span>), <span class="at">name =</span> <span class="cn">NULL</span>) <span class="sc">+</span></span>
+<span id="cb18-16"><a href="#cb18-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_x_continuous</span>(<span class="at">limits =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">100</span>), <span class="at">breaks =</span> <span class="fu">seq</span>(<span class="dv">0</span>, <span class="dv">75</span>, <span class="dv">15</span>),</span>
+<span id="cb18-17"><a href="#cb18-17" aria-hidden="true" tabindex="-1"></a>                     <span class="at">expand =</span> <span class="fu">expansion</span>(<span class="at">mult =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">0</span>))) <span class="sc">+</span></span>
+<span id="cb18-18"><a href="#cb18-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> plot_title, <span class="at">x =</span> x_label, <span class="at">y =</span> <span class="cn">NULL</span>, <span class="at">caption =</span> source_text) <span class="sc">+</span></span>
+<span id="cb18-19"><a href="#cb18-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">annotate</span>(<span class="st">"segment"</span>, <span class="at">x =</span> <span class="dv">0</span>, <span class="at">xend =</span> <span class="dv">75</span>, <span class="at">y =</span> <span class="sc">-</span><span class="cn">Inf</span>, <span class="at">yend =</span> <span class="sc">-</span><span class="cn">Inf</span>,</span>
+<span id="cb18-20"><a href="#cb18-20" aria-hidden="true" tabindex="-1"></a>           <span class="at">colour =</span> pal[[<span class="st">"grey"</span>]], <span class="at">linewidth =</span> <span class="fl">0.5</span>) <span class="sc">+</span>                       <span class="co"># axis line 0-75</span></span>
+<span id="cb18-21"><a href="#cb18-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_mine</span>() <span class="sc">+</span></span>
+<span id="cb18-22"><a href="#cb18-22" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">panel.grid.major.y =</span> <span class="fu">element_blank</span>(), <span class="at">axis.line =</span> <span class="fu">element_blank</span>(),</span>
+<span id="cb18-23"><a href="#cb18-23" aria-hidden="true" tabindex="-1"></a>        <span class="at">axis.ticks.y =</span> <span class="fu">element_blank</span>(),</span>
+<span id="cb18-24"><a href="#cb18-24" aria-hidden="true" tabindex="-1"></a>        <span class="at">axis.text.y =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="fu">rel</span>(<span class="fl">0.9</span>))) <span class="sc">+</span></span>
+<span id="cb18-25"><a href="#cb18-25" aria-hidden="true" tabindex="-1"></a>  <span class="fu">legend_inside</span>(<span class="dv">1</span>, <span class="dv">0</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="assign05_Data_Visualization_files/figure-html/gg_bar_horizontal-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="c-pie-chart-1" class="level3">
+<h3 class="anchored" data-anchor-id="c-pie-chart-1">c) Pie Chart</h3>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>plot_title  <span class="ot">&lt;-</span> <span class="st">"Countries by HPI score band, 2025"</span>                 <span class="co"># PLACEHOLDER</span></span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>source_text <span class="ot">&lt;-</span> <span class="st">"Source: Happy Planet Index 2006-2025 public data set (happyplanetindex.org)."</span>  <span class="co"># PLACEHOLDER</span></span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>slices <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>(<span class="fu">table</span>(<span class="at">band =</span> hpi<span class="sc">$</span>band))</span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>slices<span class="sc">$</span>pct <span class="ot">&lt;-</span> <span class="fu">round</span>(<span class="dv">100</span> <span class="sc">*</span> slices<span class="sc">$</span>Freq <span class="sc">/</span> <span class="fu">sum</span>(slices<span class="sc">$</span>Freq))</span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Position of each label: middle of its slice, counted clockwise from 12 o'clock</span></span>
+<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a>slices<span class="sc">$</span>mid <span class="ot">&lt;-</span> <span class="fu">cumsum</span>(slices<span class="sc">$</span>Freq) <span class="sc">-</span> slices<span class="sc">$</span>Freq <span class="sc">/</span> <span class="dv">2</span></span>
+<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-9"><a href="#cb19-9" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(slices, <span class="fu">aes</span>(<span class="at">x =</span> <span class="dv">1</span>, <span class="at">y =</span> Freq, <span class="at">fill =</span> band)) <span class="sc">+</span></span>
+<span id="cb19-10"><a href="#cb19-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_col</span>(<span class="at">width =</span> <span class="dv">1</span>, <span class="at">colour =</span> <span class="st">"white"</span>, <span class="at">linewidth =</span> <span class="dv">1</span>,</span>
+<span id="cb19-11"><a href="#cb19-11" aria-hidden="true" tabindex="-1"></a>           <span class="at">position =</span> <span class="fu">position_stack</span>(<span class="at">reverse =</span> <span class="cn">TRUE</span>)) <span class="sc">+</span></span>
+<span id="cb19-12"><a href="#cb19-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_text</span>(<span class="fu">aes</span>(<span class="at">x =</span> <span class="fl">1.68</span>, <span class="at">y =</span> mid, <span class="at">label =</span> <span class="fu">paste0</span>(pct, <span class="st">"%</span><span class="sc">\n</span><span class="st">("</span>, Freq, <span class="st">")"</span>)),</span>
+<span id="cb19-13"><a href="#cb19-13" aria-hidden="true" tabindex="-1"></a>            <span class="at">size =</span> <span class="dv">3</span>, <span class="at">lineheight =</span> <span class="fl">0.9</span>, <span class="at">family =</span> base_font, <span class="at">colour =</span> pal[[<span class="st">"grey"</span>]]) <span class="sc">+</span></span>
+<span id="cb19-14"><a href="#cb19-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">coord_polar</span>(<span class="at">theta =</span> <span class="st">"y"</span>, <span class="at">start =</span> <span class="dv">0</span>, <span class="at">direction =</span> <span class="dv">1</span>, <span class="at">clip =</span> <span class="st">"off"</span>) <span class="sc">+</span>    <span class="co"># clockwise from the top</span></span>
+<span id="cb19-15"><a href="#cb19-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_manual</span>(<span class="at">values =</span> seq_green, <span class="at">name =</span> <span class="st">"HPI score"</span>) <span class="sc">+</span></span>
+<span id="cb19-16"><a href="#cb19-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_x_continuous</span>(<span class="at">limits =</span> <span class="fu">c</span>(<span class="fl">0.5</span>, <span class="fl">1.75</span>)) <span class="sc">+</span></span>
+<span id="cb19-17"><a href="#cb19-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> plot_title,</span>
+<span id="cb19-18"><a href="#cb19-18" aria-hidden="true" tabindex="-1"></a>       <span class="at">subtitle =</span> <span class="fu">paste</span>(<span class="st">"Total:"</span>, <span class="fu">sum</span>(slices<span class="sc">$</span>Freq), <span class="st">"ranked countries"</span>),        <span class="co"># annotation</span></span>
+<span id="cb19-19"><a href="#cb19-19" aria-hidden="true" tabindex="-1"></a>       <span class="at">caption =</span> source_text) <span class="sc">+</span></span>
+<span id="cb19-20"><a href="#cb19-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_mine</span>() <span class="sc">+</span></span>
+<span id="cb19-21"><a href="#cb19-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">axis.line =</span> <span class="fu">element_blank</span>(), <span class="at">axis.text =</span> <span class="fu">element_blank</span>(),</span>
+<span id="cb19-22"><a href="#cb19-22" aria-hidden="true" tabindex="-1"></a>        <span class="at">axis.ticks =</span> <span class="fu">element_blank</span>(),</span>
+<span id="cb19-23"><a href="#cb19-23" aria-hidden="true" tabindex="-1"></a>        <span class="at">axis.title.x =</span> <span class="fu">element_blank</span>(), <span class="at">axis.title.y =</span> <span class="fu">element_blank</span>(),</span>
+<span id="cb19-24"><a href="#cb19-24" aria-hidden="true" tabindex="-1"></a>        <span class="at">panel.grid.major.y =</span> <span class="fu">element_blank</span>(),            <span class="co"># a pie needs no axes or grid</span></span>
+<span id="cb19-25"><a href="#cb19-25" aria-hidden="true" tabindex="-1"></a>        <span class="at">plot.subtitle =</span> <span class="fu">element_text</span>(<span class="at">margin =</span> <span class="fu">margin</span>(<span class="at">t =</span> <span class="dv">4</span>, <span class="at">b =</span> <span class="dv">4</span>)),</span>
+<span id="cb19-26"><a href="#cb19-26" aria-hidden="true" tabindex="-1"></a>        <span class="at">legend.position =</span> <span class="st">"right"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="assign05_Data_Visualization_files/figure-html/gg_pie-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="d-boxplot-1" class="level3">
+<h3 class="anchored" data-anchor-id="d-boxplot-1">d) Boxplot</h3>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>plot_title  <span class="ot">&lt;-</span> <span class="st">"HPI scores by region, 2025"</span>                        <span class="co"># PLACEHOLDER</span></span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>x_label     <span class="ot">&lt;-</span> <span class="st">"HPI score (points)"</span>                                <span class="co"># PLACEHOLDER</span></span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>source_text <span class="ot">&lt;-</span> <span class="st">"Source: Happy Planet Index 2006-2025 public data set (happyplanetindex.org)."</span>  <span class="co"># PLACEHOLDER</span></span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>hpi<span class="sc">$</span>region_ord <span class="ot">&lt;-</span> <span class="fu">reorder</span>(hpi<span class="sc">$</span>region, hpi<span class="sc">$</span>HPI, <span class="at">FUN =</span> median)   <span class="co"># lowest median at the bottom</span></span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a>overall_median <span class="ot">&lt;-</span> <span class="fu">median</span>(hpi<span class="sc">$</span>HPI)</span>
+<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">2025</span>)                                                  <span class="co"># reproducible jitter</span></span>
+<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-9"><a href="#cb20-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Whisker ends per region (same rule as base R boxplot: 1.5 x IQR)</span></span>
+<span id="cb20-10"><a href="#cb20-10" aria-hidden="true" tabindex="-1"></a>whiskers <span class="ot">&lt;-</span> <span class="fu">do.call</span>(rbind, <span class="fu">lapply</span>(<span class="fu">split</span>(hpi<span class="sc">$</span>HPI, hpi<span class="sc">$</span>region_ord), <span class="cf">function</span>(v) {</span>
+<span id="cb20-11"><a href="#cb20-11" aria-hidden="true" tabindex="-1"></a>  st <span class="ot">&lt;-</span> <span class="fu">boxplot.stats</span>(v)<span class="sc">$</span>stats</span>
+<span id="cb20-12"><a href="#cb20-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">data.frame</span>(<span class="at">min =</span> st[<span class="dv">1</span>], <span class="at">q1 =</span> st[<span class="dv">2</span>], <span class="at">q3 =</span> st[<span class="dv">4</span>], <span class="at">max =</span> st[<span class="dv">5</span>])</span>
+<span id="cb20-13"><a href="#cb20-13" aria-hidden="true" tabindex="-1"></a>}))</span>
+<span id="cb20-14"><a href="#cb20-14" aria-hidden="true" tabindex="-1"></a>whiskers<span class="sc">$</span>region_ord <span class="ot">&lt;-</span> <span class="fu">factor</span>(<span class="fu">rownames</span>(whiskers), <span class="at">levels =</span> <span class="fu">levels</span>(hpi<span class="sc">$</span>region_ord))</span>
+<span id="cb20-15"><a href="#cb20-15" aria-hidden="true" tabindex="-1"></a>whiskers<span class="sc">$</span>y <span class="ot">&lt;-</span> <span class="fu">as.integer</span>(whiskers<span class="sc">$</span>region_ord)</span>
+<span id="cb20-16"><a href="#cb20-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-17"><a href="#cb20-17" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(hpi, <span class="fu">aes</span>(<span class="at">x =</span> HPI, <span class="at">y =</span> region_ord)) <span class="sc">+</span></span>
+<span id="cb20-18"><a href="#cb20-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_segment</span>(<span class="at">data =</span> whiskers, <span class="fu">aes</span>(<span class="at">x =</span> min, <span class="at">xend =</span> q1, <span class="at">y =</span> region_ord, <span class="at">yend =</span> region_ord),</span>
+<span id="cb20-19"><a href="#cb20-19" aria-hidden="true" tabindex="-1"></a>               <span class="at">inherit.aes =</span> <span class="cn">FALSE</span>, <span class="at">colour =</span> pal[[<span class="st">"green"</span>]], <span class="at">linetype =</span> <span class="st">"dashed"</span>) <span class="sc">+</span>   <span class="co"># whiskers</span></span>
+<span id="cb20-20"><a href="#cb20-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_segment</span>(<span class="at">data =</span> whiskers, <span class="fu">aes</span>(<span class="at">x =</span> q3, <span class="at">xend =</span> max, <span class="at">y =</span> region_ord, <span class="at">yend =</span> region_ord),</span>
+<span id="cb20-21"><a href="#cb20-21" aria-hidden="true" tabindex="-1"></a>               <span class="at">inherit.aes =</span> <span class="cn">FALSE</span>, <span class="at">colour =</span> pal[[<span class="st">"green"</span>]], <span class="at">linetype =</span> <span class="st">"dashed"</span>) <span class="sc">+</span></span>
+<span id="cb20-22"><a href="#cb20-22" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_segment</span>(<span class="at">data =</span> whiskers, <span class="fu">aes</span>(<span class="at">x =</span> min, <span class="at">xend =</span> min, <span class="at">y =</span> y <span class="sc">-</span> <span class="fl">0.12</span>, <span class="at">yend =</span> y <span class="sc">+</span> <span class="fl">0.12</span>),</span>
+<span id="cb20-23"><a href="#cb20-23" aria-hidden="true" tabindex="-1"></a>               <span class="at">inherit.aes =</span> <span class="cn">FALSE</span>, <span class="at">colour =</span> pal[[<span class="st">"green"</span>]]) <span class="sc">+</span>                     <span class="co"># staples</span></span>
+<span id="cb20-24"><a href="#cb20-24" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_segment</span>(<span class="at">data =</span> whiskers, <span class="fu">aes</span>(<span class="at">x =</span> max, <span class="at">xend =</span> max, <span class="at">y =</span> y <span class="sc">-</span> <span class="fl">0.12</span>, <span class="at">yend =</span> y <span class="sc">+</span> <span class="fl">0.12</span>),</span>
+<span id="cb20-25"><a href="#cb20-25" aria-hidden="true" tabindex="-1"></a>               <span class="at">inherit.aes =</span> <span class="cn">FALSE</span>, <span class="at">colour =</span> pal[[<span class="st">"green"</span>]]) <span class="sc">+</span></span>
+<span id="cb20-26"><a href="#cb20-26" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_boxplot</span>(<span class="at">fill =</span> <span class="st">"#B5DEC4"</span>, <span class="at">colour =</span> pal[[<span class="st">"green"</span>]], <span class="at">width =</span> <span class="fl">0.6</span>,</span>
+<span id="cb20-27"><a href="#cb20-27" aria-hidden="true" tabindex="-1"></a>               <span class="at">linewidth =</span> <span class="fl">0.6</span>, <span class="at">outlier.shape =</span> <span class="cn">NA</span>, <span class="at">coef =</span> <span class="dv">0</span>) <span class="sc">+</span>    <span class="co"># box only; whiskers drawn above</span></span>
+<span id="cb20-28"><a href="#cb20-28" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_jitter</span>(<span class="fu">aes</span>(<span class="at">fill =</span> <span class="st">"Country"</span>), <span class="at">height =</span> <span class="fl">0.15</span>, <span class="at">width =</span> <span class="dv">0</span>, <span class="at">shape =</span> <span class="dv">21</span>,</span>
+<span id="cb20-29"><a href="#cb20-29" aria-hidden="true" tabindex="-1"></a>              <span class="at">colour =</span> <span class="st">"white"</span>, <span class="at">size =</span> <span class="dv">2</span>, <span class="at">stroke =</span> <span class="fl">0.4</span>, <span class="at">alpha =</span> <span class="fl">0.85</span>) <span class="sc">+</span></span>
+<span id="cb20-30"><a href="#cb20-30" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_vline</span>(<span class="fu">aes</span>(<span class="at">xintercept =</span> overall_median, <span class="at">linetype =</span> <span class="st">"Median of all countries"</span>),</span>
+<span id="cb20-31"><a href="#cb20-31" aria-hidden="true" tabindex="-1"></a>             <span class="at">colour =</span> pal[[<span class="st">"orange"</span>]], <span class="at">linewidth =</span> <span class="fl">0.9</span>, <span class="at">key_glyph =</span> <span class="st">"path"</span>) <span class="sc">+</span>  <span class="co"># annotation</span></span>
+<span id="cb20-32"><a href="#cb20-32" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_manual</span>(<span class="at">values =</span> <span class="fu">c</span>(<span class="st">"Country"</span> <span class="ot">=</span> pal[[<span class="st">"green"</span>]]), <span class="at">name =</span> <span class="cn">NULL</span>) <span class="sc">+</span></span>
+<span id="cb20-33"><a href="#cb20-33" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_linetype_manual</span>(<span class="at">values =</span> <span class="st">"dotdash"</span>, <span class="at">name =</span> <span class="cn">NULL</span>) <span class="sc">+</span></span>
+<span id="cb20-34"><a href="#cb20-34" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_x_continuous</span>(<span class="at">limits =</span> <span class="fu">c</span>(<span class="dv">30</span>, <span class="dv">70</span>), <span class="at">breaks =</span> <span class="fu">seq</span>(<span class="dv">30</span>, <span class="dv">70</span>, <span class="dv">10</span>)) <span class="sc">+</span></span>
+<span id="cb20-35"><a href="#cb20-35" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> plot_title, <span class="at">x =</span> x_label, <span class="at">y =</span> <span class="cn">NULL</span>, <span class="at">caption =</span> source_text) <span class="sc">+</span></span>
+<span id="cb20-36"><a href="#cb20-36" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_mine</span>() <span class="sc">+</span></span>
+<span id="cb20-37"><a href="#cb20-37" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">panel.grid.major.y =</span> <span class="fu">element_blank</span>(),</span>
+<span id="cb20-38"><a href="#cb20-38" aria-hidden="true" tabindex="-1"></a>        <span class="at">axis.line.y =</span> <span class="fu">element_blank</span>(), <span class="at">axis.ticks.y =</span> <span class="fu">element_blank</span>(),</span>
+<span id="cb20-39"><a href="#cb20-39" aria-hidden="true" tabindex="-1"></a>        <span class="at">legend.spacing.y =</span> <span class="fu">unit</span>(<span class="dv">0</span>, <span class="st">"pt"</span>), <span class="at">legend.margin =</span> <span class="fu">margin</span>(<span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">0</span>)) <span class="sc">+</span></span>
+<span id="cb20-40"><a href="#cb20-40" aria-hidden="true" tabindex="-1"></a>  <span class="fu">legend_inside</span>(<span class="dv">1</span>, <span class="dv">0</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="assign05_Data_Visualization_files/figure-html/gg_boxplot-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="e-scatterplot-1" class="level3">
+<h3 class="anchored" data-anchor-id="e-scatterplot-1">e) Scatterplot</h3>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>plot_title  <span class="ot">&lt;-</span> <span class="st">"Life satisfaction vs. ecological footprint, 2025"</span>  <span class="co"># PLACEHOLDER</span></span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>x_label     <span class="ot">&lt;-</span> <span class="st">"Ecological footprint (global hectares per person)"</span> <span class="co"># PLACEHOLDER</span></span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>y_label     <span class="ot">&lt;-</span> <span class="st">"Life satisfaction (0-10 scale)"</span>                    <span class="co"># PLACEHOLDER</span></span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>source_text <span class="ot">&lt;-</span> <span class="st">"Source: Happy Planet Index 2006-2025 public data set (happyplanetindex.org)."</span>  <span class="co"># PLACEHOLDER</span></span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a>ef_limit <span class="ot">&lt;-</span> <span class="fl">1.48</span>                                   <span class="co"># sustainable footprint for 2025 (gha)</span></span>
+<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a>cr <span class="ot">&lt;-</span> hpi[hpi<span class="sc">$</span>Country <span class="sc">==</span> <span class="st">"Costa Rica"</span>, ]</span>
+<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a>points_df <span class="ot">&lt;-</span> hpi[<span class="sc">!</span><span class="fu">is.na</span>(hpi<span class="sc">$</span><span class="st">`</span><span class="at">Ecological Footprint</span><span class="st">`</span>) <span class="sc">&amp;</span> <span class="sc">!</span><span class="fu">is.na</span>(hpi<span class="sc">$</span><span class="st">`</span><span class="at">Life satisfaction</span><span class="st">`</span>), ]</span>
+<span id="cb21-9"><a href="#cb21-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-10"><a href="#cb21-10" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(points_df, <span class="fu">aes</span>(<span class="at">x =</span> <span class="st">`</span><span class="at">Ecological Footprint</span><span class="st">`</span>, <span class="at">y =</span> <span class="st">`</span><span class="at">Life satisfaction</span><span class="st">`</span>)) <span class="sc">+</span></span>
+<span id="cb21-11"><a href="#cb21-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_vline</span>(<span class="at">xintercept =</span> ef_limit, <span class="at">colour =</span> pal[[<span class="st">"orange"</span>]],</span>
+<span id="cb21-12"><a href="#cb21-12" aria-hidden="true" tabindex="-1"></a>             <span class="at">linetype =</span> <span class="st">"dashed"</span>, <span class="at">linewidth =</span> <span class="fl">0.9</span>) <span class="sc">+</span>                             <span class="co"># annotation</span></span>
+<span id="cb21-13"><a href="#cb21-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">annotate</span>(<span class="st">"text"</span>, <span class="at">x =</span> ef_limit, <span class="at">y =</span> <span class="fl">3.15</span>, <span class="at">label =</span> <span class="fu">paste</span>(<span class="st">"Sustainable limit:"</span>, ef_limit, <span class="st">"gha"</span>),</span>
+<span id="cb21-14"><a href="#cb21-14" aria-hidden="true" tabindex="-1"></a>           <span class="at">hjust =</span> <span class="sc">-</span><span class="fl">0.05</span>, <span class="at">size =</span> <span class="fl">2.8</span>, <span class="at">family =</span> base_font, <span class="at">colour =</span> pal[[<span class="st">"ink"</span>]]) <span class="sc">+</span></span>
+<span id="cb21-15"><a href="#cb21-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="fu">aes</span>(<span class="at">shape =</span> band, <span class="at">fill =</span> band), <span class="at">colour =</span> pal[[<span class="st">"green"</span>]],</span>
+<span id="cb21-16"><a href="#cb21-16" aria-hidden="true" tabindex="-1"></a>             <span class="at">size =</span> <span class="fl">2.6</span>, <span class="at">stroke =</span> <span class="fl">0.5</span>) <span class="sc">+</span></span>
+<span id="cb21-17"><a href="#cb21-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">annotate</span>(<span class="st">"segment"</span>, <span class="at">x =</span> <span class="fl">4.2</span>, <span class="at">y =</span> <span class="fl">8.15</span>,</span>
+<span id="cb21-18"><a href="#cb21-18" aria-hidden="true" tabindex="-1"></a>           <span class="at">xend =</span> cr<span class="sc">$</span><span class="st">`</span><span class="at">Ecological Footprint</span><span class="st">`</span> <span class="sc">+</span> <span class="fl">0.15</span>, <span class="at">yend =</span> cr<span class="sc">$</span><span class="st">`</span><span class="at">Life satisfaction</span><span class="st">`</span> <span class="sc">+</span> <span class="fl">0.05</span>,</span>
+<span id="cb21-19"><a href="#cb21-19" aria-hidden="true" tabindex="-1"></a>           <span class="at">arrow =</span> <span class="fu">arrow</span>(<span class="at">length =</span> <span class="fu">unit</span>(<span class="fl">0.08</span>, <span class="st">"inches"</span>)),</span>
+<span id="cb21-20"><a href="#cb21-20" aria-hidden="true" tabindex="-1"></a>           <span class="at">colour =</span> pal[[<span class="st">"ink"</span>]], <span class="at">linewidth =</span> <span class="fl">0.5</span>) <span class="sc">+</span>                           <span class="co"># annotation</span></span>
+<span id="cb21-21"><a href="#cb21-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">annotate</span>(<span class="st">"text"</span>, <span class="at">x =</span> <span class="fl">4.2</span>, <span class="at">y =</span> <span class="fl">8.15</span>, <span class="at">label =</span> <span class="st">"Costa Rica: highest HPI"</span>, <span class="at">hjust =</span> <span class="sc">-</span><span class="fl">0.05</span>,</span>
+<span id="cb21-22"><a href="#cb21-22" aria-hidden="true" tabindex="-1"></a>           <span class="at">size =</span> <span class="dv">3</span>, <span class="at">family =</span> base_font, <span class="at">colour =</span> pal[[<span class="st">"ink"</span>]]) <span class="sc">+</span></span>
+<span id="cb21-23"><a href="#cb21-23" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_shape_manual</span>(<span class="at">values =</span> <span class="fu">c</span>(<span class="dv">25</span>, <span class="dv">22</span>, <span class="dv">21</span>, <span class="dv">24</span>), <span class="at">name =</span> <span class="st">"HPI score"</span>) <span class="sc">+</span>  <span class="co"># same pch as base R</span></span>
+<span id="cb21-24"><a href="#cb21-24" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_manual</span>(<span class="at">values =</span> seq_green, <span class="at">name =</span> <span class="st">"HPI score"</span>) <span class="sc">+</span></span>
+<span id="cb21-25"><a href="#cb21-25" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_x_continuous</span>(<span class="at">limits =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">12</span>), <span class="at">breaks =</span> <span class="fu">seq</span>(<span class="dv">0</span>, <span class="dv">12</span>, <span class="dv">2</span>)) <span class="sc">+</span></span>
+<span id="cb21-26"><a href="#cb21-26" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_y_continuous</span>(<span class="at">limits =</span> <span class="fu">c</span>(<span class="dv">3</span>, <span class="fl">8.3</span>), <span class="at">breaks =</span> <span class="dv">3</span><span class="sc">:</span><span class="dv">8</span>) <span class="sc">+</span></span>
+<span id="cb21-27"><a href="#cb21-27" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> plot_title, <span class="at">x =</span> x_label, <span class="at">y =</span> y_label, <span class="at">caption =</span> source_text) <span class="sc">+</span></span>
+<span id="cb21-28"><a href="#cb21-28" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_mine</span>() <span class="sc">+</span></span>
+<span id="cb21-29"><a href="#cb21-29" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">panel.grid.major.x =</span> <span class="fu">element_line</span>(<span class="at">colour =</span> pal[[<span class="st">"light_grey"</span>]],</span>
+<span id="cb21-30"><a href="#cb21-30" aria-hidden="true" tabindex="-1"></a>                                          <span class="at">linewidth =</span> <span class="fl">0.4</span>, <span class="at">linetype =</span> <span class="st">"dotted"</span>)) <span class="sc">+</span></span>
+<span id="cb21-31"><a href="#cb21-31" aria-hidden="true" tabindex="-1"></a>  <span class="fu">legend_inside</span>(<span class="dv">1</span>, <span class="dv">0</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="assign05_Data_Visualization_files/figure-html/gg_scatter-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<hr>
+</section>
+</section>
+<section id="part-3.-output-formats" class="level1">
+<h1>Part 3. Output Formats</h1>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="do">## ---- export-setup ----------------------------------------------------------</span></span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Run after the setup and theme chunks of Part 1 (theme_base) and Part 2 (theme_mine).</span></span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Chosen chart: the scatterplot (e). It has text, thin lines, arrows and filled</span></span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a><span class="co"># symbols, which makes the differences between formats easy to see when zooming.</span></span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a>fig_width <span class="ot">&lt;-</span> <span class="fl">6.5</span>    <span class="co"># inches</span></span>
+<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a>fig_height  <span class="ot">&lt;-</span> <span class="dv">4</span>      <span class="co"># inches</span></span>
+<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a>dpi     <span class="ot">&lt;-</span> <span class="dv">300</span>    <span class="co"># for the raster formats</span></span>
+<span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-9"><a href="#cb22-9" aria-hidden="true" tabindex="-1"></a>export_dir <span class="ot">&lt;-</span> here<span class="sc">::</span><span class="fu">here</span>(<span class="st">"export"</span>)</span>
+<span id="cb22-10"><a href="#cb22-10" aria-hidden="true" tabindex="-1"></a><span class="fu">dir.create</span>(export_dir, <span class="at">showWarnings =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb22-11"><a href="#cb22-11" aria-hidden="true" tabindex="-1"></a>export_path <span class="ot">&lt;-</span> <span class="cf">function</span>(name, ext) <span class="fu">file.path</span>(export_dir, <span class="fu">paste0</span>(name, <span class="st">"."</span>, ext))</span>
+<span id="cb22-12"><a href="#cb22-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-13"><a href="#cb22-13" aria-hidden="true" tabindex="-1"></a><span class="co"># pdf() only knows the PDF base fonts (Helvetica, Times, Courier), not Windows fonts.</span></span>
+<span id="cb22-14"><a href="#cb22-14" aria-hidden="true" tabindex="-1"></a><span class="co"># On Windows, map the family "Georgia" to the serif PDF font so pdf() does not fail.</span></span>
+<span id="cb22-15"><a href="#cb22-15" aria-hidden="true" tabindex="-1"></a><span class="co"># (cairo_pdf() would embed the real Georgia, if you prefer.)</span></span>
+<span id="cb22-16"><a href="#cb22-16" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (.Platform<span class="sc">$</span>OS.type <span class="sc">==</span> <span class="st">"windows"</span> <span class="sc">&amp;&amp;</span> <span class="sc">!</span><span class="st">"Georgia"</span> <span class="sc">%in%</span> <span class="fu">names</span>(<span class="fu">pdfFonts</span>())) {</span>
+<span id="cb22-17"><a href="#cb22-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pdfFonts</span>(<span class="at">Georgia =</span> <span class="fu">pdfFonts</span>()<span class="sc">$</span>serif)</span>
+<span id="cb22-18"><a href="#cb22-18" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb22-19"><a href="#cb22-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-20"><a href="#cb22-20" aria-hidden="true" tabindex="-1"></a><span class="do">## ---- export-base -------------------------------------------------------------</span></span>
+<span id="cb22-21"><a href="#cb22-21" aria-hidden="true" tabindex="-1"></a><span class="co"># Part 1 scatterplot wrapped in a function, so it can be drawn on each device</span></span>
+<span id="cb22-22"><a href="#cb22-22" aria-hidden="true" tabindex="-1"></a>draw_scatter <span class="ot">&lt;-</span> <span class="cf">function</span>() {</span>
+<span id="cb22-23"><a href="#cb22-23" aria-hidden="true" tabindex="-1"></a>  plot_title  <span class="ot">&lt;-</span> <span class="st">"Life satisfaction vs. ecological footprint, 2025"</span>  <span class="co"># PLACEHOLDER</span></span>
+<span id="cb22-24"><a href="#cb22-24" aria-hidden="true" tabindex="-1"></a>  x_label     <span class="ot">&lt;-</span> <span class="st">"Ecological footprint (global hectares per person)"</span> <span class="co"># PLACEHOLDER</span></span>
+<span id="cb22-25"><a href="#cb22-25" aria-hidden="true" tabindex="-1"></a>  y_label     <span class="ot">&lt;-</span> <span class="st">"Life satisfaction (0-10 scale)"</span>                    <span class="co"># PLACEHOLDER</span></span>
+<span id="cb22-26"><a href="#cb22-26" aria-hidden="true" tabindex="-1"></a>  source_text <span class="ot">&lt;-</span> <span class="st">"Source: Happy Planet Index 2006-2025 public data set (happyplanetindex.org)."</span>  <span class="co"># PLACEHOLDER</span></span>
+<span id="cb22-27"><a href="#cb22-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-28"><a href="#cb22-28" aria-hidden="true" tabindex="-1"></a>  band_pch <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">25</span>, <span class="dv">22</span>, <span class="dv">21</span>, <span class="dv">24</span>)                     <span class="co"># one pch per band (shape + colour)</span></span>
+<span id="cb22-29"><a href="#cb22-29" aria-hidden="true" tabindex="-1"></a>  band_idx      <span class="ot">&lt;-</span> <span class="fu">as.integer</span>(hpi<span class="sc">$</span>band)</span>
+<span id="cb22-30"><a href="#cb22-30" aria-hidden="true" tabindex="-1"></a>  ef_limit   <span class="ot">&lt;-</span> <span class="fl">1.48</span>                                  <span class="co"># sustainable footprint for 2025 (gha)</span></span>
+<span id="cb22-31"><a href="#cb22-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-32"><a href="#cb22-32" aria-hidden="true" tabindex="-1"></a>  op <span class="ot">&lt;-</span> <span class="fu">theme_base</span>()</span>
+<span id="cb22-33"><a href="#cb22-33" aria-hidden="true" tabindex="-1"></a>  <span class="fu">plot</span>(hpi<span class="sc">$</span><span class="st">`</span><span class="at">Ecological Footprint</span><span class="st">`</span>, hpi<span class="sc">$</span><span class="st">`</span><span class="at">Life satisfaction</span><span class="st">`</span>, <span class="at">type =</span> <span class="st">"n"</span>,</span>
+<span id="cb22-34"><a href="#cb22-34" aria-hidden="true" tabindex="-1"></a>       <span class="at">main =</span> plot_title, <span class="at">xlab =</span> x_label, <span class="at">ylab =</span> y_label,</span>
+<span id="cb22-35"><a href="#cb22-35" aria-hidden="true" tabindex="-1"></a>       <span class="at">xlim =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">12</span>), <span class="at">ylim =</span> <span class="fu">c</span>(<span class="dv">3</span>, <span class="fl">8.3</span>), <span class="at">axes =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb22-36"><a href="#cb22-36" aria-hidden="true" tabindex="-1"></a>  <span class="fu">axis</span>(<span class="dv">1</span>, <span class="at">at =</span> <span class="fu">seq</span>(<span class="dv">0</span>, <span class="dv">12</span>, <span class="dv">2</span>)); <span class="fu">axis</span>(<span class="dv">2</span>, <span class="at">at =</span> <span class="dv">3</span><span class="sc">:</span><span class="dv">8</span>)</span>
+<span id="cb22-37"><a href="#cb22-37" aria-hidden="true" tabindex="-1"></a>  <span class="fu">add_grid</span>(<span class="at">h =</span> <span class="cn">TRUE</span>, <span class="at">v =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb22-38"><a href="#cb22-38" aria-hidden="true" tabindex="-1"></a>  <span class="fu">abline</span>(<span class="at">v =</span> ef_limit, <span class="at">col =</span> pal[[<span class="st">"orange"</span>]], <span class="at">lty =</span> <span class="st">"dashed"</span>, <span class="at">lwd =</span> <span class="dv">2</span>)          <span class="co"># annotation</span></span>
+<span id="cb22-39"><a href="#cb22-39" aria-hidden="true" tabindex="-1"></a>  <span class="fu">text</span>(ef_limit, <span class="fl">3.15</span>, <span class="fu">paste</span>(<span class="st">"Sustainable limit:"</span>, ef_limit, <span class="st">"gha"</span>), <span class="at">pos =</span> <span class="dv">4</span>,</span>
+<span id="cb22-40"><a href="#cb22-40" aria-hidden="true" tabindex="-1"></a>       <span class="at">cex =</span> <span class="fl">0.75</span>, <span class="at">col =</span> pal[[<span class="st">"ink"</span>]])</span>
+<span id="cb22-41"><a href="#cb22-41" aria-hidden="true" tabindex="-1"></a>  <span class="fu">points</span>(hpi<span class="sc">$</span><span class="st">`</span><span class="at">Ecological Footprint</span><span class="st">`</span>, hpi<span class="sc">$</span><span class="st">`</span><span class="at">Life satisfaction</span><span class="st">`</span>,</span>
+<span id="cb22-42"><a href="#cb22-42" aria-hidden="true" tabindex="-1"></a>         <span class="at">pch =</span> band_pch[band_idx], <span class="at">bg =</span> seq_green[band_idx], <span class="at">col =</span> pal[[<span class="st">"green"</span>]], <span class="at">cex =</span> <span class="fl">1.2</span>, <span class="at">lwd =</span> <span class="fl">0.8</span>)</span>
+<span id="cb22-43"><a href="#cb22-43" aria-hidden="true" tabindex="-1"></a>  cr <span class="ot">&lt;-</span> hpi[hpi<span class="sc">$</span>Country <span class="sc">==</span> <span class="st">"Costa Rica"</span>, ]</span>
+<span id="cb22-44"><a href="#cb22-44" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrows</span>(<span class="fl">4.2</span>, <span class="fl">8.15</span>, cr<span class="sc">$</span><span class="st">`</span><span class="at">Ecological Footprint</span><span class="st">`</span> <span class="sc">+</span> <span class="fl">0.15</span>, cr<span class="sc">$</span><span class="st">`</span><span class="at">Life satisfaction</span><span class="st">`</span> <span class="sc">+</span> <span class="fl">0.05</span>,</span>
+<span id="cb22-45"><a href="#cb22-45" aria-hidden="true" tabindex="-1"></a>         <span class="at">length =</span> <span class="fl">0.08</span>, <span class="at">col =</span> pal[[<span class="st">"ink"</span>]], <span class="at">lwd =</span> <span class="fl">1.2</span>)                       <span class="co"># annotation</span></span>
+<span id="cb22-46"><a href="#cb22-46" aria-hidden="true" tabindex="-1"></a>  <span class="fu">text</span>(<span class="fl">4.2</span>, <span class="fl">8.15</span>, <span class="st">"Costa Rica: highest HPI"</span>, <span class="at">pos =</span> <span class="dv">4</span>, <span class="at">cex =</span> <span class="fl">0.8</span>, <span class="at">col =</span> pal[[<span class="st">"ink"</span>]])</span>
+<span id="cb22-47"><a href="#cb22-47" aria-hidden="true" tabindex="-1"></a>  <span class="fu">legend</span>(<span class="st">"bottomright"</span>, <span class="at">title =</span> <span class="st">"HPI score"</span>, <span class="at">legend =</span> <span class="fu">levels</span>(hpi<span class="sc">$</span>band),</span>
+<span id="cb22-48"><a href="#cb22-48" aria-hidden="true" tabindex="-1"></a>         <span class="at">pch =</span> band_pch, <span class="at">pt.bg =</span> seq_green, <span class="at">col =</span> pal[[<span class="st">"green"</span>]],</span>
+<span id="cb22-49"><a href="#cb22-49" aria-hidden="true" tabindex="-1"></a>         <span class="at">pt.cex =</span> <span class="fl">1.2</span>, <span class="at">bty =</span> <span class="st">"n"</span>, <span class="at">cex =</span> <span class="fl">0.8</span>)</span>
+<span id="cb22-50"><a href="#cb22-50" aria-hidden="true" tabindex="-1"></a>  <span class="fu">source_note</span>(source_text)</span>
+<span id="cb22-51"><a href="#cb22-51" aria-hidden="true" tabindex="-1"></a>  <span class="fu">par</span>(op)</span>
+<span id="cb22-52"><a href="#cb22-52" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb22-53"><a href="#cb22-53" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-54"><a href="#cb22-54" aria-hidden="true" tabindex="-1"></a><span class="fu">pdf</span>(<span class="fu">export_path</span>(<span class="st">"scatter_base"</span>, <span class="st">"pdf"</span>), <span class="at">width =</span> fig_width, <span class="at">height =</span> fig_height)</span>
+<span id="cb22-55"><a href="#cb22-55" aria-hidden="true" tabindex="-1"></a><span class="fu">draw_scatter</span>()</span>
+<span id="cb22-56"><a href="#cb22-56" aria-hidden="true" tabindex="-1"></a><span class="fu">dev.off</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>png 
+  2 </code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="fu">svg</span>(<span class="fu">export_path</span>(<span class="st">"scatter_base"</span>, <span class="st">"svg"</span>), <span class="at">width =</span> fig_width, <span class="at">height =</span> fig_height)</span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a><span class="fu">draw_scatter</span>()</span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a><span class="fu">dev.off</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>png 
+  2 </code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="fu">png</span>(<span class="fu">export_path</span>(<span class="st">"scatter_base"</span>, <span class="st">"png"</span>), <span class="at">width =</span> fig_width, <span class="at">height =</span> fig_height, <span class="at">units =</span> <span class="st">"in"</span>, <span class="at">res =</span> dpi)</span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a><span class="fu">draw_scatter</span>()</span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a><span class="fu">dev.off</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>png 
+  2 </code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="fu">jpeg</span>(<span class="fu">export_path</span>(<span class="st">"scatter_base"</span>, <span class="st">"jpg"</span>), <span class="at">width =</span> fig_width, <span class="at">height =</span> fig_height, <span class="at">units =</span> <span class="st">"in"</span>, <span class="at">res =</span> dpi,</span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a>     <span class="at">quality =</span> <span class="dv">90</span>)</span>
+<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a><span class="fu">draw_scatter</span>()</span>
+<span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a><span class="fu">dev.off</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>png 
+  2 </code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="fu">tiff</span>(<span class="fu">export_path</span>(<span class="st">"scatter_base"</span>, <span class="st">"tiff"</span>), <span class="at">width =</span> fig_width, <span class="at">height =</span> fig_height, <span class="at">units =</span> <span class="st">"in"</span>, <span class="at">res =</span> dpi,</span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a>     <span class="at">compression =</span> <span class="st">"lzw"</span>)</span>
+<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a><span class="fu">draw_scatter</span>()</span>
+<span id="cb30-4"><a href="#cb30-4" aria-hidden="true" tabindex="-1"></a><span class="fu">dev.off</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>png 
+  2 </code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="fu">bmp</span>(<span class="fu">export_path</span>(<span class="st">"scatter_base"</span>, <span class="st">"bmp"</span>), <span class="at">width =</span> fig_width, <span class="at">height =</span> fig_height, <span class="at">units =</span> <span class="st">"in"</span>, <span class="at">res =</span> dpi)</span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a><span class="fu">draw_scatter</span>()</span>
+<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a><span class="fu">dev.off</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>png 
+  2 </code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb34"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="do">## ---- export-ggplot -----------------------------------------------------------</span></span>
+<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Part 2 scatterplot stored as an object (g_disp)</span></span>
+<span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a>plot_title  <span class="ot">&lt;-</span> <span class="st">"Life satisfaction vs. ecological footprint, 2025"</span>  <span class="co"># PLACEHOLDER</span></span>
+<span id="cb34-4"><a href="#cb34-4" aria-hidden="true" tabindex="-1"></a>x_label     <span class="ot">&lt;-</span> <span class="st">"Ecological footprint (global hectares per person)"</span> <span class="co"># PLACEHOLDER</span></span>
+<span id="cb34-5"><a href="#cb34-5" aria-hidden="true" tabindex="-1"></a>y_label     <span class="ot">&lt;-</span> <span class="st">"Life satisfaction (0-10 scale)"</span>                    <span class="co"># PLACEHOLDER</span></span>
+<span id="cb34-6"><a href="#cb34-6" aria-hidden="true" tabindex="-1"></a>source_text <span class="ot">&lt;-</span> <span class="st">"Source: Happy Planet Index 2006-2025 public data set (happyplanetindex.org)."</span>  <span class="co"># PLACEHOLDER</span></span>
+<span id="cb34-7"><a href="#cb34-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb34-8"><a href="#cb34-8" aria-hidden="true" tabindex="-1"></a>ef_limit <span class="ot">&lt;-</span> <span class="fl">1.48</span>                                   <span class="co"># sustainable footprint for 2025 (gha)</span></span>
+<span id="cb34-9"><a href="#cb34-9" aria-hidden="true" tabindex="-1"></a>cr <span class="ot">&lt;-</span> hpi[hpi<span class="sc">$</span>Country <span class="sc">==</span> <span class="st">"Costa Rica"</span>, ]</span>
+<span id="cb34-10"><a href="#cb34-10" aria-hidden="true" tabindex="-1"></a>points_df <span class="ot">&lt;-</span> hpi[<span class="sc">!</span><span class="fu">is.na</span>(hpi<span class="sc">$</span><span class="st">`</span><span class="at">Ecological Footprint</span><span class="st">`</span>) <span class="sc">&amp;</span> <span class="sc">!</span><span class="fu">is.na</span>(hpi<span class="sc">$</span><span class="st">`</span><span class="at">Life satisfaction</span><span class="st">`</span>), ]</span>
+<span id="cb34-11"><a href="#cb34-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb34-12"><a href="#cb34-12" aria-hidden="true" tabindex="-1"></a>g_disp <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(points_df, <span class="fu">aes</span>(<span class="at">x =</span> <span class="st">`</span><span class="at">Ecological Footprint</span><span class="st">`</span>, <span class="at">y =</span> <span class="st">`</span><span class="at">Life satisfaction</span><span class="st">`</span>)) <span class="sc">+</span></span>
+<span id="cb34-13"><a href="#cb34-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_vline</span>(<span class="at">xintercept =</span> ef_limit, <span class="at">colour =</span> pal[[<span class="st">"orange"</span>]],</span>
+<span id="cb34-14"><a href="#cb34-14" aria-hidden="true" tabindex="-1"></a>             <span class="at">linetype =</span> <span class="st">"dashed"</span>, <span class="at">linewidth =</span> <span class="fl">0.9</span>) <span class="sc">+</span>                             <span class="co"># annotation</span></span>
+<span id="cb34-15"><a href="#cb34-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">annotate</span>(<span class="st">"text"</span>, <span class="at">x =</span> ef_limit, <span class="at">y =</span> <span class="fl">3.15</span>, <span class="at">label =</span> <span class="fu">paste</span>(<span class="st">"Sustainable limit:"</span>, ef_limit, <span class="st">"gha"</span>),</span>
+<span id="cb34-16"><a href="#cb34-16" aria-hidden="true" tabindex="-1"></a>           <span class="at">hjust =</span> <span class="sc">-</span><span class="fl">0.05</span>, <span class="at">size =</span> <span class="fl">2.8</span>, <span class="at">family =</span> base_font, <span class="at">colour =</span> pal[[<span class="st">"ink"</span>]]) <span class="sc">+</span></span>
+<span id="cb34-17"><a href="#cb34-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="fu">aes</span>(<span class="at">shape =</span> band, <span class="at">fill =</span> band), <span class="at">colour =</span> pal[[<span class="st">"green"</span>]],</span>
+<span id="cb34-18"><a href="#cb34-18" aria-hidden="true" tabindex="-1"></a>             <span class="at">size =</span> <span class="fl">2.6</span>, <span class="at">stroke =</span> <span class="fl">0.5</span>) <span class="sc">+</span></span>
+<span id="cb34-19"><a href="#cb34-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">annotate</span>(<span class="st">"segment"</span>, <span class="at">x =</span> <span class="fl">4.2</span>, <span class="at">y =</span> <span class="fl">8.15</span>,</span>
+<span id="cb34-20"><a href="#cb34-20" aria-hidden="true" tabindex="-1"></a>           <span class="at">xend =</span> cr<span class="sc">$</span><span class="st">`</span><span class="at">Ecological Footprint</span><span class="st">`</span> <span class="sc">+</span> <span class="fl">0.15</span>, <span class="at">yend =</span> cr<span class="sc">$</span><span class="st">`</span><span class="at">Life satisfaction</span><span class="st">`</span> <span class="sc">+</span> <span class="fl">0.05</span>,</span>
+<span id="cb34-21"><a href="#cb34-21" aria-hidden="true" tabindex="-1"></a>           <span class="at">arrow =</span> <span class="fu">arrow</span>(<span class="at">length =</span> <span class="fu">unit</span>(<span class="fl">0.08</span>, <span class="st">"inches"</span>)),</span>
+<span id="cb34-22"><a href="#cb34-22" aria-hidden="true" tabindex="-1"></a>           <span class="at">colour =</span> pal[[<span class="st">"ink"</span>]], <span class="at">linewidth =</span> <span class="fl">0.5</span>) <span class="sc">+</span>                           <span class="co"># annotation</span></span>
+<span id="cb34-23"><a href="#cb34-23" aria-hidden="true" tabindex="-1"></a>  <span class="fu">annotate</span>(<span class="st">"text"</span>, <span class="at">x =</span> <span class="fl">4.2</span>, <span class="at">y =</span> <span class="fl">8.15</span>, <span class="at">label =</span> <span class="st">"Costa Rica: highest HPI"</span>, <span class="at">hjust =</span> <span class="sc">-</span><span class="fl">0.05</span>,</span>
+<span id="cb34-24"><a href="#cb34-24" aria-hidden="true" tabindex="-1"></a>           <span class="at">size =</span> <span class="dv">3</span>, <span class="at">family =</span> base_font, <span class="at">colour =</span> pal[[<span class="st">"ink"</span>]]) <span class="sc">+</span></span>
+<span id="cb34-25"><a href="#cb34-25" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_shape_manual</span>(<span class="at">values =</span> <span class="fu">c</span>(<span class="dv">25</span>, <span class="dv">22</span>, <span class="dv">21</span>, <span class="dv">24</span>), <span class="at">name =</span> <span class="st">"HPI score"</span>) <span class="sc">+</span>  <span class="co"># same pch as base R</span></span>
+<span id="cb34-26"><a href="#cb34-26" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_manual</span>(<span class="at">values =</span> seq_green, <span class="at">name =</span> <span class="st">"HPI score"</span>) <span class="sc">+</span></span>
+<span id="cb34-27"><a href="#cb34-27" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_x_continuous</span>(<span class="at">limits =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">12</span>), <span class="at">breaks =</span> <span class="fu">seq</span>(<span class="dv">0</span>, <span class="dv">12</span>, <span class="dv">2</span>)) <span class="sc">+</span></span>
+<span id="cb34-28"><a href="#cb34-28" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_y_continuous</span>(<span class="at">limits =</span> <span class="fu">c</span>(<span class="dv">3</span>, <span class="fl">8.3</span>), <span class="at">breaks =</span> <span class="dv">3</span><span class="sc">:</span><span class="dv">8</span>) <span class="sc">+</span></span>
+<span id="cb34-29"><a href="#cb34-29" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> plot_title, <span class="at">x =</span> x_label, <span class="at">y =</span> y_label, <span class="at">caption =</span> source_text) <span class="sc">+</span></span>
+<span id="cb34-30"><a href="#cb34-30" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_mine</span>() <span class="sc">+</span></span>
+<span id="cb34-31"><a href="#cb34-31" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">panel.grid.major.x =</span> <span class="fu">element_line</span>(<span class="at">colour =</span> pal[[<span class="st">"light_grey"</span>]],</span>
+<span id="cb34-32"><a href="#cb34-32" aria-hidden="true" tabindex="-1"></a>                                          <span class="at">linewidth =</span> <span class="fl">0.4</span>, <span class="at">linetype =</span> <span class="st">"dotted"</span>)) <span class="sc">+</span></span>
+<span id="cb34-33"><a href="#cb34-33" aria-hidden="true" tabindex="-1"></a>  <span class="fu">legend_inside</span>(<span class="dv">1</span>, <span class="dv">0</span>)</span>
+<span id="cb34-34"><a href="#cb34-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb34-35"><a href="#cb34-35" aria-hidden="true" tabindex="-1"></a><span class="co"># ggsave() picks the device from the extension; .svg needs the svglite package</span></span>
+<span id="cb34-36"><a href="#cb34-36" aria-hidden="true" tabindex="-1"></a><span class="fu">ggsave</span>(<span class="fu">export_path</span>(<span class="st">"scatter_ggplot"</span>, <span class="st">"pdf"</span>),  g_disp, <span class="at">width =</span> fig_width, <span class="at">height =</span> fig_height, <span class="at">units =</span> <span class="st">"in"</span>)</span>
+<span id="cb34-37"><a href="#cb34-37" aria-hidden="true" tabindex="-1"></a><span class="fu">ggsave</span>(<span class="fu">export_path</span>(<span class="st">"scatter_ggplot"</span>, <span class="st">"svg"</span>),  g_disp, <span class="at">width =</span> fig_width, <span class="at">height =</span> fig_height, <span class="at">units =</span> <span class="st">"in"</span>)</span>
+<span id="cb34-38"><a href="#cb34-38" aria-hidden="true" tabindex="-1"></a><span class="fu">ggsave</span>(<span class="fu">export_path</span>(<span class="st">"scatter_ggplot"</span>, <span class="st">"png"</span>),  g_disp, <span class="at">width =</span> fig_width, <span class="at">height =</span> fig_height, <span class="at">units =</span> <span class="st">"in"</span>, <span class="at">dpi =</span> dpi)</span>
+<span id="cb34-39"><a href="#cb34-39" aria-hidden="true" tabindex="-1"></a><span class="fu">ggsave</span>(<span class="fu">export_path</span>(<span class="st">"scatter_ggplot"</span>, <span class="st">"jpg"</span>),  g_disp, <span class="at">width =</span> fig_width, <span class="at">height =</span> fig_height, <span class="at">units =</span> <span class="st">"in"</span>, <span class="at">dpi =</span> dpi,</span>
+<span id="cb34-40"><a href="#cb34-40" aria-hidden="true" tabindex="-1"></a>       <span class="at">quality =</span> <span class="dv">90</span>)</span>
+<span id="cb34-41"><a href="#cb34-41" aria-hidden="true" tabindex="-1"></a><span class="fu">ggsave</span>(<span class="fu">export_path</span>(<span class="st">"scatter_ggplot"</span>, <span class="st">"tiff"</span>), g_disp, <span class="at">width =</span> fig_width, <span class="at">height =</span> fig_height, <span class="at">units =</span> <span class="st">"in"</span>, <span class="at">dpi =</span> dpi,</span>
+<span id="cb34-42"><a href="#cb34-42" aria-hidden="true" tabindex="-1"></a>       <span class="at">compression =</span> <span class="st">"lzw"</span>)</span>
+<span id="cb34-43"><a href="#cb34-43" aria-hidden="true" tabindex="-1"></a><span class="fu">ggsave</span>(<span class="fu">export_path</span>(<span class="st">"scatter_ggplot"</span>, <span class="st">"bmp"</span>),  g_disp, <span class="at">width =</span> fig_width, <span class="at">height =</span> fig_height, <span class="at">units =</span> <span class="st">"in"</span>, <span class="at">dpi =</span> dpi)</span>
+<span id="cb34-44"><a href="#cb34-44" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb34-45"><a href="#cb34-45" aria-hidden="true" tabindex="-1"></a><span class="do">## ---- export-table -------------------------------------------------------------</span></span>
+<span id="cb34-46"><a href="#cb34-46" aria-hidden="true" tabindex="-1"></a>formats <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"pdf"</span>, <span class="st">"svg"</span>, <span class="st">"png"</span>, <span class="st">"jpg"</span>, <span class="st">"tiff"</span>, <span class="st">"bmp"</span>)</span>
+<span id="cb34-47"><a href="#cb34-47" aria-hidden="true" tabindex="-1"></a>format_table <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb34-48"><a href="#cb34-48" aria-hidden="true" tabindex="-1"></a>  <span class="at">Format             =</span> <span class="fu">toupper</span>(formats),</span>
+<span id="cb34-49"><a href="#cb34-49" aria-hidden="true" tabindex="-1"></a>  <span class="at">Type               =</span> <span class="fu">c</span>(<span class="st">"Vector"</span>, <span class="st">"Vector"</span>, <span class="st">"Raster"</span>, <span class="st">"Raster"</span>, <span class="st">"Raster"</span>, <span class="st">"Raster"</span>),</span>
+<span id="cb34-50"><a href="#cb34-50" aria-hidden="true" tabindex="-1"></a>  <span class="st">`</span><span class="at">Base R (KB)</span><span class="st">`</span>      <span class="ot">=</span> <span class="fu">round</span>(<span class="fu">file.size</span>(<span class="fu">export_path</span>(<span class="st">"scatter_base"</span>, formats)) <span class="sc">/</span> <span class="dv">1024</span>, <span class="dv">1</span>),</span>
+<span id="cb34-51"><a href="#cb34-51" aria-hidden="true" tabindex="-1"></a>  <span class="st">`</span><span class="at">ggplot2 (KB)</span><span class="st">`</span>     <span class="ot">=</span> <span class="fu">round</span>(<span class="fu">file.size</span>(<span class="fu">export_path</span>(<span class="st">"scatter_ggplot"</span>, formats)) <span class="sc">/</span> <span class="dv">1024</span>, <span class="dv">1</span>),</span>
+<span id="cb34-52"><a href="#cb34-52" aria-hidden="true" tabindex="-1"></a>  <span class="at">Compression        =</span> <span class="fu">c</span>(<span class="st">"Lossless"</span>, <span class="st">"Lossless"</span>, <span class="st">"Lossless"</span>, <span class="st">"Lossy"</span>, <span class="st">"Lossless (LZW)"</span>, <span class="st">"Lossless (uncompressed)"</span>),</span>
+<span id="cb34-53"><a href="#cb34-53" aria-hidden="true" tabindex="-1"></a>  <span class="at">Transparency       =</span> <span class="fu">c</span>(<span class="st">"Yes"</span>, <span class="st">"Yes"</span>, <span class="st">"Yes"</span>, <span class="st">"No"</span>, <span class="st">"Yes"</span>, <span class="st">"No (not in R's bmp())"</span>),</span>
+<span id="cb34-54"><a href="#cb34-54" aria-hidden="true" tabindex="-1"></a>  <span class="at">check.names =</span> <span class="cn">FALSE</span></span>
+<span id="cb34-55"><a href="#cb34-55" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb34-56"><a href="#cb34-56" aria-hidden="true" tabindex="-1"></a>format_table</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>  Format   Type Base R (KB) ggplot2 (KB)             Compression
+1    PDF Vector         9.3          9.5                Lossless
+2    SVG Vector       313.1         25.0                Lossless
+3    PNG Raster        91.5        216.3                Lossless
+4    JPG Raster       251.6        657.0                   Lossy
+5   TIFF Raster       101.9        236.9          Lossless (LZW)
+6    BMP Raster      6857.9       2288.6 Lossless (uncompressed)
+           Transparency
+1                   Yes
+2                   Yes
+3                   Yes
+4                    No
+5                   Yes
+6 No (not in R's bmp())</code></pre>
+</div>
+</div>
+</section>
+<section id="report" class="level1">
+<h1>Report</h1>
+<section id="comparing-export-formats" class="level2">
+<h2 class="anchored" data-anchor-id="comparing-export-formats">Comparing export formats</h2>
+<p>I exported the scatterplot from Part 1 (base R) and its ggplot2 counterpart from Part 2 at the same physical size, 6.5 × 4 inches, using 300 dpi for the raster formats. I used the device functions (<code>pdf()</code>, <code>svg()</code>, <code>png()</code>, <code>jpeg()</code>, <code>tiff()</code>, <code>bmp()</code>, each closed with <code>dev.off()</code>) for the base R chart and <code>ggsave()</code> for the ggplot2 chart.</p>
+<section id="file-characteristics" class="level3">
+<h3 class="anchored" data-anchor-id="file-characteristics">File characteristics</h3>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb36"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a>knitr<span class="sc">::</span><span class="fu">kable</span>(format_table, <span class="at">align =</span> <span class="st">"llrrll"</span>,</span>
+<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a>             <span class="at">caption =</span> <span class="st">"Export formats for the scatterplot (6.5 × 4 in, 300 dpi for raster formats)"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<table class="caption-top table table-sm table-striped small">
+<caption>Export formats for the scatterplot (6.5 × 4 in, 300 dpi for raster formats)</caption>
+<colgroup>
+<col style="width: 8%">
+<col style="width: 8%">
+<col style="width: 14%">
+<col style="width: 15%">
+<col style="width: 28%">
+<col style="width: 25%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Format</th>
+<th style="text-align: left;">Type</th>
+<th style="text-align: right;">Base R (KB)</th>
+<th style="text-align: right;">ggplot2 (KB)</th>
+<th style="text-align: left;">Compression</th>
+<th style="text-align: left;">Transparency</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">PDF</td>
+<td style="text-align: left;">Vector</td>
+<td style="text-align: right;">9.3</td>
+<td style="text-align: right;">9.5</td>
+<td style="text-align: left;">Lossless</td>
+<td style="text-align: left;">Yes</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">SVG</td>
+<td style="text-align: left;">Vector</td>
+<td style="text-align: right;">313.1</td>
+<td style="text-align: right;">25.0</td>
+<td style="text-align: left;">Lossless</td>
+<td style="text-align: left;">Yes</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">PNG</td>
+<td style="text-align: left;">Raster</td>
+<td style="text-align: right;">91.5</td>
+<td style="text-align: right;">216.3</td>
+<td style="text-align: left;">Lossless</td>
+<td style="text-align: left;">Yes</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">JPG</td>
+<td style="text-align: left;">Raster</td>
+<td style="text-align: right;">251.6</td>
+<td style="text-align: right;">657.0</td>
+<td style="text-align: left;">Lossy</td>
+<td style="text-align: left;">No</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">TIFF</td>
+<td style="text-align: left;">Raster</td>
+<td style="text-align: right;">101.9</td>
+<td style="text-align: right;">236.9</td>
+<td style="text-align: left;">Lossless (LZW)</td>
+<td style="text-align: left;">Yes</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">BMP</td>
+<td style="text-align: left;">Raster</td>
+<td style="text-align: right;">6857.9</td>
+<td style="text-align: right;">2288.6</td>
+<td style="text-align: left;">Lossless (uncompressed)</td>
+<td style="text-align: left;">No (not in R’s bmp())</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<p>The two vector formats store drawing instructions instead of pixels, which is why the PDF files are the smallest. The SVG files show the biggest difference between the two systems. Base R’s <code>svg()</code> converts every letter into a drawn outline, while <code>ggsave()</code> writes through the svglite package and keeps the labels as real text. This makes the ggplot2 SVG about 13 times smaller and keeps its text searchable. BMP stores every pixel without compression, so it is about 75 times larger than the PNG of the same image. At quality 90, the JPG is not smaller than the PNG, because a chart has large flat areas of colour that lossless compression already handles well.</p>
+</section>
+<section id="zooming-in-to-400" class="level3">
+<h3 class="anchored" data-anchor-id="zooming-in-to-400">Zooming in to 400%</h3>
+<p>I opened each file and zoomed in to 400%.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Format</th>
+<th>Text at 400%</th>
+<th>Lines at 400%</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>PDF</td>
+<td>Perfectly sharp. The letters are redrawn from the vector instructions, so their curves stay smooth.</td>
+<td>Smooth and crisp. The arrow, the dashed reference line and the symbol edges have clean edges.</td>
+</tr>
+<tr class="even">
+<td>SVG</td>
+<td>Perfectly sharp, same as the PDF.</td>
+<td>Smooth and crisp, same as the PDF.</td>
+</tr>
+<tr class="odd">
+<td>PNG</td>
+<td>Slightly soft. The edges of the letters break into small square pixels.</td>
+<td>The diagonal arrow and the symbol edges show visible “staircase” steps.</td>
+</tr>
+<tr class="even">
+<td>JPG</td>
+<td>Soft and blocky, with faint grey speckles and halos around the letters (compression artifacts).</td>
+<td>Staircase edges plus noise around the dark lines. Areas that should be pure white show slight specks.</td>
+</tr>
+<tr class="odd">
+<td>TIFF</td>
+<td>Identical to the PNG: soft, pixelated edges, no artifacts.</td>
+<td>Identical to the PNG: staircase edges, no artifacts.</td>
+</tr>
+<tr class="even">
+<td>BMP</td>
+<td>Identical to the PNG: soft, pixelated edges, no artifacts.</td>
+<td>Identical to the PNG: staircase edges, no artifacts.</td>
+</tr>
+</tbody>
+</table>
+<p>The vector formats look the same at any zoom level because the viewer redraws them at the new size. The raster formats only enlarge the pixels that were saved at 300 dpi. PNG, TIFF and BMP look identical to each other because all three are lossless; only the JPG loses information.</p>
+</section>
+<section id="which-format-for-each-destination" class="level3">
+<h3 class="anchored" data-anchor-id="which-format-for-each-destination">Which format for each destination</h3>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Destination</th>
+<th>Format I would use</th>
+<th>Why</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Journal article</td>
+<td>PDF (vector); TIFF at 300 to 600 dpi if the journal requires raster images</td>
+<td>A vector PDF stays sharp at any column width and at any print resolution. R’s <code>pdf()</code> does not embed fonts, and most journals require embedded fonts, so I</td>
+</tr>
+</tbody>
+</table>
+</section>
+</section>
+</section>
+<section id="reflections" class="level1">
+<h1>Reflections</h1>
+<p>Cleveland and McGill (1984) ranked the perceptual tasks a chart demands. Judging position along a common scale is the most accurate. Length comes next, while angle and area, the cues a pie chart relies on, rank lower. A pie therefore forces less precise judgements than a bar chart of the same numbers, which is why it is disapproved of; R’s own help page for <code>pie()</code> warns against it.</p>
+<p>In my view, a pie chart is the right choice only when three conditions hold: the parts add up to a meaningful whole, there are very few slices, and the message is the part-to-whole relationship rather than exact comparison between slices. My chart of HPI score bands meets the first two conditions: four bands that together make up all 134 ranked countries. It conveys the gist well. Most countries score between 40 and 60, and only 5% reach 60 or more.</p>
+<p>It fails the third condition. The two largest slices, 44% and 41%, are almost impossible to rank by angle alone, which is why I printed the percentages on the chart. Because the bands are ordered, a bar chart would show the same information more accurately.</p>
+<hr>
+</section>
+<section id="ai-prompts-used" class="level1">
+<h1>AI prompts used</h1>
+<p><em>Claude Code - Opus 5.5 - 10/09/2026</em></p>
+<p><strong>Interaction 1</strong></p>
+<blockquote class="blockquote">
+<p>Using the df of the project, give me a suggestion, via base R, of the following graphs, respecting the criteria below: - Histogram<br>
+- Bar chart (i. Vertical ii. Horizontal) - Pie chart<br>
+- Boxplot<br>
+- Scatterplot</p>
+<p><strong>Criteria:</strong><br>
+- Do not use base R standard visuals. Use a different font family and size, colors, plotting symbols (pch), line types and widths, axis style, margins.<br>
+- Set the style with par() or, better, in a custom function, and let me restore the previous graphics state afterwards (op &lt;- par(…) and par(op)).<br>
+- Give me placeholders in the scripts for a title, labelled axes with units, a legend wherever color or symbol carries meaning, and a data source note - Add at least one annotation with a low-level function (text(), abline(), arrows(), mtext() or legend()) to at least two of the charts.</p>
+</blockquote>
+<p><strong>Interaction 2</strong></p>
+<blockquote class="blockquote">
+<p>Please recreate the same charts in ggplot2 from the same data.<br>
+- Write one custom theme function (for example theme_mine()), built on a complete theme, and apply it to every chart.<br>
+- Match the colors and fonts you used in Part 1 so that the two sets are recognizably the same style.<br>
+- In two or three sentences per chart type, state which system made the chart easier to produce and why.</p>
+</blockquote>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

@@ -34,7 +34,9 @@ website:
           - href: pages_epps_6356/assign03_Data_Visualization.qmd
             text: Assignment 03    
           - href: pages_epps_6356/assign04_2_Data_Visualization.qmd
-            text: Note on Grammar of Graphics      
+            text: Note on Grammar of Graphics     
+          - href: pages_epps_6356/assign05_Data_Visualization.qmd
+            text: Assignment 05 
       - text: EPPS 6302
         menu:
           - href: pages_epps_6302/assign02_Data_Collection.qmd
