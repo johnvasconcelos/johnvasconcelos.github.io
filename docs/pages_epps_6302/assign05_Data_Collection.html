@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>Assignment 03 - EPPS 6302 – John Vasconcelos</title>
+<title>Assignment 5 - EPPS 6302 - Data Collection – John Vasconcelos</title>
 <style>
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -226,7 +226,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <header id="title-block-header" class="quarto-title-block default page-columns page-full">
   <div class="quarto-title-banner page-columns page-full">
     <div class="quarto-title column-body">
-      <h1 class="title">Assignment 03 - EPPS 6302</h1>
+      <h1 class="title">Assignment 5 - EPPS 6302 - Data Collection</h1>
                       </div>
   </div>
     
@@ -247,18 +247,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#download-data-from-census-bureau" id="toc-download-data-from-census-bureau" class="nav-link active" data-scroll-target="#download-data-from-census-bureau">Download data from Census Bureau</a>
-  <ul class="collapse">
-  <li><a href="#setup" id="toc-setup" class="nav-link" data-scroll-target="#setup">Setup</a></li>
-  <li><a href="#api-key" id="toc-api-key" class="nav-link" data-scroll-target="#api-key">1 API KEY</a></li>
-  <li><a href="#explore-variables" id="toc-explore-variables" class="nav-link" data-scroll-target="#explore-variables">2 Explore variables</a></li>
-  <li><a href="#parameters" id="toc-parameters" class="nav-link" data-scroll-target="#parameters">3 Parameters</a></li>
-  <li><a href="#download-the-data" id="toc-download-the-data" class="nav-link" data-scroll-target="#download-the-data">4 Download the data</a></li>
-  <li><a href="#derive-a-rate-and-carry-its-margin-of-error-through" id="toc-derive-a-rate-and-carry-its-margin-of-error-through" class="nav-link" data-scroll-target="#derive-a-rate-and-carry-its-margin-of-error-through">5 Derive a rate, and carry its margin of error through</a></li>
-  <li><a href="#map-edit-titlestheme" id="toc-map-edit-titlestheme" class="nav-link" data-scroll-target="#map-edit-titlestheme">6 Map (edit titles/theme)</a></li>
-  <li><a href="#table-topbottom-by-poverty-rate-with-moe" id="toc-table-topbottom-by-poverty-rate-with-moe" class="nav-link" data-scroll-target="#table-topbottom-by-poverty-rate-with-moe">7 Table (top/bottom by poverty rate, with MOE)</a></li>
-  <li><a href="#save-outputs" id="toc-save-outputs" class="nav-link" data-scroll-target="#save-outputs">8 Save outputs</a></li>
-  </ul></li>
+  <li><a href="#searching-govinfo-for-the-10-most-recent-hearings" id="toc-searching-govinfo-for-the-10-most-recent-hearings" class="nav-link active" data-scroll-target="#searching-govinfo-for-the-10-most-recent-hearings">1. Searching GovInfo for the 10 most recent hearings</a></li>
+  <li><a href="#downloading-the-pdfs-into-a-folder-data-raw-listed-in-.gitignore" id="toc-downloading-the-pdfs-into-a-folder-data-raw-listed-in-.gitignore" class="nav-link" data-scroll-target="#downloading-the-pdfs-into-a-folder-data-raw-listed-in-.gitignore">2. Downloading the PDFs into a folder <code>data-raw</code> listed in .gitignore</a></li>
+  <li><a href="#saving-the-log-outside-the-ignored-folder-so-it-is-kept-in-git" id="toc-saving-the-log-outside-the-ignored-folder-so-it-is-kept-in-git" class="nav-link" data-scroll-target="#saving-the-log-outside-the-ignored-folder-so-it-is-kept-in-git">3. Saving the log outside the ignored folder, so it is kept in Git</a></li>
+  <li><a href="#report" id="toc-report" class="nav-link" data-scroll-target="#report">4. Report</a></li>
+  <li><a href="#ai-scripts" id="toc-ai-scripts" class="nav-link" data-scroll-target="#ai-scripts">AI Scripts</a></li>
   </ul>
 </nav>
     </div>
@@ -269,208 +262,116 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 
 
-<section id="download-data-from-census-bureau" class="level1">
-<h1>Download data from Census Bureau</h1>
-<section id="setup" class="level2">
-<h2 class="anchored" data-anchor-id="setup">Setup</h2>
+<p><strong>Task:</strong> download the ten most recent hearings of the Senate Committee on Foreign Relations, save them in a folder listed in <code>.gitignore</code>, and keep the download log the script writes.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidycensus) </span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tigris) </span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(sf) </span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(dplyr) </span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2) </span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(readr) </span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyr) </span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="fu">options</span>(<span class="at">tigris_use_cache =</span> <span class="cn">TRUE</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(httr2)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: package 'httr2' was built under R version 4.6.1</code></pre>
+</div>
+</div>
+<section id="searching-govinfo-for-the-10-most-recent-hearings" class="level1">
+<h1>1. Searching GovInfo for the 10 most recent hearings</h1>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>body <span class="ot">&lt;-</span> <span class="fu">list</span>(</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">query      =</span> <span class="st">'collection:(CHRG) AND "Committee on Foreign Relations"'</span>,</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">pageSize   =</span> <span class="dv">10</span>,</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">offsetMark =</span> <span class="st">"*"</span>,</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">sorts      =</span> <span class="fu">list</span>(<span class="fu">list</span>(<span class="at">field =</span> <span class="st">"publishdate"</span>, <span class="at">sortOrder =</span> <span class="st">"DESC"</span>))  <span class="co"># newest first</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>found <span class="ot">&lt;-</span> <span class="fu">request</span>(<span class="st">"https://api.govinfo.gov/search"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">req_url_query</span>(<span class="at">api_key =</span> <span class="fu">Sys.getenv</span>(<span class="st">"GOVINFO_API_KEY"</span>)) <span class="sc">|&gt;</span>   <span class="co"># key read from .Renviron</span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">req_body_json</span>(body) <span class="sc">|&gt;</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">req_perform</span>() <span class="sc">|&gt;</span></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">resp_body_json</span>()</span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>ids <span class="ot">&lt;-</span> <span class="fu">vapply</span>(found<span class="sc">$</span>results, \(r) r<span class="sc">$</span>packageId, <span class="fu">character</span>(<span class="dv">1</span>))   <span class="co"># one ID per hearing</span></span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>ids</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> [1] "CHRG-119shrg63909" "CHRG-119shrg63707" "CHRG-119shrg64059"
+ [4] "CHRG-119shrg61565" "CHRG-119shrg60820" "CHRG-119shrg60819"
+ [7] "CHRG-119shrg60060" "CHRG-119shrg60032" "CHRG-119shrg61202"
+[10] "CHRG-119shrg59893"</code></pre>
+</div>
 </div>
 </section>
-<section id="api-key" class="level2">
-<h2 class="anchored" data-anchor-id="api-key">1 API KEY</h2>
+<section id="downloading-the-pdfs-into-a-folder-data-raw-listed-in-.gitignore" class="level1">
+<h1>2. Downloading the PDFs into a folder <code>data-raw</code> listed in .gitignore</h1>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>out_dir <span class="ot">&lt;-</span> here<span class="sc">::</span><span class="fu">here</span>(<span class="st">"data-raw"</span>, <span class="st">"sfrc_hearings"</span>)   <span class="co"># data-raw/ is in .gitignore</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="fu">dir.create</span>(out_dir, <span class="at">recursive =</span> <span class="cn">TRUE</span>, <span class="at">showWarnings =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>log <span class="ot">&lt;-</span> <span class="fu">data.frame</span>()</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (r <span class="cf">in</span> found<span class="sc">$</span>results) {</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>  id   <span class="ot">&lt;-</span> r<span class="sc">$</span>packageId</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>  dest <span class="ot">&lt;-</span> <span class="fu">file.path</span>(out_dir, <span class="fu">paste0</span>(id, <span class="st">".pdf"</span>))</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>  url  <span class="ot">&lt;-</span> <span class="fu">paste0</span>(<span class="st">"https://api.govinfo.gov/packages/"</span>, id, <span class="st">"/pdf"</span>)</span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Download; if it fails, record the error instead of stopping</span></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>  status <span class="ot">&lt;-</span> <span class="fu">tryCatch</span>({</span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>    <span class="fu">request</span>(url) <span class="sc">|&gt;</span></span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>      <span class="fu">req_url_query</span>(<span class="at">api_key =</span> <span class="fu">Sys.getenv</span>(<span class="st">"GOVINFO_API_KEY"</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>      <span class="fu">req_perform</span>(<span class="at">path =</span> dest)</span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>    <span class="st">"ok"</span></span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>  }, <span class="at">error =</span> \(e) <span class="fu">paste</span>(<span class="st">"failed:"</span>, <span class="fu">conditionMessage</span>(e)))</span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a>  <span class="co"># One log row per hearing</span></span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a>  log <span class="ot">&lt;-</span> <span class="fu">rbind</span>(log, <span class="fu">data.frame</span>(</span>
+<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a>    <span class="at">timestamp  =</span> <span class="fu">format</span>(<span class="fu">Sys.time</span>(), <span class="st">"%Y-%m-%d %H:%M:%S"</span>),</span>
+<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a>    <span class="at">package_id =</span> id,</span>
+<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a>    <span class="at">title      =</span> r<span class="sc">$</span>title,</span>
+<span id="cb5-23"><a href="#cb5-23" aria-hidden="true" tabindex="-1"></a>    <span class="at">date       =</span> r<span class="sc">$</span>dateIssued,</span>
+<span id="cb5-24"><a href="#cb5-24" aria-hidden="true" tabindex="-1"></a>    <span class="at">url        =</span> url,          <span class="co"># without the key</span></span>
+<span id="cb5-25"><a href="#cb5-25" aria-hidden="true" tabindex="-1"></a>    <span class="at">status     =</span> status,</span>
+<span id="cb5-26"><a href="#cb5-26" aria-hidden="true" tabindex="-1"></a>    <span class="at">size_kb    =</span> <span class="cf">if</span> (<span class="fu">file.exists</span>(dest)) <span class="fu">round</span>(<span class="fu">file.size</span>(dest) <span class="sc">/</span> <span class="dv">1024</span>, <span class="dv">1</span>) <span class="cf">else</span> <span class="cn">NA</span></span>
+<span id="cb5-27"><a href="#cb5-27" aria-hidden="true" tabindex="-1"></a>  ))</span>
+<span id="cb5-28"><a href="#cb5-28" aria-hidden="true" tabindex="-1"></a>  <span class="fu">Sys.sleep</span>(<span class="dv">1</span>)                 <span class="co"># be polite to the API</span></span>
+<span id="cb5-29"><a href="#cb5-29" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section>
+<section id="saving-the-log-outside-the-ignored-folder-so-it-is-kept-in-git" class="level1">
+<h1>3. Saving the log outside the ignored folder, so it is kept in Git</h1>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">dir.create</span>(here<span class="sc">::</span><span class="fu">here</span>(<span class="st">"logs"</span>), <span class="at">showWarnings =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="fu">write.csv</span>(log, here<span class="sc">::</span><span class="fu">here</span>(<span class="st">"logs"</span>, <span class="st">"sfrc_hearings_download_log.csv"</span>), <span class="at">row.names =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>log[, <span class="fu">c</span>(<span class="st">"package_id"</span>, <span class="st">"date"</span>, <span class="st">"status"</span>, <span class="st">"size_kb"</span>)]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>          package_id       date status size_kb
+1  CHRG-119shrg63909 2026-03-24     ok   343.0
+2  CHRG-119shrg63707 2026-02-04     ok  9061.4
+3  CHRG-119shrg64059 2026-02-03     ok   305.6
+4  CHRG-119shrg61565 2025-06-18     ok   429.7
+5  CHRG-119shrg60820 2025-05-13     ok  3862.2
+6  CHRG-119shrg60819 2025-03-26     ok  6403.8
+7  CHRG-119shrg60060 2025-03-26     ok   378.6
+8  CHRG-119shrg60032 2025-03-05     ok   384.2
+9  CHRG-119shrg61202 2025-02-26     ok 10312.3
+10 CHRG-119shrg59893 2025-02-13     ok  5472.7</code></pre>
+</div>
+</div>
+</section>
+<section id="report" class="level1">
+<h1>4. Report</h1>
+<p>This assignment was particularly difficult because the instructions on the pdf file do not match the R <code>govtdata01.R</code> file available on Teams. For example, the assignment instructions mention parts A and B in that file. There are no indications of these parts. Also, the script given in the pdf instructions, are so different from <code>govtdata01.R</code> that was difficult to make sense of the task. For this reason, I had to rely on Claude Code to accomplish what was asked.</p>
+<p>Answers:</p>
+<ol type="a">
+<li><p>The data donwloaded in .pdf are useful, but as the files are primarily text, they would require specific processes of text analysis via machine learning or LLM even for table extraction.</p></li>
+<li><p>The metadata donwloaded is useful for meta analyses, such as reports on broad topics that have been addresed with more frequency, or topic assessments.</p></li>
+<li><p>The API in this case gave me the complete reports, with the detail that those reports are mainly text data, which require special processing.</p></li>
+</ol>
+</section>
+<section id="ai-scripts" class="level1">
+<h1>AI Scripts</h1>
+<p>*Claude Code - Opus 5.5 - 10/10/2026</p>
 <blockquote class="blockquote">
-<p>Run this only once IN THE CONSOLE DO NOT ADD API KEY TO THE SCRIPT</p>
+<p>Please, help me with R scripts to execute the following (my API Key is already saved in .renviron)</p>
+<ul>
+<li>download the ten most recent hearings of the Senate Committee on Foreign Relations</li>
+<li>save them in a folder listed in .gitignore, and keep the download log the script writes</li>
+</ul>
 </blockquote>
-<p><code>census_api_key("YOUR API KEY HERE", install = TRUE, overwrite = TRUE)</code></p>
-<blockquote class="blockquote">
-<p>ATTENTION! API KEYS expires quickly. Request a new one whenever needed.</p>
-</blockquote>
-</section>
-<section id="explore-variables" class="level2">
-<h2 class="anchored" data-anchor-id="explore-variables">2 Explore variables</h2>
-<p>Download a complete list of codes and descriptions available for the 2024 ACS 5-year (“acs5”) and stores it in a table called vars. It is like a data dictionary</p>
-<p>The Census Bureau has thousands of variables in the ACS, and each one is identified by a cryptic code like B19013_001 or B17001_002 — nobody memorizes these. load_variables() downloads the full catalog of available variable codes and their human-readable descriptions (like a dictionary or index) and stores it in vars.</p>
-<p>This step doesn’t download any actual data about counties, states, income, or poverty numbers. It’s purely a reference table you browse through (you filtered it with grepl(“^B19”, name)) to figure out which exact codes correspond to the concepts you want to study — in your case, median household income and poverty. You use this step once, just to look things up, then you already know the codes you need (B19013_001, B17001_002, B17001_001), which get hardcoded into my_vars in the next part of the script.</p>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>vars <span class="ot">&lt;-</span> <span class="fu">load_variables</span>(<span class="dv">2023</span>, <span class="st">"acs5"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-<p>Keeps only the rows where the variable name starts with “B19”.</p>
-<ul>
-<li><code>grepl</code> is a text/pattern search (regex), and <code>\^B19</code> means “starts with B19”.</li>
-</ul>
-<p>Variables starting with B19 are all income-related, so this filters the giant dictionary down to just the income variables.</p>
-<ul>
-<li><code>slice_head</code> can also capture the top n rows of each group with <code>group_by()</code></li>
-</ul>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>vars <span class="ot">&lt;-</span> dplyr<span class="sc">::</span><span class="fu">filter</span>(vars, <span class="fu">grepl</span>(<span class="st">"^B19"</span>, name)) <span class="sc">%&gt;%</span> </span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">slice_head</span>(<span class="at">n =</span> <span class="dv">10</span>) </span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(vars)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-stdout">
-<pre><code># A tibble: 10 × 4
-   name        label                                concept            geography
-   &lt;chr&gt;       &lt;chr&gt;                                &lt;chr&gt;              &lt;chr&gt;    
- 1 B19001A_001 Estimate!!Total:                     Household Income … tract    
- 2 B19001A_002 Estimate!!Total:!!Less than $10,000  Household Income … tract    
- 3 B19001A_003 Estimate!!Total:!!$10,000 to $14,999 Household Income … tract    
- 4 B19001A_004 Estimate!!Total:!!$15,000 to $19,999 Household Income … tract    
- 5 B19001A_005 Estimate!!Total:!!$20,000 to $24,999 Household Income … tract    
- 6 B19001A_006 Estimate!!Total:!!$25,000 to $29,999 Household Income … tract    
- 7 B19001A_007 Estimate!!Total:!!$30,000 to $34,999 Household Income … tract    
- 8 B19001A_008 Estimate!!Total:!!$35,000 to $39,999 Household Income … tract    
- 9 B19001A_009 Estimate!!Total:!!$40,000 to $44,999 Household Income … tract    
-10 B19001A_010 Estimate!!Total:!!$45,000 to $49,999 Household Income … tract    </code></pre>
-</div>
-</div>
-</section>
-<section id="parameters" class="level2">
-<h2 class="anchored" data-anchor-id="parameters">3 Parameters</h2>
-<p>Now that you know exactly which variable codes you want, get_acs() is the function that actually contacts the Census API and pulls the real numbers for those specific codes, for the specific geography you chose (here, counties in Missouri). This is the step that returns actual estimates and margins of error for real places, plus (because geometry = TRUE) the map boundaries for each county.</p>
-<p>But before, let’s set up the paramers for our search.</p>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>survey <span class="ot">&lt;-</span> <span class="st">"acs5"</span> </span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>year_acs <span class="ot">&lt;-</span> <span class="dv">2024</span> </span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>state_abbr <span class="ot">&lt;-</span> <span class="st">"MO"</span> </span>
-<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>geo_level <span class="ot">&lt;-</span> <span class="st">"county"</span> </span>
-<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>my_vars <span class="ot">&lt;-</span> <span class="fu">c</span>( </span>
-<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">income =</span> <span class="st">"B19013_001"</span>, <span class="co"># median household income </span></span>
-<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">pov =</span> <span class="st">"B17001_002"</span>, <span class="co"># people below poverty </span></span>
-<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">povden =</span> <span class="st">"B17001_001"</span> <span class="co"># poverty universe = denominator </span></span>
-<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>  )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-</section>
-<section id="download-the-data" class="level2">
-<h2 class="anchored" data-anchor-id="download-the-data">4 Download the data</h2>
-<p>Let’s now download the data</p>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>acs_wide <span class="ot">&lt;-</span> <span class="fu">get_acs</span>( </span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">geography =</span> geo_level, </span>
-<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">variables =</span> my_vars, </span>
-<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">state =</span> state_abbr, </span>
-<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">year =</span> year_acs, </span>
-<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">survey =</span> survey, </span>
-<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">geometry =</span> <span class="cn">TRUE</span>, </span>
-<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>  <span class="co"># 'wide' for variables in columns 'long' is default for variables in rows </span></span>
-<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">output =</span> <span class="st">"wide"</span> </span>
-<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>  )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-<p>In R, an object can be more than one thing at the same time:</p>
-<ul>
-<li><p><code>data.frame</code> means it’s a table</p></li>
-<li><p><code>sf</code> means it’s also a spatial object (simple features) because it has a special column storing the geometry</p></li>
-<li><p>That extra layer is what lets you use <code>geom_sf()</code> in <code>ggplot()</code> to draw maps</p></li>
-</ul>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">class</span>(acs_wide)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>[1] "sf"         "data.frame"</code></pre>
-</div>
-</div>
-</section>
-<section id="derive-a-rate-and-carry-its-margin-of-error-through" class="level2">
-<h2 class="anchored" data-anchor-id="derive-a-rate-and-carry-its-margin-of-error-through">5 Derive a rate, and carry its margin of error through</h2>
-<p>The chunk below calculates the <strong>poverty rate</strong> for each county: it takes the estimated number of people below the poverty line (<code>povE</code>, from <code>B17001_002</code>) and divides it by the total population in the “poverty universe” for that county (<code>povdenE</code>, from <code>B17001_001</code> — the denominator, i.e., the population this poverty measure applies to). The result is a proportion (for example, 0.15 = 15% of people in that county are below the poverty line).</p>
-<p>When you simply divide two numbers that each already have their own margins of error (<code>povM</code> and <code>povdenM</code>), you <strong>can’t</strong> just divide the margins of error too (<code>povM / povdenM</code> would be wrong). Because <code>povE</code> (people in poverty) is a subset of <code>povdenE</code> (everyone), the two estimates are statistically correlated, and there’s a specific Census Bureau formula for correctly calculating the margin of error of a <strong>proportion</strong> derived from two other estimates.</p>
-<p><code>moe_prop()</code> is a function from the <code>tidycensus</code> package itself that already implements that official Census formula for you. It takes: - <code>povE</code> — numerator estimate (people in poverty) - <code>povdenE</code> — denominator estimate (total population) - <code>povM</code> — numerator’s MOE - <code>povdenM</code> — denominator’s MOE</p>
-<p>And returns the correct MOE for the <code>pov_rate</code> you just calculated.</p>
-<p>In practice: without this line, you’d have each county’s poverty rate but no idea how reliable that number is. With <code>pov_moe</code>, you can say, for example, “this county’s poverty rate is 15% ± 3 percentage points” — which is essential for the part of the assignment that asks you to compare areas and check whether their confidence intervals overlap (the “Uncertainty check” deliverable).</p>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>acs_wide <span class="ot">&lt;-</span> acs_wide <span class="sc">%&gt;%</span> </span>
-<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
-<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">pov_rate =</span> povE <span class="sc">/</span> povdenE, </span>
-<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">pov_moe =</span> <span class="fu">moe_prop</span>(povE, povdenE, povM, povdenM)</span>
-<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>    )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-</section>
-<section id="map-edit-titlestheme" class="level2">
-<h2 class="anchored" data-anchor-id="map-edit-titlestheme">6 Map (edit titles/theme)</h2>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(acs_wide) <span class="sc">+</span> </span>
-<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="fu">geom_sf</span>(<span class="fu">aes</span>(<span class="at">fill =</span> incomeE), <span class="at">color =</span> <span class="cn">NA</span>) <span class="sc">+</span> </span>
-<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_viridis_c</span>(<span class="at">name =</span> <span class="st">"Median HH Income"</span>) <span class="sc">+</span> </span>
-<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="fu">paste0</span>(<span class="st">"ACS "</span>, </span>
-<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>                      year_acs, </span>
-<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>                      <span class="st">" 5-year: Median Income — "</span>, </span>
-<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>                      state_abbr, </span>
-<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>                      <span class="st">" ("</span>, </span>
-<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>                      geo_level, </span>
-<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>                      <span class="st">")"</span></span>
-<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>                      ), </span>
-<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>       <span class="at">caption =</span> <span class="st">"Source: U.S. Census Bureau via tidycensus"</span>) <span class="sc">+</span> </span>
-<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>() <span class="sc">+</span> </span>
-<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="co">#text = element_text(family = "Palatino"),</span></span>
-<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a>        <span class="at">plot.title =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">14</span>, <span class="at">face =</span> <span class="st">"bold"</span>), </span>
-<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a>        <span class="at">plot.caption =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">8</span>), </span>
-<span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a>        <span class="at">legend.position.inside =</span> <span class="fu">c</span>(<span class="fl">0.2</span>, <span class="fl">0.15</span>)</span>
-<span id="cb10-18"><a href="#cb10-18" aria-hidden="true" tabindex="-1"></a>  )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="assign03_Data_Collection_files/figure-html/unnamed-chunk-8-1.png" class="img-fluid figure-img" width="672"></p>
-</figure>
-</div>
-</div>
-</div>
-</section>
-<section id="table-topbottom-by-poverty-rate-with-moe" class="level2">
-<h2 class="anchored" data-anchor-id="table-topbottom-by-poverty-rate-with-moe">7 Table (top/bottom by poverty rate, with MOE)</h2>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>top10 <span class="ot">&lt;-</span> acs_wide <span class="sc">%&gt;%</span> </span>
-<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">st_drop_geometry</span>() <span class="sc">%&gt;%</span> </span>
-<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(<span class="fu">desc</span>(pov_rate)) <span class="sc">%&gt;%</span> </span>
-<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(NAME, pov_rate, pov_moe, povE, povM) <span class="sc">%&gt;%</span> </span>
-<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">slice_head</span>(<span class="at">n =</span> <span class="dv">10</span>) </span>
-<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>bottom10 <span class="ot">&lt;-</span> acs_wide <span class="sc">%&gt;%</span> </span>
-<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">st_drop_geometry</span>() <span class="sc">%&gt;%</span> </span>
-<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(pov_rate) <span class="sc">%&gt;%</span> </span>
-<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(NAME, pov_rate, pov_moe, povE, povM)  <span class="sc">%&gt;%</span> </span>
-<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">slice_head</span>(<span class="at">n =</span> <span class="dv">10</span>) </span>
-<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a>top10 </span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>                        NAME  pov_rate    pov_moe  povE povM
-1  Pemiscot County, Missouri 0.2960201 0.03654440  4366  539
-2     Wayne County, Missouri 0.2571777 0.06126130  2741  653
-3    Ripley County, Missouri 0.2478746 0.04712319  2624  499
-4    Oregon County, Missouri 0.2359243 0.04631827  1982  390
-5   Dunklin County, Missouri 0.2202533 0.02081253  5879  556
-6     Adair County, Missouri 0.2200734 0.02351721  5155  551
-7     Ozark County, Missouri 0.2147483 0.04930818  1890  434
-8    Carter County, Missouri 0.2077304 0.05540543  1091  291
-9   St. Louis city, Missouri 0.2063994 0.01046293 57765 2929
-10    Worth County, Missouri 0.2055878 0.05902627   390  112</code></pre>
-</div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>bottom10</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>                              NAME   pov_rate     pov_moe  povE povM
-1     St. Charles County, Missouri 0.05202451 0.004363680 21208 1779
-2          Andrew County, Missouri 0.06194740 0.015143549  1100  269
-3            Cass County, Missouri 0.06244626 0.008771386  6827  959
-4          Platte County, Missouri 0.07023277 0.009500749  7673 1038
-5        Scotland County, Missouri 0.07310705 0.032412611   336  149
-6          Warren County, Missouri 0.08014716 0.014984837  2941  550
-7  Ste. Genevieve County, Missouri 0.08150609 0.019433453  1472  351
-8        Franklin County, Missouri 0.08164945 0.008934481  8534  934
-9       Christian County, Missouri 0.08174038 0.015259305  7526 1405
-10           Clay County, Missouri 0.08466893 0.008846428 21591 2256</code></pre>
-</div>
-</div>
-</section>
-<section id="save-outputs" class="level2">
-<h2 class="anchored" data-anchor-id="save-outputs">8 Save outputs</h2>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">write_csv</span>(<span class="fu">st_drop_geometry</span>(acs_wide), <span class="fu">paste0</span>(<span class="st">"files/acs_"</span>, state_abbr, <span class="st">"_"</span>, year_acs, <span class="st">".csv"</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
 
 
-</section>
 </section>
 
 </main> <!-- /main -->

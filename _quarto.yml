@@ -45,6 +45,8 @@ website:
             text: Assignment 03
           - href: pages_epps_6302/assign04_Data_Collection.qmd
             text: Assignment 04 
+          - href: pages_epps_6302/assign05_Data_Collection.qmd
+            text: Assignment 05 
     right:
       - icon: github
         href: https://github.com/johnvasconcelos

@@ -1,0 +1,92 @@
+---
+title: "Assignment 5 - EPPS 6302 - Data Collection"
+---
+
+**Task:** download the ten most recent hearings of the Senate Committee on Foreign Relations, save them in a folder listed in `.gitignore`, and keep the download log the script writes.
+
+```{r setup}
+library(httr2)
+```
+
+# 1. Searching GovInfo for the 10 most recent hearings
+
+```{r search}
+body <- list(
+  query      = 'collection:(CHRG) AND "Committee on Foreign Relations"',
+  pageSize   = 10,
+  offsetMark = "*",
+  sorts      = list(list(field = "publishdate", sortOrder = "DESC"))  # newest first
+)
+
+found <- request("https://api.govinfo.gov/search") |>
+  req_url_query(api_key = Sys.getenv("GOVINFO_API_KEY")) |>   # key read from .Renviron
+  req_body_json(body) |>
+  req_perform() |>
+  resp_body_json()
+
+ids <- vapply(found$results, \(r) r$packageId, character(1))   # one ID per hearing
+ids
+```
+
+# 2. Downloading the PDFs into a folder `data-raw` listed in .gitignore
+
+```{r download}
+out_dir <- here::here("data-raw", "sfrc_hearings")   # data-raw/ is in .gitignore
+dir.create(out_dir, recursive = TRUE, showWarnings = FALSE)
+
+log <- data.frame()
+for (r in found$results) {
+  id   <- r$packageId
+  dest <- file.path(out_dir, paste0(id, ".pdf"))
+  url  <- paste0("https://api.govinfo.gov/packages/", id, "/pdf")
+
+  # Download; if it fails, record the error instead of stopping
+  status <- tryCatch({
+    request(url) |>
+      req_url_query(api_key = Sys.getenv("GOVINFO_API_KEY")) |>
+      req_perform(path = dest)
+    "ok"
+  }, error = \(e) paste("failed:", conditionMessage(e)))
+
+  # One log row per hearing
+  log <- rbind(log, data.frame(
+    timestamp  = format(Sys.time(), "%Y-%m-%d %H:%M:%S"),
+    package_id = id,
+    title      = r$title,
+    date       = r$dateIssued,
+    url        = url,          # without the key
+    status     = status,
+    size_kb    = if (file.exists(dest)) round(file.size(dest) / 1024, 1) else NA
+  ))
+  Sys.sleep(1)                 # be polite to the API
+}
+```
+
+# 3. Saving the log outside the ignored folder, so it is kept in Git
+
+```{r logs}
+dir.create(here::here("logs"), showWarnings = FALSE)
+write.csv(log, here::here("logs", "sfrc_hearings_download_log.csv"), row.names = FALSE)
+log[, c("package_id", "date", "status", "size_kb")]
+```
+
+# 4. Report
+
+This assignment was particularly difficult because the instructions on the pdf file do not match the R `govtdata01.R` file available on Teams. For example, the assignment instructions mention parts A and B in that file. There are no indications of these parts. Also, the script given in the pdf instructions, are so different from `govtdata01.R` that was difficult to make sense of the task. For this reason, I had to rely on Claude Code to accomplish what was asked.
+
+Answers:
+
+a.  The data donwloaded in .pdf are useful, but as the files are primarily text, they would require specific processes of text analysis via machine learning or LLM even for table extraction.
+
+b.  The metadata donwloaded is useful for meta analyses, such as reports on broad topics that have been addresed with more frequency, or topic assessments.
+
+c.  The API in this case gave me the complete reports, with the detail that those reports are mainly text data, which require special processing.
+
+# AI Scripts
+
+\*Claude Code - Opus 5.5 - 10/10/2026
+
+> Please, help me with R scripts to execute the following (my API Key is already saved in .renviron)
+>
+> - download the ten most recent hearings of the Senate Committee on Foreign Relations
+> - save them in a folder listed in .gitignore, and keep the download log the script writes
