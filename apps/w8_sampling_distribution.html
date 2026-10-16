@@ -1,0 +1,879 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sampling Distribution: Mean and Proportion</title>
+<script src="https://cdn.jsdelivr.net/npm/plotly.js-dist-min@2.35.2/plotly.min.js"></script>
+<style>
+  :root {
+    --bg: #f5f6f8; --card: #ffffff; --ink: #1f2933; --muted: #5f6b7a;
+    --line: #e2e6ea; --accent: #08519c; --accent-soft: #e8f0f9;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: var(--bg); color: var(--ink);
+    font: 13px/1.4 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  header { padding: 10px 16px 6px; }
+  header h1 { margin: 0; font-size: 18px; font-weight: 650; }
+  header p { margin: 2px 0 0; color: var(--muted); font-size: 12px; }
+
+  .app { display: grid; grid-template-columns: 272px minmax(0, 1fr); gap: 12px; padding: 6px 16px 16px; }
+
+  /* ---------- controls ---------- */
+  .controls { background: var(--card); border: 1px solid var(--line); border-radius: 10px;
+    padding: 10px 12px; align-self: start; position: sticky; top: 8px;
+    max-height: calc(100vh - 16px); overflow-y: auto; }
+  .controls h2 { font-size: 11px; text-transform: uppercase; letter-spacing: .06em;
+    color: var(--muted); margin: 10px 0 6px; font-weight: 650; }
+  .controls h2:first-child { margin-top: 0; }
+  .field { margin-bottom: 8px; }
+  .field label, .field .lab { display: block; font-weight: 550; margin-bottom: 3px; font-size: 12px; }
+  .field output { float: right; font-weight: 650; color: var(--accent); font-variant-numeric: tabular-nums; }
+  select, input[type=number] { width: 100%; padding: 4px 6px; border: 1px solid #c9d0d7;
+    border-radius: 6px; font: inherit; background: #fff; color: var(--ink); }
+  input[type=range] { width: 100%; margin: 0; accent-color: var(--accent); }
+  .cols2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .cols3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; }
+  .seg { display: flex; border: 1px solid #c9d0d7; border-radius: 6px; overflow: hidden; }
+  .seg label { flex: 1; text-align: center; padding: 4px 2px; cursor: pointer; margin: 0;
+    font-weight: 500; font-size: 12px; }
+  .seg input { display: none; }
+  .seg label:has(input:checked) { background: var(--accent); color: #fff; }
+  .seg label + label { border-left: 1px solid #c9d0d7; }
+  button { font: inherit; padding: 5px 10px; border-radius: 6px; cursor: pointer;
+    border: 1px solid #c9d0d7; background: #fff; color: var(--ink); }
+  button:hover { background: #f0f2f4; }
+  button.primary { background: var(--accent); border-color: var(--accent); color: #fff; width: 100%; }
+  button.primary:hover { background: #063f7a; }
+  .row-end { display: grid; grid-template-columns: 1fr auto; gap: 8px; align-items: end; }
+  .help { color: var(--muted); font-size: 11px; margin: 4px 0 0; }
+  hr { border: 0; border-top: 1px solid var(--line); margin: 10px 0; }
+
+  /* ---------- results ---------- */
+  .results { display: grid; gap: 10px; min-width: 0; }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .grid-34 { display: grid; grid-template-columns: 1fr 2fr; gap: 10px; }
+  .grid2.inner { gap: 12px; }
+  #bias_summary { margin-top: 6px; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 10px;
+    padding: 8px 10px; min-width: 0; }
+  .card h3 { margin: 0 0 2px; font-size: 13px; font-weight: 650; }
+  .card .sub { color: var(--muted); font-size: 11.5px; margin: 0; }
+  .plot { width: 100%; }
+  .plot.tall { height: 290px; }
+  .plot.short { height: 255px; }
+  .caption { font-size: 12px; color: var(--ink); margin-top: 2px; font-variant-numeric: tabular-nums; }
+  .caption b { color: var(--accent); }
+
+  table.stats { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; font-size: 12px; }
+  table.stats td, table.stats th { padding: 3px 6px; border-bottom: 1px solid var(--line); text-align: right; }
+  table.stats th { font-weight: 600; color: var(--muted); font-size: 11px; }
+  table.stats td:first-child, table.stats th:first-child { text-align: left; }
+  table.stats tr:last-child td { border-bottom: 0; }
+  .verdict { display: inline-block; padding: 2px 8px; border-radius: 999px; font-weight: 650; font-size: 11.5px; }
+  .v-good { background: #e5f5e0; color: #1b6b2a; }
+  .v-mid  { background: #fff1d6; color: #8a5a00; }
+  .v-bad  { background: #fde2e1; color: #a1251f; }
+  .meta { margin-top: 6px; font-size: 12px; }
+
+  .error { display: none; background: #fde2e1; color: #a1251f; border: 1px solid #f5bcb9;
+    border-radius: 8px; padding: 8px 12px; font-weight: 550; }
+  .error.show { display: block; }
+  .dim { opacity: .35; pointer-events: none; }
+  .plot-msg { display: flex; align-items: center; justify-content: center; height: 100%;
+    color: var(--muted); font-size: 12px; text-align: center; padding: 10px; }
+
+  /* inside an iframe the page itself does not scroll, so the sidebar should not be sticky */
+  html.embedded .controls { position: static; max-height: none; overflow: visible; }
+
+  @media (max-width: 1250px) { .grid-34 { grid-template-columns: 1fr; } }
+  @media (max-width: 900px) {
+    .app { grid-template-columns: 1fr; }
+    .controls { position: static; max-height: none; }
+    .grid2 { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Sampling Distribution: Mean and Proportion</h1>
+  <p>x̄ and p̂ are unbiased estimators of μ and p. The population has 100,000 values; the parameter is computed on it, and each sample produces one estimate.</p>
+</header>
+
+<div class="app">
+  <!-- ======================= CONTROLS ======================= -->
+  <aside class="controls">
+    <h2>Population</h2>
+    <div class="field">
+      <span class="lab">What to estimate?</span>
+      <div class="seg">
+        <label><input type="radio" name="type" value="mean" checked>Mean (μ)</label>
+        <label><input type="radio" name="type" value="prop">Proportion (p)</label>
+      </div>
+    </div>
+
+    <div id="g_mean">
+      <div class="field">
+        <label for="dist">Population distribution</label>
+        <select id="dist">
+          <option value="norm">Normal</option>
+          <option value="unif">Uniform</option>
+          <option value="pois">Poisson</option>
+          <option value="chisq">Chi-squared</option>
+          <option value="exp">Exponential</option>
+          <option value="hyper">Hypergeometric</option>
+        </select>
+      </div>
+    </div>
+
+    <div id="g_prop" hidden>
+      <div class="field">
+        <label for="dist_prop">Binary population</label>
+        <select id="dist_prop">
+          <option value="bern">Bernoulli (success with probability p)</option>
+          <option value="dic">Dichotomized variable (value &gt; cutoff)</option>
+        </select>
+      </div>
+      <div id="g_bern" class="field">
+        <label for="p">Proportion of successes (p) <output id="p_out">0.30</output></label>
+        <input type="range" id="p" min="0.01" max="0.99" step="0.01" value="0.3">
+      </div>
+      <div id="g_dic" hidden>
+        <div class="cols2">
+          <div class="field">
+            <label for="dist_base">Original variable</label>
+            <select id="dist_base">
+              <option value="norm">Normal</option>
+              <option value="unif">Uniform</option>
+              <option value="pois">Poisson</option>
+              <option value="chisq">Chi-squared</option>
+              <option value="exp">Exponential</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="cutoff">Cutoff (success = value &gt; cutoff)</label>
+            <input type="number" id="cutoff" value="55" step="1">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- parameters of each distribution -->
+    <div id="pp_norm" class="cols2">
+      <div class="field"><label for="mu">Mean (μ)</label><input type="number" id="mu" value="50" step="1"></div>
+      <div class="field"><label for="sigma">Std. dev. (σ)</label><input type="number" id="sigma" value="10" min="0.1" step="1"></div>
+    </div>
+    <div id="pp_unif" class="cols2" hidden>
+      <div class="field"><label for="unif_a">Minimum (a)</label><input type="number" id="unif_a" value="0" step="1"></div>
+      <div class="field"><label for="unif_b">Maximum (b)</label><input type="number" id="unif_b" value="10" step="1"></div>
+    </div>
+    <div id="pp_pois" class="field" hidden>
+      <label for="lambda">Rate (λ)</label><input type="number" id="lambda" value="3" min="0.1" step="0.5">
+    </div>
+    <div id="pp_chisq" class="field" hidden>
+      <label for="df">Degrees of freedom (k)</label><input type="number" id="df" value="3" min="1" step="1">
+    </div>
+    <div id="pp_exp" class="field" hidden>
+      <label for="rate">Rate (λ)</label><input type="number" id="rate" value="0.5" min="0.01" step="0.1">
+    </div>
+    <div id="pp_hyper" hidden>
+      <div class="cols3">
+        <div class="field"><label for="hyp_m">Successes (m)</label><input type="number" id="hyp_m" value="30" min="1" step="1"></div>
+        <div class="field"><label for="hyp_n">Failures</label><input type="number" id="hyp_n" value="70" min="1" step="1"></div>
+        <div class="field"><label for="hyp_k">Drawn (k)</label><input type="number" id="hyp_k" value="10" min="1" step="1"></div>
+      </div>
+      <p class="help">Each population value is the number of successes when drawing k items from the urn, without replacement.</p>
+    </div>
+
+    <div class="row-end">
+      <div class="field" style="margin-bottom:0"><label for="seed">Seed</label><input type="number" id="seed" value="123" step="1"></div>
+      <button id="new_pop" title="Increments the seed and regenerates the population">New population</button>
+    </div>
+
+    <hr>
+    <h2>Sampling</h2>
+    <div class="field">
+      <span class="lab">Sampling method</span>
+      <div class="seg">
+        <label><input type="radio" name="replacement" value="without" checked>Without replacement</label>
+        <label><input type="radio" name="replacement" value="with">With replacement</label>
+      </div>
+    </div>
+    <div class="field">
+      <label for="n">Size of each sample (n) <output id="n_out">30</output></label>
+      <input type="range" id="n" min="2" max="500" step="1" value="30">
+    </div>
+    <div class="field">
+      <label for="k">Number of samples <output id="k_out">1000</output></label>
+      <input type="range" id="k" min="10" max="10000" step="10" value="1000">
+    </div>
+    <div class="field">
+      <label for="bins">Histogram bins <output id="bins_out">40</output></label>
+      <input type="range" id="bins" min="10" max="100" step="1" value="40">
+    </div>
+    <button id="resample" class="primary">Draw again</button>
+  </aside>
+
+  <!-- ======================= RESULTS ======================= -->
+  <main class="results">
+    <div id="error" class="error"></div>
+
+    <div id="plots" class="results">
+      <div class="grid2">
+        <section class="card">
+          <h3 id="pop_title">1. Population</h3>
+          <div id="plot_pop" class="plot tall"></div>
+          <div id="pop_summary" class="caption"></div>
+        </section>
+        <section class="card">
+          <h3 id="sampling_title">2. Sampling distribution</h3>
+          <div id="plot_sampling" class="plot tall"></div>
+          <div id="sampling_caption" class="caption"></div>
+        </section>
+      </div>
+
+      <div class="grid-34">
+        <section class="card">
+          <h3>3. Unbiasedness: the mean of the estimates converges to the parameter</h3>
+          <p class="sub" id="conv_sub">Running mean of the estimates vs. the parameter</p>
+          <div id="plot_convergence" class="plot short"></div>
+          <div id="bias_summary"></div>
+        </section>
+        <section class="card">
+          <h3>4. How normal is the sampling distribution?</h3>
+          <div class="grid2 inner">
+            <div>
+              <p class="sub"><b>Normal Q-Q plot</b> · points on the line = normal; curved ends = skewness or heavy tails</p>
+              <div id="plot_qq" class="plot short"></div>
+            </div>
+            <div>
+              <p class="sub"><b>Skewness as n grows</b> · theoretical curve: population skewness / √n</p>
+              <div id="plot_skew_n" class="plot short"></div>
+            </div>
+          </div>
+          <div id="normality_summary"></div>
+          <p class="help">Verdict rule: close to normal if |skewness| &lt; 0.25 and |excess kurtosis| &lt; 0.5; clearly non-normal if |skewness| ≥ 0.75 or |excess kurtosis| ≥ 1.5. With many samples, Shapiro-Wilk rejects even tiny departures, so read the p-value together with skewness, kurtosis and the Q-Q plot.</p>
+        </section>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- ======================= STATISTICS (pure functions) ======================= -->
+<script id="stats-lib">
+// Seeded random number generator (mulberry32) with normal, gamma, Poisson draws
+function makeRng(seed) {
+  let a = (seed >>> 0) || 0x9e3779b9;
+  const u = () => {
+    a = (a + 0x6D2B79F5) | 0;
+    let t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+  let spare = null;
+  const unif = () => { let x; do { x = u(); } while (x === 0); return x; };   // (0,1)
+  const norm = () => {
+    if (spare !== null) { const s = spare; spare = null; return s; }
+    let v1, v2, s;
+    do { v1 = 2 * u() - 1; v2 = 2 * u() - 1; s = v1 * v1 + v2 * v2; } while (s >= 1 || s === 0);
+    const f = Math.sqrt(-2 * Math.log(s) / s);
+    spare = v2 * f;
+    return v1 * f;
+  };
+  const gamma = (shape) => {              // Marsaglia–Tsang, scale 1
+    if (shape < 1) return gamma(shape + 1) * Math.pow(unif(), 1 / shape);
+    const d = shape - 1 / 3, c = 1 / Math.sqrt(9 * d);
+    for (;;) {
+      let x, v;
+      do { x = norm(); v = 1 + c * x; } while (v <= 0);
+      v = v * v * v;
+      const U = unif();
+      if (U < 1 - 0.0331 * x * x * x * x) return d * v;
+      if (Math.log(U) < 0.5 * x * x + d * (1 - v + Math.log(v))) return d * v;
+    }
+  };
+  const pois = (lam) => {
+    if (lam < 10) {                        // Knuth
+      const L = Math.exp(-lam); let k = 0, p = 1;
+      do { k++; p *= u(); } while (p > L);
+      return k - 1;
+    }
+    const slam = Math.sqrt(lam), loglam = Math.log(lam);   // Hörmann PTRS
+    const b = 0.931 + 2.53 * slam, a2 = -0.059 + 0.02483 * b;
+    const invalpha = 1.1239 + 1.1328 / (b - 3.4), vr = 0.9277 - 3.6224 / (b - 2);
+    for (;;) {
+      const U = u() - 0.5, V = u(), us = 0.5 - Math.abs(U);
+      const k = Math.floor((2 * a2 / us + b) * U + lam + 0.43);
+      if (us >= 0.07 && V <= vr) return k;
+      if (k < 0 || (us < 0.013 && V > us)) continue;
+      if (Math.log(V) + Math.log(invalpha) - Math.log(a2 / (us * us) + b) <= -lam + k * loglam - lgamma(k + 1)) return k;
+    }
+  };
+  return { u, unif, norm, gamma, pois };
+}
+
+// log-gamma (Lanczos)
+const LG = [0.99999999999980993, 676.5203681218851, -1259.1392167224028, 771.32342877765313,
+  -176.61502916214059, 12.507343278686905, -0.13857109526572012, 9.9843695780195716e-6, 1.5056327351493116e-7];
+function lgamma(x) {
+  if (x < 0.5) return Math.log(Math.PI / Math.abs(Math.sin(Math.PI * x))) - lgamma(1 - x);
+  x -= 1;
+  let a = LG[0];
+  const t = x + 7.5;
+  for (let i = 1; i < 9; i++) a += LG[i] / (x + i);
+  return 0.5 * Math.log(2 * Math.PI) + (x + 0.5) * Math.log(t) - t + Math.log(a);
+}
+const lchoose = (n, k) => lgamma(n + 1) - lgamma(k + 1) - lgamma(n - k + 1);
+
+// Densities / probability functions
+const dnorm = (x, m, s) => Math.exp(-0.5 * ((x - m) / s) ** 2) / (s * Math.sqrt(2 * Math.PI));
+const dunif = (x, a, b) => (x >= a && x <= b ? 1 / (b - a) : 0);
+const dpois = (x, l) => (x < 0 || x !== Math.floor(x) ? 0 : Math.exp(x * Math.log(l) - l - lgamma(x + 1)));
+const dchisq = (x, k) => {
+  if (x < 0) return 0;
+  if (x === 0) return k < 2 ? Infinity : (k === 2 ? 0.5 : 0);
+  return Math.exp((k / 2 - 1) * Math.log(x) - x / 2 - (k / 2) * Math.LN2 - lgamma(k / 2));
+};
+const dexp = (x, r) => (x < 0 ? 0 : r * Math.exp(-r * x));
+const dhyper = (x, m, n, k) => {
+  if (x < Math.max(0, k - n) || x > Math.min(k, m) || x !== Math.floor(x)) return 0;
+  return Math.exp(lchoose(m, x) + lchoose(n, k - x) - lchoose(m + n, k));
+};
+const dbinom = (x, n, p) => {
+  if (x < 0 || x > n) return 0;
+  if (p === 0) return x === 0 ? 1 : 0;
+  if (p === 1) return x === n ? 1 : 0;
+  return Math.exp(lchoose(n, x) + x * Math.log(p) + (n - x) * Math.log1p(-p));
+};
+
+// Normal quantile (Acklam) and upper tail
+function qnorm(p) {
+  const a = [-3.969683028665376e+01, 2.209460984245205e+02, -2.759285104469687e+02, 1.383577518672690e+02, -3.066479806614716e+01, 2.506628277459239e+00];
+  const b = [-5.447609879822406e+01, 1.615858368580409e+02, -1.556989798598866e+02, 6.680131188771972e+01, -1.328068155288572e+01];
+  const c = [-7.784894002430293e-03, -3.223964580411365e-01, -2.400758277161838e+00, -2.549732539343734e+00, 4.374664141464968e+00, 2.938163982698783e+00];
+  const d = [7.784695709041462e-03, 3.224671290700398e-01, 2.445134137142996e+00, 3.754408661907416e+00];
+  const pl = 0.02425;
+  let q, r;
+  if (p < pl) {
+    q = Math.sqrt(-2 * Math.log(p));
+    return (((((c[0] * q + c[1]) * q + c[2]) * q + c[3]) * q + c[4]) * q + c[5]) / ((((d[0] * q + d[1]) * q + d[2]) * q + d[3]) * q + 1);
+  }
+  if (p <= 1 - pl) {
+    q = p - 0.5; r = q * q;
+    return (((((a[0] * r + a[1]) * r + a[2]) * r + a[3]) * r + a[4]) * r + a[5]) * q / (((((b[0] * r + b[1]) * r + b[2]) * r + b[3]) * r + b[4]) * r + 1);
+  }
+  q = Math.sqrt(-2 * Math.log(1 - p));
+  return -(((((c[0] * q + c[1]) * q + c[2]) * q + c[3]) * q + c[4]) * q + c[5]) / ((((d[0] * q + d[1]) * q + d[2]) * q + d[3]) * q + 1);
+}
+function erfc(x) {
+  const z = Math.abs(x), t = 1 / (1 + 0.5 * z);
+  const r = t * Math.exp(-z * z - 1.26551223 + t * (1.00002368 + t * (0.37409196 + t * (0.09678418 +
+    t * (-0.18628806 + t * (0.27886807 + t * (-1.13520398 + t * (1.48851587 + t * (-0.82215223 + t * 0.17087277)))))))));
+  return x >= 0 ? r : 2 - r;
+}
+const pnormUpper = (x, m, s) => 0.5 * erfc((x - m) / (s * Math.SQRT2));
+
+// Shapiro-Wilk W and p-value (Royston 1995, algorithm AS R94, as in R's shapiro.test)
+function shapiroWilk(values) {
+  const x = Float64Array.from(values).sort();
+  const n = x.length;
+  if (n < 3 || x[n - 1] - x[0] < 1e-19) return null;
+  const poly = (cc, v) => { let r = 0; for (let j = cc.length - 1; j >= 0; j--) r = r * v + cc[j]; return r; };
+  const c1 = [0, .221157, -.147981, -2.07119, 4.434685, -2.706056];
+  const c2 = [0, .042981, -.293762, -1.752461, 5.682633, -3.582633];
+  const c3 = [.544, -.39978, .025054, -6.714e-4], c4 = [1.3822, -.77857, .062767, -.0020322];
+  const c5 = [-1.5861, -.31082, -.083751, .0038915], c6 = [-.4803, -.082676, .0030302];
+  const g = [-2.273, .459];
+  const nn2 = Math.floor(n / 2);
+  const a = new Float64Array(nn2 + 1);
+  if (n === 3) a[1] = Math.SQRT1_2;
+  else {
+    const an25 = n + .25, m = new Float64Array(nn2 + 1);
+    let summ2 = 0;
+    for (let i = 1; i <= nn2; i++) { m[i] = qnorm((i - .375) / an25); summ2 += m[i] * m[i]; }
+    summ2 *= 2;
+    const ssumm2 = Math.sqrt(summ2), rsn = 1 / Math.sqrt(n);
+    const a1 = poly(c1, rsn) - m[1] / ssumm2;
+    let i1, fac;
+    if (n > 5) {
+      i1 = 3;
+      const a2 = -m[2] / ssumm2 + poly(c2, rsn);
+      fac = Math.sqrt((summ2 - 2 * m[1] ** 2 - 2 * m[2] ** 2) / (1 - 2 * a1 ** 2 - 2 * a2 ** 2));
+      a[2] = a2;
+    } else {
+      i1 = 2;
+      fac = Math.sqrt((summ2 - 2 * m[1] ** 2) / (1 - 2 * a1 ** 2));
+    }
+    a[1] = a1;
+    for (let i = i1; i <= nn2; i++) a[i] = -m[i] / fac;
+  }
+  let mean = 0; for (let i = 0; i < n; i++) mean += x[i]; mean /= n;
+  let ss = 0; for (let i = 0; i < n; i++) ss += (x[i] - mean) ** 2;
+  let num = 0; for (let i = 1; i <= nn2; i++) num += a[i] * (x[n - i] - x[i - 1]);
+  let W = Math.min(1, num * num / ss);
+  if (n === 3) {
+    const pw = 1.90985931710274 * (Math.asin(Math.sqrt(W)) - 1.04719755119660);
+    return { W, p: Math.max(0, pw) };
+  }
+  if (W >= 1) return { W, p: 1 };
+  let y = Math.log(1 - W), mm, s;
+  if (n <= 11) {
+    const gam = poly(g, n);
+    if (y >= gam) return { W, p: 1e-99 };
+    y = -Math.log(gam - y);
+    mm = poly(c3, n); s = Math.exp(poly(c4, n));
+  } else {
+    const xx = Math.log(n);
+    mm = poly(c5, xx); s = Math.exp(poly(c6, xx));
+  }
+  return { W, p: pnormUpper(y, mm, s) };
+}
+
+// Skewness and excess kurtosis (moment estimators, as in the R app)
+function shape(x) {
+  const n = x.length;
+  let m = 0; for (let i = 0; i < n; i++) m += x[i]; m /= n;
+  let m2 = 0, m3 = 0, m4 = 0;
+  for (let i = 0; i < n; i++) { const d = x[i] - m, d2 = d * d; m2 += d2; m3 += d2 * d; m4 += d2 * d2; }
+  m2 /= n; m3 /= n; m4 /= n;
+  if (m2 === 0) return { skew: NaN, kurt: NaN };
+  return { skew: m3 / m2 ** 1.5, kurt: m4 / (m2 * m2) - 3 };
+}
+</script>
+
+<!-- ======================= APP ======================= -->
+<script>
+const N_POP = 100000;
+const $ = id => document.getElementById(id);
+const DIST_NAMES = { norm: "Normal", unif: "Uniform", pois: "Poisson", chisq: "Chi-squared",
+                     exp: "Exponential", hyper: "Hypergeometric", bern: "Bernoulli" };
+const C = { pop: "#9ecae1", succ: "#fd8d3c", dark: "#08519c", est: "#a1d99b", normal: "#006d2c",
+            exact: "#54278f", red: "#d62728", qq: "#31a354", zone: "#e5f5e0" };
+const PLOT_CONFIG = { displayModeBar: false, responsive: true };
+
+const num = id => parseFloat($(id).value);
+const radio = name => document.querySelector(`input[name="${name}"]:checked`).value;
+
+function readInputs() {
+  return {
+    type: radio("type"), dist: $("dist").value, distProp: $("dist_prop").value, p: num("p"),
+    distBase: $("dist_base").value, cutoff: num("cutoff"),
+    mu: num("mu"), sigma: num("sigma"), a: num("unif_a"), b: num("unif_b"),
+    lambda: num("lambda"), df: num("df"), rate: num("rate"),
+    hm: Math.round(num("hyp_m")), hn: Math.round(num("hyp_n")), hk: Math.round(num("hyp_k")),
+    seed: num("seed"), replace: radio("replacement") === "with",
+    n: +$("n").value, k: +$("k").value, bins: +$("bins").value
+  };
+}
+const propMode = I => I.type === "prop";
+const dichotomized = I => propMode(I) && I.distProp === "dic";
+const distCode = I => !propMode(I) ? I.dist : (I.distProp === "bern" ? "bern" : I.distBase);
+
+function syncVisibility(I) {
+  const code = distCode(I);
+  $("g_mean").hidden = propMode(I);
+  $("g_prop").hidden = !propMode(I);
+  $("g_bern").hidden = I.distProp !== "bern";
+  $("g_dic").hidden = I.distProp !== "dic";
+  for (const c of ["norm", "unif", "pois", "chisq", "exp", "hyper"]) $("pp_" + c).hidden = code !== c;
+  $("p_out").textContent = I.p.toFixed(2);
+  $("n_out").textContent = I.n;
+  $("k_out").textContent = I.k.toLocaleString("en-US");
+  $("bins_out").textContent = I.bins;
+}
+
+function checkParameters(code, I) {
+  const ok = v => Number.isFinite(v);
+  switch (code) {
+    case "norm":  if (!ok(I.mu)) return "Enter the mean (μ).";
+                  return ok(I.sigma) && I.sigma > 0 ? null : "The standard deviation must be greater than zero.";
+    case "unif":  return ok(I.a) && ok(I.b) && I.b > I.a ? null : "The maximum (b) must be greater than the minimum (a).";
+    case "pois":  return ok(I.lambda) && I.lambda > 0 ? null : "λ must be greater than zero.";
+    case "chisq": return ok(I.df) && I.df >= 1 ? null : "The degrees of freedom must be at least 1.";
+    case "exp":   return ok(I.rate) && I.rate > 0 ? null : "The rate must be greater than zero.";
+    case "hyper":
+      if (!(I.hm >= 1 && I.hn >= 1)) return "m and the number of failures must be at least 1.";
+      return I.hk >= 1 && I.hk <= I.hm + I.hn ? null : "k must be between 1 and the total number of items in the urn.";
+    case "bern":  return I.p > 0 && I.p < 1 ? null : "p must be between 0 and 1.";
+  }
+  return null;
+}
+
+function paramsFor(code, I) {
+  return { norm: [I.mu, I.sigma], unif: [I.a, I.b], pois: [I.lambda], chisq: [I.df],
+           exp: [I.rate], hyper: [I.hm, I.hn, I.hk], bern: [I.p] }[code];
+}
+
+function generate(code, I, rng) {
+  const x = new Float64Array(N_POP);
+  switch (code) {
+    case "norm":  for (let i = 0; i < N_POP; i++) x[i] = I.mu + I.sigma * rng.norm(); break;
+    case "unif":  for (let i = 0; i < N_POP; i++) x[i] = I.a + (I.b - I.a) * rng.u(); break;
+    case "pois":  for (let i = 0; i < N_POP; i++) x[i] = rng.pois(I.lambda); break;
+    case "chisq": for (let i = 0; i < N_POP; i++) x[i] = 2 * rng.gamma(I.df / 2); break;
+    case "exp":   for (let i = 0; i < N_POP; i++) x[i] = -Math.log(rng.unif()) / I.rate; break;
+    case "bern":  for (let i = 0; i < N_POP; i++) x[i] = rng.u() < I.p ? 1 : 0; break;
+    case "hyper":
+      for (let i = 0; i < N_POP; i++) {
+        let s = I.hm, tot = I.hm + I.hn, got = 0;
+        for (let j = 0; j < I.hk; j++) { if (rng.u() * tot < s) { got++; s--; } tot--; }
+        x[i] = got;
+      }
+      break;
+  }
+  return x;
+}
+
+function densityFun(code, I) {
+  return { norm: x => dnorm(x, I.mu, I.sigma), unif: x => dunif(x, I.a, I.b),
+           pois: x => dpois(x, I.lambda), chisq: x => dchisq(x, I.df),
+           exp: x => dexp(x, I.rate), hyper: x => dhyper(x, I.hm, I.hn, I.hk) }[code];
+}
+
+// Index permutation reused across samples (partial Fisher–Yates, undone after each sample)
+const perm = new Int32Array(N_POP).map((_, i) => i);
+function sampleMean(pop, n, replace, rng) {
+  let s = 0;
+  if (replace) {
+    for (let i = 0; i < n; i++) s += pop[Math.floor(rng.u() * N_POP)];
+    return s / n;
+  }
+  const js = new Int32Array(n);
+  for (let i = 0; i < n; i++) {
+    const j = i + Math.floor(rng.u() * (N_POP - i));
+    js[i] = j;
+    const t = perm[i]; perm[i] = perm[j]; perm[j] = t;
+    s += pop[perm[i]];
+  }
+  for (let i = n - 1; i >= 0; i--) { const j = js[i]; const t = perm[i]; perm[i] = perm[j]; perm[j] = t; }
+  return s / n;
+}
+
+// Histogram with "pretty" breaks (like R's hist(breaks = nbins))
+function histo(data, nb) {
+  let min = Infinity, max = -Infinity;
+  for (const v of data) { if (v < min) min = v; if (v > max) max = v; }
+  if (max === min) { min -= 0.5; max += 0.5; }
+  const raw = (max - min) / nb, p10 = 10 ** Math.floor(Math.log10(raw)), f = raw / p10;
+  const w = (f < 1.41 ? 1 : f < 3.16 ? 2 : f < 7.07 ? 5 : 10) * p10;
+  const start = Math.floor(min / w) * w;
+  const nbins = Math.max(1, Math.ceil((max - start) / w - 1e-9));
+  const counts = new Float64Array(nbins);
+  for (const v of data) {
+    let i = Math.floor((v - start) / w);
+    if (i >= nbins) i = nbins - 1; if (i < 0) i = 0;
+    counts[i]++;
+  }
+  const mids = [], density = [];
+  for (let i = 0; i < nbins; i++) { mids.push(start + (i + 0.5) * w); density.push(counts[i] / (data.length * w)); }
+  return { mids, density, width: w };
+}
+
+function seq(a, b, len) { const r = []; for (let i = 0; i < len; i++) r.push(a + (b - a) * i / (len - 1)); return r; }
+// grid over [a,b] plus a dense grid around a narrow peak (center ± 5 se)
+function curveGrid(a, b, center, se) {
+  const xs = seq(a, b, 600).concat(seq(Math.max(a, center - 5 * se), Math.min(b, center + 5 * se), 600));
+  return xs.sort((p, q) => p - q);
+}
+const maxOf = arr => { let m = -Infinity; for (const v of arr) if (Number.isFinite(v) && v > m) m = v; return m; };
+
+// ---------------- state ----------------
+const cache = { baseKey: null, base: null, popKey: null, pop: null, ps: null, estKey: null, est: null };
+let drawCounter = 0;
+
+function layout(xTitle, yTitle, extra = {}) {
+  return Object.assign({
+    margin: { l: 50, r: 8, t: 6, b: 36 },
+    font: { family: "system-ui, -apple-system, Segoe UI, Roboto, sans-serif", size: 11, color: "#1f2933" },
+    paper_bgcolor: "#fff", plot_bgcolor: "#fff",
+    xaxis: { title: { text: xTitle, standoff: 4 }, gridcolor: "#eef0f2", zeroline: false },
+    yaxis: { title: { text: yTitle, standoff: 4 }, gridcolor: "#eef0f2", zeroline: false },
+    legend: { x: 1, xanchor: "right", y: 1, bgcolor: "rgba(255,255,255,0.75)", font: { size: 10 } },
+    bargap: 0, barmode: "overlay", hovermode: "closest"
+  }, extra);
+}
+const vline = (x, y1, color, width, dash, name, showlegend = true) =>
+  ({ type: "scatter", mode: "lines", x: [x, x], y: [0, y1], line: { color, width, dash }, name, showlegend, hoverinfo: "name+x" });
+const hline = (y, x0, x1, color, width, name) =>
+  ({ type: "scatter", mode: "lines", x: [x0, x1], y: [y, y], line: { color, width }, name, hoverinfo: "name+y" });
+const bars = (h, color, name, showlegend = true) =>
+  ({ type: "bar", x: h.mids, y: h.density, width: h.width, marker: { color, line: { color: "#fff", width: 0.5 } }, name, showlegend, hoverinfo: "x+y" });
+
+function showError(msg) {
+  $("error").textContent = msg;
+  $("error").classList.add("show");
+  $("plots").classList.add("dim");
+}
+function clearError() { $("error").classList.remove("show"); $("plots").classList.remove("dim"); }
+
+function plotMessage(id, msg) { Plotly.purge($(id)); $(id).innerHTML = `<div class="plot-msg">${msg}</div>`; }
+function plot(id, traces, lay) {
+  const el = $(id);
+  if (el.querySelector(".plot-msg")) el.innerHTML = "";
+  Plotly.react(el, traces, lay, PLOT_CONFIG);
+}
+
+// ---------------- main update ----------------
+function update() {
+  const I = readInputs();
+  syncVisibility(I);
+  const code = distCode(I);
+  const err = checkParameters(code, I);
+  if (err) return showError(err);
+  const seedInt = Number.isFinite(I.seed) ? Math.floor(I.seed) : 0;
+
+  const baseKey = JSON.stringify([code, paramsFor(code, I), seedInt]);
+  if (baseKey !== cache.baseKey) {
+    cache.base = generate(code, I, makeRng(seedInt));
+    cache.baseKey = baseKey; cache.popKey = null;
+  }
+
+  const dic = dichotomized(I);
+  const popKey = baseKey + "|" + I.type + "|" + (dic ? I.cutoff : "");
+  if (popKey !== cache.popKey) {
+    let pop = cache.base;
+    if (dic) {
+      if (!Number.isFinite(I.cutoff)) return showError("Enter a cutoff.");
+      pop = new Float64Array(N_POP);
+      let s = 0;
+      for (let i = 0; i < N_POP; i++) { pop[i] = cache.base[i] > I.cutoff ? 1 : 0; s += pop[i]; }
+      if (s === 0 || s === N_POP) return showError("With this cutoff, all values fall on the same side. Adjust the cutoff.");
+    }
+    let mean = 0, mn = Infinity, mx = -Infinity;
+    for (const v of pop) { mean += v; if (v < mn) mn = v; if (v > mx) mx = v; }
+    mean /= N_POP;
+    let ss = 0; for (const v of pop) ss += (v - mean) ** 2;
+    cache.pop = pop;
+    cache.ps = { mean, sigma: Math.sqrt(ss / N_POP), min: mn, max: mx, sum: mean * N_POP, shape: shape(pop) };
+    cache.popKey = popKey; cache.estKey = null;
+  }
+
+  const estKey = [popKey, I.n, I.k, I.replace, drawCounter].join("|");
+  if (estKey !== cache.estKey) {
+    const rng = makeRng((seedInt * 2654435761 + 97 * drawCounter + 12345) >>> 0);
+    const est = new Float64Array(I.k);
+    for (let i = 0; i < I.k; i++) est[i] = sampleMean(cache.pop, I.n, I.replace, rng);
+    cache.est = est; cache.estKey = estKey; cache.estRng = rng;
+  }
+  clearError();
+  render(I, code);
+}
+
+// ---------------- rendering ----------------
+function render(I, code) {
+  const pop = cache.pop, ps = cache.ps, est = cache.est, n = I.n, k = I.k;
+  const prop = propMode(I), dic = dichotomized(I);
+  const par = ps.mean;
+  const fpc = I.replace ? 1 : Math.sqrt((N_POP - n) / (N_POP - 1));
+  const se = ps.sigma / Math.sqrt(n) * fpc;
+  const parSym = prop ? "p" : "μ", estSym = prop ? "p̂" : "x̄";
+  let estMean = 0; for (const v of est) estMean += v; estMean /= k;
+  let estSS = 0; for (const v of est) estSS += (v - estMean) ** 2;
+  const estSd = k > 1 ? Math.sqrt(estSS / (k - 1)) : NaN;
+
+  // ----- 1. Population -----
+  $("pop_title").textContent = !prop
+    ? `1. Population: ${DIST_NAMES[code]} (N = 100,000)`
+    : I.distProp === "bern" ? "1. Binary population: Bernoulli (N = 100,000)"
+    : `1. Population: ${DIST_NAMES[code]} dichotomized at ${I.cutoff} (N = 100,000)`;
+  $("pop_summary").innerHTML = prop
+    ? `Parameter <b>p = ${par.toFixed(4)}</b> &nbsp;|&nbsp; σ = √(p(1−p)) = ${ps.sigma.toFixed(4)} &nbsp;|&nbsp; N = 100,000`
+    : `Parameter <b>μ = ${par.toFixed(4)}</b> &nbsp;|&nbsp; σ = ${ps.sigma.toFixed(4)} &nbsp;|&nbsp; N = 100,000`;
+
+  if (prop && I.distProp === "bern") {
+    const props = [1 - par, par];
+    plot("plot_pop", [{ type: "bar", x: ["Failure (0)", "Success (1)"], y: props, width: 0.6,
+      marker: { color: [C.pop, C.succ] }, text: props.map(v => v.toFixed(4)), textposition: "outside",
+      showlegend: false, hoverinfo: "x+y" }],
+      layout("", "Proportion", { yaxis: { title: { text: "Proportion", standoff: 4 }, range: [0, 1.15], gridcolor: "#eef0f2" } }));
+  } else if (dic) {
+    const h = histo(cache.base, I.bins);
+    const succ = { ...h, density: h.density.map((d, i) => h.mids[i] > I.cutoff ? d : 0) };
+    const fail = { ...h, density: h.density.map((d, i) => h.mids[i] > I.cutoff ? 0 : d) };
+    const ymax = maxOf(h.density) * 1.1;
+    plot("plot_pop", [bars(succ, C.succ, "Success (> cutoff)"), bars(fail, C.pop, "Failure (≤ cutoff)"),
+      vline(I.cutoff, ymax, "#222", 2, "dash", "Cutoff")],
+      layout("Value of the original variable", "Density", { yaxis: { title: { text: "Density", standoff: 4 }, range: [0, ymax], gridcolor: "#eef0f2" } }));
+  } else {
+    const f = densityFun(code, I);
+    if (code === "pois" || code === "hyper") {
+      const counts = new Map();
+      for (const v of pop) counts.set(v, (counts.get(v) || 0) + 1);
+      const xs = [...counts.keys()].sort((a, b) => a - b);
+      const ys = xs.map(x => counts.get(x) / N_POP), fs = xs.map(f);
+      const ymax = Math.max(maxOf(ys), maxOf(fs)) * 1.1;
+      plot("plot_pop", [
+        { type: "bar", x: xs, y: ys, width: 0.6, marker: { color: C.pop }, name: "Observed proportion", hoverinfo: "x+y" },
+        { type: "scatter", mode: "markers", x: xs, y: fs, marker: { color: C.dark, size: 6 }, name: "Theoretical probability" },
+        vline(par, ymax, C.dark, 2, "solid", "μ (population mean)")],
+        layout("Value", "Probability", { yaxis: { title: { text: "Probability", standoff: 4 }, range: [0, ymax], gridcolor: "#eef0f2" } }));
+    } else {
+      const h = histo(pop, I.bins);
+      const xs = seq(ps.min, ps.max, 600), fx = xs.map(f);
+      const ymax = Math.max(maxOf(h.density), maxOf(fx)) * 1.1;
+      plot("plot_pop", [bars(h, C.pop, "Population", false),
+        { type: "scatter", mode: "lines", x: xs, y: fx, line: { color: C.dark, width: 2 }, name: "Theoretical density" },
+        vline(par, ymax, C.dark, 2, "dash", "μ (population mean)")],
+        layout("Value", "Density", { yaxis: { title: { text: "Density", standoff: 4 }, range: [0, ymax], gridcolor: "#eef0f2" } }));
+    }
+  }
+
+  // ----- 2. Sampling distribution -----
+  $("sampling_title").textContent = prop ? "2. Sampling distribution of the proportion (p̂)" : "2. Sampling distribution of the mean (x̄)";
+  $("sampling_caption").innerHTML =
+    `${k.toLocaleString("en-US")} estimates of ${estSym}, samples of size n = ${n} (${I.replace ? "with" : "without"} replacement) &nbsp;|&nbsp; theoretical SE = ${se.toFixed(4)}`;
+
+  if (prop) {
+    // p̂ takes only the values 0, 1/n, ..., 1: one bar per value
+    const counts = new Float64Array(n + 1);
+    for (const v of est) counts[Math.round(v * n)]++;
+    const h = { mids: [], density: [], width: 1 / n };
+    for (let j = 0; j <= n; j++) if (counts[j] > 0) { h.mids.push(j / n); h.density.push(counts[j] / k * n); }
+    const ex = [], ey = [];
+    let maxExact = 0;
+    for (let j = 0; j <= n; j++) {
+      const pr = I.replace ? dbinom(j, n, par) : dhyper(j, Math.round(ps.sum), N_POP - Math.round(ps.sum), n);
+      if (pr > 1e-5) { ex.push(j / n); ey.push(pr * n); maxExact = Math.max(maxExact, pr * n); }
+    }
+    const xs = curveGrid(0, 1, par, se), fx = xs.map(x => dnorm(x, par, se));
+    const ymax = Math.max(maxOf(h.density), maxExact, maxOf(fx)) * 1.1;
+    plot("plot_sampling", [bars(h, C.est, "Estimates", false),
+      { type: "scatter", mode: "markers", x: ex, y: ey, marker: { color: C.exact, size: 5 }, name: I.replace ? "Exact binomial" : "Exact hypergeometric" },
+      { type: "scatter", mode: "lines", x: xs, y: fx, line: { color: C.normal, width: 2 }, name: "Normal approximation" },
+      vline(par, ymax, C.dark, 3, "solid", "p (parameter)"),
+      vline(estMean, ymax, C.red, 2, "dash", "Mean of the p̂")],
+      layout("p̂", "Density", { xaxis: { title: { text: "p̂", standoff: 4 }, range: [0, 1], gridcolor: "#eef0f2" },
+                               yaxis: { title: { text: "Density", standoff: 4 }, range: [0, ymax], gridcolor: "#eef0f2" } }));
+  } else {
+    const h = histo(est, I.bins);
+    const xs = curveGrid(ps.min, ps.max, par, se), fx = xs.map(x => dnorm(x, par, se));
+    const ymax = Math.max(maxOf(h.density), maxOf(fx)) * 1.1;
+    plot("plot_sampling", [bars(h, C.est, "Estimates", false),
+      { type: "scatter", mode: "lines", x: xs, y: fx, line: { color: C.normal, width: 2 }, name: "Theoretical normal N(μ, σ/√n)" },
+      vline(par, ymax, C.dark, 3, "solid", "μ (parameter)"),
+      vline(estMean, ymax, C.red, 2, "dash", "Mean of the x̄")],
+      layout("x̄  (same axis as the population)", "Density", {
+        xaxis: { title: { text: "x̄  (same axis as the population)", standoff: 4 }, range: [ps.min, ps.max], gridcolor: "#eef0f2" },
+        yaxis: { title: { text: "Density", standoff: 4 }, range: [0, ymax], gridcolor: "#eef0f2" } }));
+  }
+
+  // ----- 3. Convergence -----
+  const running = new Float64Array(k);
+  let cum = 0, spread = se / 5;
+  for (let i = 0; i < k; i++) { cum += est[i]; running[i] = cum / (i + 1); spread = Math.max(spread, Math.abs(running[i] - par)); }
+  const idx = Array.from({ length: k }, (_, i) => i + 1);
+  $("conv_sub").textContent = `Running mean of the ${estSym} vs. the parameter ${parSym}`;
+  plot("plot_convergence", [
+    { type: "scattergl", mode: "lines", x: idx, y: Array.from(running), line: { color: C.red, width: 2 }, name: `Running mean of the ${estSym}` },
+    hline(par, 1, k, C.dark, 3, `${parSym} (parameter)`)],
+    layout("Number of samples drawn", `Running mean of the ${estSym}`, {
+      yaxis: { title: { text: `Running mean of ${estSym}`, standoff: 4 }, range: [par - spread * 1.1, par + spread * 1.1], gridcolor: "#eef0f2" } }));
+
+  // ----- Bias summary -----
+  const bias = estMean - par;
+  $("bias_summary").innerHTML = `
+    <table class="stats">
+      <tr><td>Parameter ${parSym}</td><td>${par.toFixed(5)}</td></tr>
+      <tr><td>Mean of the ${k.toLocaleString("en-US")} estimates of ${estSym}</td><td>${estMean.toFixed(5)}</td></tr>
+      <tr><td>Estimated bias (mean − parameter)</td><td>${(bias >= 0 ? "+" : "") + bias.toFixed(5)} &nbsp;<span style="color:var(--muted)">(${(100 * bias / se).toFixed(2)}% of the SE)</span></td></tr>
+      <tr><td>Observed standard error (sd of ${estSym})</td><td>${estSd.toFixed(5)}</td></tr>
+      <tr><td>Theoretical standard error &nbsp;<span style="color:var(--muted)">${I.replace ? "σ/√n" : "σ/√n × √((N−n)/(N−1))"}</span></td><td>${se.toFixed(5)}</td></tr>
+    </table>`;
+
+  // ----- 4. Normality -----
+  const s = shape(est), pshape = ps.shape;
+  if (!(estSd > 0)) {
+    plotMessage("plot_qq", "All estimates are identical; the Q-Q plot is not defined.");
+  } else {
+    const sorted = Float64Array.from(est).sort();
+    const aa = k <= 10 ? 3 / 8 : 0.5;
+    const tq = Array.from({ length: k }, (_, i) => qnorm((i + 1 - aa) / (k + 1 - 2 * aa)));
+    const q7 = p => { const hh = (k - 1) * p, lo = Math.floor(hh); return sorted[lo] + (hh - lo) * ((sorted[Math.min(lo + 1, k - 1)]) - sorted[lo]); };
+    const z = qnorm(0.75), slope = (q7(0.75) - q7(0.25)) / (2 * z), icpt = q7(0.25) + slope * z;
+    const x0 = tq[0], x1 = tq[k - 1];
+    plot("plot_qq", [
+      { type: "scattergl", mode: "markers", x: tq, y: Array.from(sorted), marker: { color: C.qq, size: 4 }, name: estSym, showlegend: false },
+      { type: "scatter", mode: "lines", x: [x0, x1], y: [icpt + slope * x0, icpt + slope * x1], line: { color: C.dark, width: 2 }, name: "Q-Q line", showlegend: false }],
+      layout("Theoretical normal quantiles", `Observed quantiles of ${estSym}`));
+  }
+
+  if (!Number.isFinite(pshape.skew)) {
+    plotMessage("plot_skew_n", "The population has no variation.");
+  } else {
+    const ns = Array.from({ length: 499 }, (_, i) => i + 2);
+    const theo = ns.map(m => pshape.skew / Math.sqrt(m));
+    const vals = theo.concat([0, 0.25, -0.25]); if (Number.isFinite(s.skew)) vals.push(s.skew);
+    let lo = Math.min(...vals), hi = Math.max(...vals); const pad = (hi - lo) * 0.06; lo -= pad; hi += pad;
+    plot("plot_skew_n", [
+      { type: "scatter", mode: "lines", x: [2, 500, 500, 2, 2], y: [-0.25, -0.25, 0.25, 0.25, -0.25], fill: "toself",
+        fillcolor: C.zone, line: { width: 0 }, name: "Close-to-normal zone (|skew| < 0.25)", hoverinfo: "skip" },
+      { ...hline(0, 2, 500, "#888", 1, "zero"), line: { color: "#888", width: 1, dash: "dot" }, showlegend: false, hoverinfo: "skip" },
+      { type: "scatter", mode: "lines", x: ns, y: theo, line: { color: C.dark, width: 2 }, name: "Theoretical: pop. skewness / √n" },
+      { type: "scatter", mode: "markers", x: [n], y: [s.skew], marker: { color: C.red, size: 11 }, name: `Observed at n = ${n}` }],
+      layout("Sample size (n)", "Skewness", {
+        xaxis: { title: { text: "Sample size (n)", standoff: 4 }, range: [0, 505], gridcolor: "#eef0f2", zeroline: false },
+        yaxis: { title: { text: "Skewness", standoff: 4 }, range: [lo, hi], gridcolor: "#eef0f2", zeroline: false } }));
+  }
+
+  if (!Number.isFinite(s.skew)) {
+    $("normality_summary").innerHTML = `<p class="meta">All estimates are identical; normality measures are not defined.</p>`;
+  } else {
+    let swVals = est;
+    if (k > 5000) {          // Shapiro-Wilk accepts at most 5000 values: random subset
+      const rng = makeRng((Math.floor(num("seed")) || 0) * 31 + drawCounter + 7);
+      const idxs = Int32Array.from({ length: k }, (_, i) => i);
+      for (let i = 0; i < 5000; i++) { const j = i + Math.floor(rng.u() * (k - i)); const t = idxs[i]; idxs[i] = idxs[j]; idxs[j] = t; }
+      swVals = Array.from(idxs.subarray(0, 5000), i => est[i]);
+    }
+    const sw = shapiroWilk(swVals);
+    const pTxt = !sw ? "not available" : sw.p < 1e-4 ? "&lt; 0.0001" : sw.p.toPrecision(3);
+    const verdict = Math.abs(s.skew) < 0.25 && Math.abs(s.kurt) < 0.5 ? ["CLOSE TO NORMAL", "v-good"]
+                  : Math.abs(s.skew) >= 0.75 || Math.abs(s.kurt) >= 1.5 ? ["CLEARLY NON-NORMAL", "v-bad"]
+                  : ["MODERATELY NON-NORMAL", "v-mid"];
+    const sg = v => (v >= 0 ? "+" : "") + v.toFixed(3);
+    $("normality_summary").innerHTML = `
+      <table class="stats">
+        <tr><th></th><th>Population</th><th>Theoretical for ${estSym} (n = ${n})</th><th>Observed ${estSym}</th></tr>
+        <tr><td>Skewness</td><td>${sg(pshape.skew)}</td><td>${sg(pshape.skew / Math.sqrt(n))}</td><td>${sg(s.skew)}</td></tr>
+        <tr><td>Excess kurtosis</td><td>${sg(pshape.kurt)}</td><td>${sg(pshape.kurt / n)}</td><td>${sg(s.kurt)}</td></tr>
+      </table>
+      <div class="meta">Shapiro-Wilk p-value (${swVals.length.toLocaleString("en-US")} values) = <b>${pTxt}</b>
+        &nbsp; Verdict: <span class="verdict ${verdict[1]}">${verdict[0]}</span></div>`;
+  }
+}
+
+// ---------------- events ----------------
+let timer = null;
+const schedule = (delay = 80) => { clearTimeout(timer); timer = setTimeout(update, delay); };
+document.querySelectorAll(".controls input, .controls select").forEach(el => {
+  el.addEventListener(el.type === "range" ? "input" : "change", () => {
+    if (el.type === "range") syncVisibility(readInputs());
+    schedule(el.type === "range" ? 120 : 0);
+  });
+});
+$("new_pop").addEventListener("click", () => {
+  $("seed").value = (Math.floor(num("seed")) || 0) + 1;
+  update();
+});
+$("resample").addEventListener("click", () => { drawCounter++; update(); });
+window.addEventListener("load", update);
+
+// When embedded in an iframe, tell the parent page how tall the app is
+// (postMessage works even when the page is opened from disk)
+if (window.self !== window.top) {
+  document.documentElement.classList.add("embedded");
+  let lastH = 0;
+  const reportHeight = () => {
+    const h = Math.ceil(document.body.getBoundingClientRect().height);
+    if (h > 0 && h !== lastH) {
+      lastH = h;
+      window.parent.postMessage({ type: "sampling-app-height", height: h }, "*");
+    }
+  };
+  new ResizeObserver(reportHeight).observe(document.body);
+  window.addEventListener("load", () => { reportHeight(); setTimeout(reportHeight, 500); setTimeout(reportHeight, 1500); });
+}
+</script>
+</body>
+</html>

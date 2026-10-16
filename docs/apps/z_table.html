@@ -1,0 +1,467 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Standard Normal Table (Z-Table)</title>
+<script src="https://cdn.jsdelivr.net/npm/plotly.js-dist-min@2.35.2/plotly.min.js"></script>
+<style>
+  :root {
+    --bg: #f5f6f8; --card: #ffffff; --ink: #1f2933; --muted: #5f6b7a;
+    --line: #e2e6ea; --accent: #08519c; --accent-soft: #e8f0f9;
+    --shade: #fd8d3c; --shade-soft: #fff1e6;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: var(--bg); color: var(--ink);
+    font: 13px/1.4 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  header { padding: 10px 16px 6px; }
+  header h1 { margin: 0; font-size: 18px; font-weight: 650; }
+  header p { margin: 2px 0 0; color: var(--muted); font-size: 12px; }
+
+  .wrap { display: grid; gap: 10px; padding: 6px 16px 16px; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 10px;
+    padding: 10px 12px; min-width: 0; }
+  .card h3 { margin: 0 0 2px; font-size: 13px; font-weight: 650; }
+  .card .sub { color: var(--muted); font-size: 11.5px; margin: 0 0 4px; }
+
+  /* ---------- top controls ---------- */
+  .controls { display: grid; grid-template-columns: auto auto minmax(220px, 1fr) minmax(260px, 1.3fr);
+    gap: 14px 18px; align-items: start; }
+  .lab { display: block; font-weight: 600; margin-bottom: 4px; font-size: 11px;
+    text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
+  .seg { display: inline-flex; border: 1px solid #c9d0d7; border-radius: 8px; overflow: hidden; }
+  .seg button { font: inherit; border: 0; background: #fff; color: var(--ink); padding: 7px 14px;
+    cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 3px; min-width: 78px; }
+  .seg button + button { border-left: 1px solid #c9d0d7; }
+  .seg button:hover { background: #f0f2f4; }
+  .seg button[aria-pressed="true"] { background: var(--accent); color: #fff; }
+  .seg svg { width: 38px; height: 16px; display: block; }
+  .seg button .t { font-weight: 600; font-size: 12px; }
+  .seg button[aria-pressed="true"] svg .curve { stroke: #fff; }
+  .seg button[aria-pressed="true"] svg .area { fill: #ffd1ad; }
+
+  input[type=number] { width: 100%; padding: 7px 9px; border: 1px solid #c9d0d7; border-radius: 8px;
+    font: inherit; font-size: 16px; font-variant-numeric: tabular-nums; background: #fff; color: var(--ink); }
+  input[type=number]:focus { outline: 2px solid var(--accent-soft); border-color: var(--accent); }
+  input.bad { border-color: #d64545; background: #fff6f6; }
+  .chips { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 6px; }
+  .chips button { font: inherit; font-size: 11.5px; padding: 2px 8px; border-radius: 999px;
+    border: 1px solid #c9d0d7; background: #fff; color: var(--ink); cursor: pointer;
+    font-variant-numeric: tabular-nums; }
+  .chips button:hover { background: var(--accent-soft); border-color: var(--accent); }
+  .msg { color: #a1251f; font-size: 11.5px; margin-top: 4px; min-height: 0; }
+
+  .result { background: var(--accent-soft); border-radius: 8px; padding: 8px 12px; }
+  .result .main { font-size: 20px; font-weight: 650; font-variant-numeric: tabular-nums; line-height: 1.25; }
+  .result .main b { color: var(--accent); }
+  .result .extra { font-size: 12px; color: var(--muted); margin-top: 3px; font-variant-numeric: tabular-nums; }
+
+  /* ---------- plot + table ---------- */
+  .grid-main { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr); gap: 10px; }
+  #plot { width: 100%; height: 360px; }
+
+  table.zt { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; font-size: 12px; }
+  table.zt th, table.zt td { padding: 3px 4px; text-align: center; border-bottom: 1px solid var(--line); }
+  table.zt thead th { color: var(--muted); font-weight: 650; border-bottom: 2px solid var(--line); }
+  table.zt tbody th { color: var(--muted); font-weight: 650; text-align: left; padding-left: 6px; }
+  table.zt td { cursor: pointer; }
+  table.zt td:hover { background: #f0f2f4; }
+  table.zt .hl-row, table.zt .hl-col { background: var(--shade-soft); }
+  table.zt td.hl-cell { background: var(--shade); color: #fff; font-weight: 700; border-radius: 4px; }
+  table.zt th.hl-head { color: #c4540d; }
+  .tnote { color: var(--muted); font-size: 11.5px; margin-top: 6px; }
+  .tnav { display: flex; gap: 6px; align-items: center; justify-content: space-between; margin-bottom: 4px; }
+  .tnav button { font: inherit; font-size: 11.5px; padding: 2px 8px; border-radius: 6px;
+    border: 1px solid #c9d0d7; background: #fff; cursor: pointer; }
+  .tnav button:hover { background: #f0f2f4; }
+  .tnav button:disabled { opacity: .4; cursor: default; }
+
+  html.embedded body { background: transparent; }
+
+  @media (max-width: 1100px) {
+    .controls { grid-template-columns: auto auto; }
+    .grid-main { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 620px) {
+    .controls { grid-template-columns: 1fr; }
+    .seg button { min-width: 0; padding: 6px 9px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Standard Normal Table (Z-Table)</h1>
+  <p>Find the area under the standard normal curve for a z-score, or the z-score that gives a chosen area. Z ~ N(0, 1).</p>
+</header>
+
+<div class="wrap">
+  <!-- ======================= CONTROLS ======================= -->
+  <section class="card controls">
+    <div>
+      <span class="lab">Area</span>
+      <div class="seg" id="seg_tail" role="group" aria-label="Area">
+        <button data-v="left" aria-pressed="true" title="Area to the left of z: P(Z ≤ z)">
+          <svg viewBox="0 0 38 16"><path class="area" d="M1 15 C8 15 12 2 19 2 L19 15 Z" fill="#fdbb84"/><path class="curve" d="M1 15 C8 15 12 2 19 2 C26 2 30 15 37 15" fill="none" stroke="#08519c" stroke-width="1.4"/></svg>
+          <span class="t">Left</span>
+        </button>
+        <button data-v="central" aria-pressed="false" title="Area between −z and z: P(−z ≤ Z ≤ z)">
+          <svg viewBox="0 0 38 16"><path class="area" d="M12 15 C14 8 16 2 19 2 C22 2 24 8 26 15 Z" fill="#fdbb84"/><path class="curve" d="M1 15 C8 15 12 2 19 2 C26 2 30 15 37 15" fill="none" stroke="#08519c" stroke-width="1.4"/></svg>
+          <span class="t">Central</span>
+        </button>
+        <button data-v="right" aria-pressed="false" title="Area to the right of z: P(Z ≥ z)">
+          <svg viewBox="0 0 38 16"><path class="area" d="M19 2 C26 2 30 15 37 15 L19 15 Z" fill="#fdbb84"/><path class="curve" d="M1 15 C8 15 12 2 19 2 C26 2 30 15 37 15" fill="none" stroke="#08519c" stroke-width="1.4"/></svg>
+          <span class="t">Right</span>
+        </button>
+      </div>
+    </div>
+
+    <div>
+      <span class="lab">Direction</span>
+      <div class="seg" id="seg_dir" role="group" aria-label="Direction">
+        <button data-v="z2p" aria-pressed="true" title="Enter z, get the probability"><span class="t">z → p</span></button>
+        <button data-v="p2z" aria-pressed="false" title="Enter the probability, get z"><span class="t">p → z</span></button>
+      </div>
+    </div>
+
+    <div>
+      <label class="lab" for="val" id="val_label">z value</label>
+      <input type="number" id="val" value="1.96" step="0.01" inputmode="decimal">
+      <div class="chips" id="chips"></div>
+      <div class="msg" id="msg"></div>
+    </div>
+
+    <div class="result" aria-live="polite">
+      <div class="main" id="res_main"></div>
+      <div class="extra" id="res_extra"></div>
+    </div>
+  </section>
+
+  <!-- ======================= PLOT + TABLE ======================= -->
+  <div class="grid-main">
+    <section class="card">
+      <h3 id="plot_title">Area under the standard normal curve</h3>
+      <div id="plot"></div>
+    </section>
+    <section class="card">
+      <div class="tnav">
+        <div>
+          <h3 id="table_title">Z-table</h3>
+          <p class="sub" id="table_sub"></p>
+        </div>
+        <div style="display:flex; gap:4px">
+          <button id="t_up" title="Show smaller z">▲</button>
+          <button id="t_down" title="Show larger z">▼</button>
+        </div>
+      </div>
+      <table class="zt" id="ztable"></table>
+      <div class="tnote" id="table_note">Row = z to one decimal; column = second decimal. Click any cell to use that z.</div>
+    </section>
+  </div>
+</div>
+
+<script id="stats-lib">
+// Standard normal CDF, double precision (Hart / West 2005)
+function pnorm(z) {
+  const x = Math.abs(z);
+  let c;
+  if (x > 37) c = 0;
+  else {
+    const e = Math.exp(-x * x / 2);
+    if (x < 7.07106781186547) {
+      let b = 3.52624965998911e-02 * x + 0.700383064443688;
+      b = b * x + 6.37396220353165; b = b * x + 33.912866078383; b = b * x + 112.079291497871;
+      b = b * x + 221.213596169931; b = b * x + 220.206867912376;
+      c = e * b;
+      b = 8.83883476483184e-02 * x + 1.75566716318264;
+      b = b * x + 16.064177579207; b = b * x + 86.7807322029461; b = b * x + 296.564248779674;
+      b = b * x + 637.333633378831; b = b * x + 793.826512519948; b = b * x + 440.413735824752;
+      c = c / b;
+    } else {
+      let b = x + 0.65; b = x + 4 / b; b = x + 3 / b; b = x + 2 / b; b = x + 1 / b;
+      c = e / b / 2.506628274631;
+    }
+  }
+  return z > 0 ? 1 - c : c;
+}
+// Upper tail without cancellation
+const pnormUpper = z => pnorm(-z);
+const dnorm = x => Math.exp(-0.5 * x * x) / Math.sqrt(2 * Math.PI);
+
+// Normal quantile: Acklam's approximation + one Halley refinement step
+function qnorm(p) {
+  if (p <= 0) return -Infinity;
+  if (p >= 1) return Infinity;
+  const a = [-3.969683028665376e+01, 2.209460984245205e+02, -2.759285104469687e+02, 1.383577518672690e+02, -3.066479806614716e+01, 2.506628277459239e+00];
+  const b = [-5.447609879822406e+01, 1.615858368580409e+02, -1.556989798598866e+02, 6.680131188771972e+01, -1.328068155288572e+01];
+  const c = [-7.784894002430293e-03, -3.223964580411365e-01, -2.400758277161838e+00, -2.549732539343734e+00, 4.374664141464968e+00, 2.938163982698783e+00];
+  const d = [7.784695709041462e-03, 3.224671290700398e-01, 2.445134137142996e+00, 3.754408661907416e+00];
+  const pl = 0.02425;
+  let q, r, x;
+  if (p < pl) {
+    q = Math.sqrt(-2 * Math.log(p));
+    x = (((((c[0] * q + c[1]) * q + c[2]) * q + c[3]) * q + c[4]) * q + c[5]) / ((((d[0] * q + d[1]) * q + d[2]) * q + d[3]) * q + 1);
+  } else if (p <= 1 - pl) {
+    q = p - 0.5; r = q * q;
+    x = (((((a[0] * r + a[1]) * r + a[2]) * r + a[3]) * r + a[4]) * r + a[5]) * q / (((((b[0] * r + b[1]) * r + b[2]) * r + b[3]) * r + b[4]) * r + 1);
+  } else {
+    q = Math.sqrt(-2 * Math.log(1 - p));
+    x = -(((((c[0] * q + c[1]) * q + c[2]) * q + c[3]) * q + c[4]) * q + c[5]) / ((((d[0] * q + d[1]) * q + d[2]) * q + d[3]) * q + 1);
+  }
+  const e = pnorm(x) - p;
+  const u = e * Math.sqrt(2 * Math.PI) * Math.exp(x * x / 2);
+  return x - u / (1 + x * u / 2);
+}
+
+// Area for each table type
+function area(tail, z) {
+  if (tail === "left") return pnorm(z);
+  if (tail === "right") return pnormUpper(z);
+  const a = Math.abs(z);
+  return 1 - 2 * pnormUpper(a);          // central: P(−|z| ≤ Z ≤ |z|)
+}
+// Inverse: z such that area(tail, z) = p
+function zFor(tail, p) {
+  if (tail === "left") return qnorm(p);
+  if (tail === "right") return -qnorm(p);
+  return -qnorm((1 - p) / 2);           // central, z ≥ 0
+}
+</script>
+
+<script>
+const $ = id => document.getElementById(id);
+const state = { tail: "left", dir: "z2p", z: 1.96, p: pnorm(1.96), rowStart: null };
+const CHIPS = {
+  z2p: ["0", "1", "1.28", "1.645", "1.96", "2.326", "2.576", "3"],
+  p2z: ["0.80", "0.90", "0.95", "0.975", "0.99", "0.995"]
+};
+const SHADE = "#fd8d3c", CURVE = "#08519c";
+
+function fmtP(p) {
+  if (p === 0) return "0";
+  if (p < 5e-5) return p.toExponential(3);
+  if (1 - p < 5e-5 && p < 1) return "1 − " + (1 - p).toExponential(3);
+  return p.toFixed(4);
+}
+const fmtZ = (z, d = 4) => (z < 0 ? "−" : "") + Math.abs(z).toFixed(d);
+
+// ---------------- controls ----------------
+function setSeg(id, v) {
+  document.querySelectorAll(`#${id} button`).forEach(b => b.setAttribute("aria-pressed", String(b.dataset.v === v)));
+}
+document.querySelectorAll("#seg_tail button").forEach(b => b.addEventListener("click", () => {
+  state.tail = b.dataset.v; setSeg("seg_tail", state.tail);
+  recompute(); render();
+}));
+document.querySelectorAll("#seg_dir button").forEach(b => b.addEventListener("click", () => {
+  if (state.dir === b.dataset.v) return;
+  state.dir = b.dataset.v; setSeg("seg_dir", state.dir);
+  // carry the current answer into the input, so switching direction keeps the same point
+  const v = state.dir === "z2p" ? state.z : state.p;
+  if (Number.isFinite(v)) $("val").value = state.dir === "z2p" ? +v.toFixed(4) : +v.toFixed(4);
+  setupInput();
+  recompute(); render();
+}));
+$("val").addEventListener("input", () => { recompute(); state.rowStart = null; render(); });
+
+function setupInput() {
+  const z2p = state.dir === "z2p";
+  $("val_label").textContent = z2p ? "z value" : "Probability p (between 0 and 1)";
+  $("val").step = z2p ? "0.01" : "0.001";
+  if (z2p) { $("val").removeAttribute("min"); $("val").removeAttribute("max"); }
+  else { $("val").min = "0"; $("val").max = "1"; }
+  $("chips").innerHTML = CHIPS[state.dir].map(v => `<button type="button" data-v="${v}">${v}</button>`).join("");
+  $("chips").querySelectorAll("button").forEach(b => b.addEventListener("click", () => {
+    $("val").value = b.dataset.v; recompute(); state.rowStart = null; render();
+  }));
+}
+
+// Validate input, compute the counterpart
+function recompute() {
+  const raw = $("val").value.trim();
+  const v = parseFloat(raw);
+  state.error = null;
+  if (raw === "" || !Number.isFinite(v)) state.error = state.dir === "z2p" ? "Enter a z value." : "Enter a probability.";
+  else if (state.dir === "z2p") {
+    state.z = v; state.p = area(state.tail, v);
+  } else {
+    if (!(v > 0 && v < 1)) state.error = "The probability must be strictly between 0 and 1.";
+    else { state.p = v; state.z = zFor(state.tail, v); }
+  }
+  $("val").classList.toggle("bad", !!state.error);
+  $("msg").textContent = state.error || "";
+}
+
+// ---------------- result text ----------------
+function renderResult() {
+  if (state.error) { $("res_main").textContent = "—"; $("res_extra").textContent = ""; return; }
+  const { tail, dir, z, p } = state;
+  const zs = dir === "z2p" ? fmtZ(z, Math.max(2, decimalsOf($("val").value))) : fmtZ(z);
+  const za = dir === "z2p" ? fmtZ(Math.abs(z), Math.max(2, decimalsOf($("val").value))) : fmtZ(Math.abs(z));
+  let main, extra;
+  if (dir === "z2p") {
+    if (tail === "left")  main = `P(Z ≤ ${zs}) = <b>${fmtP(p)}</b>`;
+    if (tail === "right") main = `P(Z ≥ ${zs}) = <b>${fmtP(p)}</b>`;
+    if (tail === "central") main = `P(−${za} ≤ Z ≤ ${za}) = <b>${fmtP(p)}</b>`;
+  } else {
+    if (tail === "left")  main = `<b>z = ${zs}</b> &nbsp;so that P(Z ≤ z) = ${fmtP(p)}`;
+    if (tail === "right") main = `<b>z = ${zs}</b> &nbsp;so that P(Z ≥ z) = ${fmtP(p)}`;
+    if (tail === "central") main = `<b>z = ±${za}</b> &nbsp;so that P(−z ≤ Z ≤ z) = ${fmtP(p)}`;
+  }
+  if (tail === "central") {
+    const t = pnormUpper(Math.abs(z));
+    extra = `Each tail = ${fmtP(t)} &nbsp;·&nbsp; both tails = ${fmtP(2 * t)}`;
+    if (dir === "z2p" && z < 0) extra += " &nbsp;·&nbsp; central area uses |z|";
+  } else {
+    extra = `Complement: ${tail === "left" ? "P(Z ≥ z)" : "P(Z ≤ z)"} = ${fmtP(1 - p)}`;
+  }
+  $("res_main").innerHTML = main;
+  $("res_extra").innerHTML = extra;
+}
+function decimalsOf(s) { const m = String(s).split(".")[1]; return m ? Math.min(m.length, 4) : 0; }
+
+// ---------------- plot ----------------
+function seq(a, b, n) { const r = []; for (let i = 0; i < n; i++) r.push(a + (b - a) * i / (n - 1)); return r; }
+function region(a, b) {
+  const xs = seq(a, b, 200);
+  return { x: [a, ...xs, b], y: [0, ...xs.map(dnorm), 0] };
+}
+function renderPlot() {
+  const lim = state.error ? 4 : Math.min(6, Math.max(4, Math.abs(state.z) + 0.6));
+  const xs = seq(-lim, lim, 500);
+  const traces = [];
+  const shapes = [], ann = [];
+  if (!state.error) {
+    const z = state.z, az = Math.abs(z);
+    let parts;
+    if (state.tail === "left") parts = [[-lim, Math.max(-lim, Math.min(lim, z))]];
+    else if (state.tail === "right") parts = [[Math.max(-lim, Math.min(lim, z)), lim]];
+    else parts = [[-Math.min(az, lim), Math.min(az, lim)]];
+    parts.forEach(([a, b], i) => {
+      if (b > a) {
+        const r = region(a, b);
+        traces.push({ type: "scatter", mode: "lines", x: r.x, y: r.y, fill: "toself", fillcolor: "rgba(253,141,60,0.55)",
+          line: { width: 0 }, hoverinfo: "skip", showlegend: false });
+      }
+    });
+    const lines = state.tail === "central" ? [-az, az] : [z];
+    lines.forEach(v => {
+      if (Math.abs(v) <= lim) {
+        shapes.push({ type: "line", x0: v, x1: v, y0: 0, y1: dnorm(v), line: { color: "#c4540d", width: 2, dash: "dash" } });
+        ann.push({ x: v, y: 0, yref: "y", text: `<b>${fmtZ(v, 2)}</b>`, showarrow: false, yshift: -12, font: { color: "#c4540d", size: 12 } });
+      }
+    });
+    // label the area inside the shaded region (or near the curve when the region is thin)
+    let lx;
+    if (state.tail === "left") lx = Math.max(-lim + 0.6, Math.min(z - 0.7, 0));
+    else if (state.tail === "right") lx = Math.min(lim - 0.6, Math.max(z + 0.7, 0));
+    else lx = 0;
+    const ly = state.tail === "central" ? Math.min(dnorm(0) * 0.45, dnorm(Math.min(az, 1)) * 0.6) : Math.max(0.05, dnorm(lx) * 0.45);
+    ann.push({ x: lx, y: Math.max(0.04, ly), text: `<b>area = ${fmtP(state.p)}</b>`, showarrow: false,
+      font: { size: 14, color: "#1f2933" }, bgcolor: "rgba(255,255,255,0.85)", borderpad: 3 });
+  }
+  traces.push({ type: "scatter", mode: "lines", x: xs, y: xs.map(dnorm), line: { color: CURVE, width: 2.5 },
+    hovertemplate: "z = %{x:.2f}<br>density = %{y:.4f}<extra></extra>", showlegend: false });
+  const layout = {
+    margin: { l: 44, r: 10, t: 6, b: 46 },
+    font: { family: "system-ui, -apple-system, Segoe UI, Roboto, sans-serif", size: 11, color: "#1f2933" },
+    paper_bgcolor: "#fff", plot_bgcolor: "#fff",
+    xaxis: { title: { text: "z", standoff: 18 }, range: [-lim, lim], gridcolor: "#eef0f2", zeroline: false, dtick: 1 },
+    yaxis: { title: { text: "Density", standoff: 4 }, range: [0, 0.43], gridcolor: "#eef0f2", zeroline: false },
+    shapes, annotations: ann, hovermode: "closest"
+  };
+  Plotly.react($("plot"), traces, layout, { displayModeBar: false, responsive: true });
+  const titles = { left: "Area to the left of z", right: "Area to the right of z", central: "Area between −z and z" };
+  $("plot_title").textContent = titles[state.tail] + " (shaded)";
+}
+
+// ---------------- z-table ----------------
+// Rows: left/right tables cover −3.4 … 3.4 (including "−0.0"); central covers 0.0 … 3.4
+function tableRows() {
+  const rows = [];
+  if (state.tail !== "central") for (let i = 34; i >= 0; i--) rows.push({ label: "−" + (i / 10).toFixed(1), base: -i / 10, neg: true });
+  for (let i = 0; i <= 34; i++) rows.push({ label: (i / 10).toFixed(1), base: i / 10, neg: false });
+  return rows;
+}
+const cellZ = (row, j) => row.neg ? -(Math.abs(row.base) + j / 100) : row.base + j / 100;
+
+function renderTable() {
+  const rows = tableRows();
+  const WINDOW = 12;
+  // locate the cell for the current z (rounded to 2 decimals)
+  let hr = -1, hc = -1;
+  if (!state.error) {
+    let z = state.tail === "central" ? Math.abs(state.z) : state.z;
+    const zr = Math.round(z * 100) / 100;
+    if (Math.abs(zr) <= 3.49) {
+      const a = Math.round(Math.abs(zr) * 100);
+      const rowAbs = Math.floor(a / 10) / 10, col = a % 10;
+      const neg = zr < 0 || (zr === 0 && Object.is(zr, -0));
+      hr = rows.findIndex(r => r.neg === (neg && state.tail !== "central") && Math.abs(r.base - rowAbs * (neg && state.tail !== "central" ? -1 : 1)) < 1e-9);
+      hc = col;
+    }
+  }
+  if (state.rowStart === null) {
+    let center = hr;
+    if (center < 0) center = !state.error && state.z < 0 && state.tail !== "central" ? 0 : rows.length - 1;
+    state.rowStart = Math.max(0, Math.min(rows.length - WINDOW, center - Math.floor(WINDOW / 2)));
+  }
+  const start = state.rowStart, end = Math.min(rows.length, start + WINDOW);
+  $("t_up").disabled = start === 0;
+  $("t_down").disabled = end >= rows.length;
+
+  let html = "<thead><tr><th>z</th>";
+  for (let j = 0; j < 10; j++) html += `<th class="${j === hc ? "hl-head" : ""}">.0${j}</th>`;
+  html += "</tr></thead><tbody>";
+  for (let i = start; i < end; i++) {
+    const r = rows[i];
+    html += `<tr><th class="${i === hr ? "hl-head" : ""}">${r.label}</th>`;
+    for (let j = 0; j < 10; j++) {
+      const z = cellZ(r, j);
+      const cls = i === hr && j === hc ? "hl-cell" : (i === hr ? "hl-row" : (j === hc && hr >= 0 ? "hl-col" : ""));
+      html += `<td class="${cls}" data-z="${z.toFixed(2)}">${area(state.tail, z).toFixed(4)}</td>`;
+    }
+    html += "</tr>";
+  }
+  html += "</tbody>";
+  $("ztable").innerHTML = html;
+  $("ztable").querySelectorAll("td").forEach(td => td.addEventListener("click", () => {
+    if (state.dir !== "z2p") { state.dir = "z2p"; setSeg("seg_dir", "z2p"); setupInput(); }
+    $("val").value = td.dataset.z;
+    recompute(); render(false);
+  }));
+
+  const titles = { left: "Left-tail table: P(Z ≤ z)", right: "Right-tail table: P(Z ≥ z)", central: "Central table: P(−z ≤ Z ≤ z)" };
+  $("table_title").textContent = titles[state.tail];
+  let note = "Row = z to one decimal; column = second decimal. Click any cell to use that z.";
+  if (!state.error && hr < 0) note = `z = ${fmtZ(state.z, 2)} is outside the table range (|z| ≤ 3.49); the result above is still exact.`;
+  else if (state.dir === "p2z" && !state.error) note = `Closest table entry to p = ${fmtP(state.p)} is highlighted (z rounded to 2 decimals). Click any cell to use that z.`;
+  $("table_note").textContent = note;
+  $("table_sub").textContent = "";
+}
+$("t_up").addEventListener("click", () => { state.rowStart = Math.max(0, state.rowStart - 6); renderTable(); });
+$("t_down").addEventListener("click", () => { state.rowStart = state.rowStart + 6; const n = tableRows().length; state.rowStart = Math.min(state.rowStart, n - 12); renderTable(); });
+
+function render(resetWindow = true) {
+  if (resetWindow) state.rowStart = null;
+  renderResult(); renderPlot(); renderTable();
+}
+
+// ---------------- embedding: report height to the parent page ----------------
+if (window.self !== window.top) {
+  document.documentElement.classList.add("embedded");
+  let lastH = 0;
+  const reportHeight = () => {
+    const h = Math.ceil(document.body.getBoundingClientRect().height);
+    if (h > 0 && h !== lastH) { lastH = h; window.parent.postMessage({ type: "z-table-height", height: h }, "*"); }
+  };
+  new ResizeObserver(reportHeight).observe(document.body);
+  window.addEventListener("load", () => { reportHeight(); setTimeout(reportHeight, 500); setTimeout(reportHeight, 1500); });
+}
+
+setupInput();
+recompute();
+window.addEventListener("load", () => render());
+</script>
+</body>
+</html>

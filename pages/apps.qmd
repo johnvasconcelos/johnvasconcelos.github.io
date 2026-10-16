@@ -2,10 +2,6 @@
 title: "Apps"
 format: html
 editor: visual
----
-
----
-title: "Apps"
 page-layout: full
 ---
 

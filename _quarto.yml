@@ -4,6 +4,12 @@ project:
   execute-dir: project
   resources:
     - files/cv.pdf
+    - apps/w6_binomial_distribution.html
+    - apps/w6_hypergeometric_distribution.html
+    - apps/w6_poisson_distribution.html
+    - apps/z_table.html
+    - apps/w8_sampling_distribution.html
+    - apps/w9_confidence_intervals.html
 
 website:
   title: "John Vasconcelos"
@@ -17,6 +23,20 @@ website:
         text: Research
       - href: pages/teaching.qmd
         text: Teaching
+      - text: StatApps
+        menu:
+          - href: pages/w6_binomial_distribution.qmd
+            text: "Binomial Distribution"
+          - href: pages/w6_hypergeometric_distribution.qmd
+            text: "Hypergeometric Distribution"
+          - href: pages/w6_poisson_distribution.qmd
+            text: "Poisson Distribution"
+          - href: pages/z_table.qmd
+            text: "Z-Table"
+          - href: pages/w8_sampling_distribution.qmd
+            text: "Sampling Distributions"
+          - href: pages/w9_confidence_intervals.qmd
+            text: "Confidence Intervals"
       - href: pages/cv.qmd
         text: CV
       - text: Portfolio

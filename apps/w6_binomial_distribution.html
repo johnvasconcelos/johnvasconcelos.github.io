@@ -1,0 +1,367 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Binomial Distribution</title>
+<script src="https://cdn.jsdelivr.net/npm/plotly.js-dist-min@2.35.2/plotly.min.js"></script>
+<style>
+  :root {
+    --bg: #f5f6f8; --card: #ffffff; --ink: #1f2933; --muted: #5f6b7a;
+    --line: #e2e6ea; --accent: #08519c; --accent-soft: #e8f0f9;
+    --bar: #9ecae1; --sel: #fd8d3c; --sel-soft: #fff1e6; --mean: #d62728;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: var(--bg); color: var(--ink);
+    font: 13px/1.4 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  header { padding: 10px 16px 6px; }
+  header h1 { margin: 0; font-size: 18px; font-weight: 650; }
+  header p { margin: 2px 0 0; color: var(--muted); font-size: 12px; max-width: 900px; }
+
+  .app { display: grid; grid-template-columns: 272px minmax(0, 1fr); gap: 12px; padding: 6px 16px 16px; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; min-width: 0; }
+  .card h3 { margin: 0 0 2px; font-size: 13px; font-weight: 650; }
+  .card .sub { color: var(--muted); font-size: 11.5px; margin: 0; }
+
+  /* ---------- controls ---------- */
+  .controls { align-self: start; }
+  .controls h2 { font-size: 11px; text-transform: uppercase; letter-spacing: .06em;
+    color: var(--muted); margin: 12px 0 6px; font-weight: 650; }
+  .controls h2:first-child { margin-top: 0; }
+  .field { margin-bottom: 10px; }
+  .field label { display: block; font-weight: 550; margin-bottom: 3px; font-size: 12px; }
+  .field output { float: right; font-weight: 650; color: var(--accent); font-variant-numeric: tabular-nums; }
+  input[type=range] { width: 100%; margin: 0; accent-color: var(--accent); }
+  .ticks { display: flex; justify-content: space-between; color: var(--muted); font-size: 10.5px; font-variant-numeric: tabular-nums; }
+  .chips { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 6px; }
+  .chips button { font: inherit; font-size: 11.5px; padding: 2px 8px; border-radius: 999px;
+    border: 1px solid #c9d0d7; background: #fff; color: var(--ink); cursor: pointer; font-variant-numeric: tabular-nums; }
+  .chips button:hover { background: var(--accent-soft); border-color: var(--accent); }
+  .formula { font-family: ui-monospace, "SF Mono", Consolas, monospace; font-size: 12px; background: var(--accent-soft);
+    border-radius: 6px; padding: 6px 8px; line-height: 1.5; }
+  .note { font-size: 11.5px; color: var(--muted); border-left: 3px solid var(--bar); padding: 4px 8px; margin-top: 8px; background: #f8fafc; }
+
+  table.stats { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; font-size: 12px; }
+  table.stats td { padding: 4px 2px; border-bottom: 1px solid var(--line); }
+  table.stats td:last-child { text-align: right; font-weight: 650; }
+  table.stats tr:last-child td { border-bottom: 0; }
+  table.stats .muted { color: var(--muted); font-weight: 400; }
+
+  /* ---------- results ---------- */
+  .results { display: grid; gap: 10px; min-width: 0; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); align-items: start; }
+  #plot { width: 100%; height: 360px; }
+  .detail { background: var(--accent-soft); border-radius: 8px; padding: 7px 10px; margin-top: 6px;
+    font-variant-numeric: tabular-nums; font-size: 12.5px; }
+  .detail .tag { display: inline-block; background: var(--sel); color: #fff; font-weight: 700; border-radius: 5px; padding: 1px 7px; margin-right: 6px; }
+  .detail b { color: var(--accent); }
+  .hint { color: var(--muted); font-size: 11.5px; margin-top: 4px; }
+
+  .tablewrap { max-height: 420px; overflow-y: auto; border: 1px solid var(--line); border-radius: 8px; margin-top: 6px; }
+  table.pt { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; font-size: 12px; }
+  table.pt th { position: sticky; top: 0; background: #f0f2f4; color: var(--muted); font-weight: 650; font-size: 11px;
+    padding: 5px 8px; text-align: right; border-bottom: 1px solid var(--line); }
+  table.pt td { padding: 3px 8px; text-align: right; border-bottom: 1px solid #f0f2f4; cursor: pointer; }
+  table.pt th:first-child, table.pt td:first-child { text-align: left; }
+  table.pt tr:hover td { background: #f5f7f9; }
+  table.pt tr.mode td:first-child::after { content: " ★"; color: var(--accent); }
+  table.pt tr.sel td { background: var(--sel-soft); }
+  table.pt tr.sel td:first-child { box-shadow: inset 3px 0 0 var(--sel); font-weight: 700; }
+  table.pt tr.zero td { color: #b8c0c8; }
+  .mini { display: inline-block; height: 7px; background: var(--bar); border-radius: 2px; vertical-align: middle; margin-right: 6px; }
+  tr.sel .mini { background: var(--sel); }
+
+  html.embedded body { background: transparent; }
+
+  @media (max-width: 1150px) { .results { grid-template-columns: 1fr; } }
+  @media (max-width: 760px) { .app { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+
+<header>
+  <h1 id="title"></h1>
+  <p id="desc"></p>
+</header>
+
+<div class="app">
+  <aside class="card controls">
+    <h2>Parameters</h2>
+    <div id="sliders"></div>
+    <h2>Formula</h2>
+    <div class="formula" id="formula"></div>
+    <div id="note"></div>
+    <h2>Distribution statistics</h2>
+    <table class="stats" id="stats"></table>
+  </aside>
+
+  <main class="results">
+    <section class="card">
+      <h3>P(X = k) for each value of k</h3>
+      <p class="sub">Bars = probability of each k · dashed line = mean μ · ★ = mode</p>
+      <div id="plot"></div>
+      <div class="detail" id="detail"></div>
+      <div class="hint">Click a bar or a table row to select k.</div>
+    </section>
+    <section class="card">
+      <h3>Probability table</h3>
+      <p class="sub" id="table_sub"></p>
+      <div class="tablewrap" id="tablewrap">
+        <table class="pt">
+          <thead><tr><th>k</th><th>P(X = k)</th><th>P(X ≤ k)</th><th>P(X ≥ k)</th></tr></thead>
+          <tbody id="tbody"></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+</div>
+
+<script>
+// ---------------- math ----------------
+const LG = [0.99999999999980993, 676.5203681218851, -1259.1392167224028, 771.32342877765313,
+  -176.61502916214059, 12.507343278686905, -0.13857109526572012, 9.9843695780195716e-6, 1.5056327351493116e-7];
+function lgamma(x) {
+  if (x < 0.5) return Math.log(Math.PI / Math.abs(Math.sin(Math.PI * x))) - lgamma(1 - x);
+  x -= 1;
+  let a = LG[0];
+  const t = x + 7.5;
+  for (let i = 1; i < 9; i++) a += LG[i] / (x + i);
+  return 0.5 * Math.log(2 * Math.PI) + (x + 0.5) * Math.log(t) - t + Math.log(a);
+}
+const lchoose = (n, k) => (k < 0 || k > n) ? -Infinity : lgamma(n + 1) - lgamma(k + 1) - lgamma(n - k + 1);
+const fmt2 = x => x.toFixed(2);
+
+// ---------------- distribution configs ----------------
+const DISTS = {
+  binomial: {
+    title: "Binomial Distribution",
+    desc: "Number of successes in n independent trials, each with the same probability of success p. Adjust n and p to see how P(X = k) changes.",
+    formula: "P(X = k) = C(n, k) · p<sup>k</sup> · (1 − p)<sup>n − k</sup>",
+    sliders: [
+      { id: "n", label: "Number of trials (n)", min: 1, max: 100, step: 1, value: 20, fmt: v => v },
+      { id: "p", label: "Probability of success (p)", min: 0.01, max: 0.99, step: 0.01, value: 0.5, fmt: v => v.toFixed(2),
+        chips: [0.1, 0.25, 0.5, 0.75, 0.9] }
+    ],
+    pmf(v) {
+      const { n, p } = v, out = [];
+      for (let k = 0; k <= n; k++) out.push(Math.exp(lchoose(n, k) + k * Math.log(p) + (n - k) * Math.log1p(-p)));
+      return { ks: [...Array(n + 1).keys()], probs: out, kmin: 0, kmax: n };
+    },
+    stats(v) {
+      const { n, p } = v;
+      return [["Mean (μ = n·p)", n * p], ["Variance (σ² = n·p·(1 − p))", n * p * (1 - p)], ["Standard deviation (σ)", Math.sqrt(n * p * (1 - p))]];
+    },
+    tableSub: v => `${v.n + 1} rows (k = 0 to ${v.n})`
+  },
+
+  hypergeometric: {
+    title: "Hypergeometric Distribution",
+    desc: "Number of successes when drawing a sample of size n without replacement from a finite population of N items, K of which are successes — e.g., cards from a deck or defective parts from a batch.",
+    formula: "P(X = k) = C(K, k) · C(N − K, n − k) / C(N, n)",
+    note: "Difference from the binomial: in the binomial each trial is independent (with replacement, or an infinite population). Here each draw changes what remains, so the probability of success is <b>not constant</b> across draws.",
+    sliders: [
+      { id: "N", label: "Population size (N)", min: 10, max: 200, step: 1, value: 50, fmt: v => v },
+      { id: "K", label: "Successes in the population (K)", min: 0, max: 50, step: 1, value: 20, fmt: v => v },
+      { id: "n", label: "Sample size (n)", min: 1, max: 50, step: 1, value: 15, fmt: v => v }
+    ],
+    constrain(v, set) {           // K and n cannot exceed N
+      set("K", { max: v.N }); set("n", { max: v.N });
+    },
+    pmf(v) {
+      const { N, K, n } = v;
+      const kmin = Math.max(0, n - (N - K)), kmax = Math.min(n, K);
+      const den = lchoose(N, n), out = [];
+      for (let k = 0; k <= n; k++) out.push(k < kmin || k > kmax ? 0 : Math.exp(lchoose(K, k) + lchoose(N - K, n - k) - den));
+      return { ks: [...Array(n + 1).keys()], probs: out, kmin, kmax };
+    },
+    stats(v) {
+      const { N, K, n } = v;
+      const varr = N > 1 ? n * (K / N) * (1 - K / N) * (N - n) / (N - 1) : 0;
+      return [["Mean (μ = n·K / N)", n * K / N], ["Variance", varr], ["Standard deviation (σ)", Math.sqrt(Math.max(0, varr))],
+              ["Finite population correction", N > 1 ? (N - n) / (N - 1) : 0]];
+    },
+    tableSub: (v, r) => `${v.n + 1} rows · possible values k = ${r.kmin} to ${r.kmax}`
+  },
+
+  poisson: {
+    title: "Poisson Distribution",
+    desc: "Number of events in a fixed interval when events occur independently at an average rate λ (lambda). Unlike the binomial, there is no maximum number of trials — only the expected frequency of events.",
+    formula: "P(X = k) = λ<sup>k</sup> · e<sup>−λ</sup> / k!",
+    sliders: [
+      { id: "lambda", label: "Average rate (λ)", min: 0.1, max: 30, step: 0.1, value: 5, fmt: v => v.toFixed(1),
+        chips: [0.5, 1, 4, 10, 20] }
+    ],
+    pmf(v) {
+      const l = v.lambda, out = [];
+      let cum = 0, k = 0;
+      // stop once the remaining upper tail is below 0.00001 (and k is past the mean)
+      while (k <= 200) {
+        const pk = Math.exp(k * Math.log(l) - l - lgamma(k + 1));
+        out.push(pk); cum += pk;
+        if (k >= Math.max(10, l) && 1 - cum < 1e-5) break;
+        k++;
+      }
+      return { ks: [...Array(out.length).keys()], probs: out, kmin: 0, kmax: out.length - 1, truncated: true };
+    },
+    stats(v) {
+      const l = v.lambda;
+      return [["Mean (μ = λ)", l], ["Variance (σ² = λ)", l], ["Standard deviation (σ = √λ)", Math.sqrt(l)]];
+    },
+    tableSub: (v, r) => `k = 0 to ${r.kmax} · the table stops when P(X > k) < 0.00001`
+  }
+};
+
+const DIST = DISTS["binomial"];
+const $ = id => document.getElementById(id);
+const state = { v: {}, sel: null };
+
+function fmtP(p) {
+  if (p === 0) return "0";
+  if (p < 5e-5) return p.toExponential(2);
+  if (p > 1 - 5e-5) return "1.0000";
+  return p.toFixed(4);
+}
+
+// ---------------- build controls ----------------
+document.title = DIST.title;
+$("title").textContent = DIST.title;
+$("desc").textContent = DIST.desc;
+$("formula").innerHTML = DIST.formula;
+if (DIST.note) $("note").innerHTML = `<div class="note">${DIST.note}</div>`;
+
+$("sliders").innerHTML = DIST.sliders.map(s => `
+  <div class="field">
+    <label for="s_${s.id}">${s.label} <output id="o_${s.id}"></output></label>
+    <input type="range" id="s_${s.id}" min="${s.min}" max="${s.max}" step="${s.step}" value="${s.value}">
+    <div class="ticks"><span id="tmin_${s.id}">${s.min}</span><span id="tmax_${s.id}">${s.max}</span></div>
+    ${s.chips ? `<div class="chips">${s.chips.map(c => `<button type="button" data-s="${s.id}" data-v="${c}">${c}</button>`).join("")}</div>` : ""}
+  </div>`).join("");
+
+function setSlider(id, opts) {
+  const el = $("s_" + id);
+  if (opts.max !== undefined) {
+    el.max = opts.max; $("tmax_" + id).textContent = opts.max;
+    if (+el.value > opts.max) el.value = opts.max;
+  }
+}
+function readValues() {
+  const v = {};
+  DIST.sliders.forEach(s => v[s.id] = parseFloat($("s_" + s.id).value));
+  if (DIST.constrain) {
+    DIST.constrain(v, setSlider);
+    DIST.sliders.forEach(s => v[s.id] = parseFloat($("s_" + s.id).value));
+  }
+  DIST.sliders.forEach(s => $("o_" + s.id).textContent = s.fmt(v[s.id]));
+  return v;
+}
+DIST.sliders.forEach(s => $("s_" + s.id).addEventListener("input", update));
+document.querySelectorAll(".chips button").forEach(b => b.addEventListener("click", () => {
+  $("s_" + b.dataset.s).value = b.dataset.v; update();
+}));
+
+// ---------------- main ----------------
+let R = null;
+function update() {
+  state.v = readValues();
+  const r = DIST.pmf(state.v);
+  const n = r.probs.length;
+  // cumulative probabilities (upper tail summed from the right for accuracy)
+  r.cdf = new Array(n); r.sf = new Array(n);
+  let c = 0; for (let i = 0; i < n; i++) { c += r.probs[i]; r.cdf[i] = Math.min(1, c); }
+  let s = 0; for (let i = n - 1; i >= 0; i--) { s += r.probs[i]; r.sf[i] = Math.min(1, s); }
+  if (r.truncated) {           // Poisson: add the (tiny) mass beyond the last k to P(X ≥ k)
+    const rest = Math.max(0, 1 - c);
+    for (let i = 0; i < n; i++) r.sf[i] = Math.min(1, r.sf[i] + rest);
+  }
+  const pmax = Math.max(...r.probs);
+  r.mode = r.probs.indexOf(pmax);
+  r.modes = r.ks.filter((k, i) => Math.abs(r.probs[i] - pmax) <= 1e-9 * pmax);   // ties (e.g. Poisson with integer λ)
+  r.mean = DIST.stats(state.v)[0][1];
+  R = r;
+  state.sel = r.mode;          // parameters changed: select the mode again
+  renderStats(); renderPlot(); renderTable(true); renderDetail();
+}
+
+function renderStats() {
+  const rows = DIST.stats(state.v).map(([k, v]) => `<tr><td>${k}</td><td>${fmt2(v)}</td></tr>`);
+  rows.push(`<tr><td>Mode (most likely k)</td><td>k = ${R.modes.join(" and ")}</td></tr>`);
+  rows.push(`<tr><td>P(mode)</td><td>${fmtP(R.probs[R.mode])}</td></tr>`);
+  $("stats").innerHTML = rows.join("");
+}
+
+function renderPlot() {
+  const colors = R.ks.map(k => k === state.sel ? getCss("--sel") : getCss("--bar"));
+  const ymax = Math.max(...R.probs) * 1.18;
+  const traces = [{
+    type: "bar", x: R.ks, y: R.probs, marker: { color: colors, line: { color: "#fff", width: R.ks.length > 60 ? 0 : 0.5 } },
+    hovertemplate: "k = %{x}<br>P(X = k) = %{y:.4f}<extra></extra>", showlegend: false
+  }];
+  const shapes = [{ type: "line", x0: R.mean, x1: R.mean, y0: 0, y1: ymax, line: { color: getCss("--mean"), width: 2, dash: "dash" } }];
+  const ann = [{ x: R.mean, y: ymax, yanchor: "bottom", text: `μ = ${R.mean.toFixed(2)}`, showarrow: false,
+    font: { color: getCss("--mean"), size: 11 } }];
+  R.modes.forEach(m => ann.push({ x: m, y: R.probs[m], yanchor: "bottom", text: "★", showarrow: false, font: { color: getCss("--accent"), size: 13 } }));
+  const layout = {
+    margin: { l: 50, r: 10, t: 18, b: 38 },
+    font: { family: "system-ui, -apple-system, Segoe UI, Roboto, sans-serif", size: 11, color: "#1f2933" },
+    paper_bgcolor: "#fff", plot_bgcolor: "#fff", bargap: R.ks.length > 60 ? 0.05 : 0.15,
+    xaxis: { title: { text: "k", standoff: 4 }, gridcolor: "#eef0f2", zeroline: false, range: [-0.6, R.ks.length - 0.4] },
+    yaxis: { title: { text: "P(X = k)", standoff: 4 }, gridcolor: "#eef0f2", zeroline: false, range: [0, ymax * 1.06] },
+    shapes, annotations: ann, hovermode: "closest"
+  };
+  const el = $("plot");
+  Plotly.react(el, traces, layout, { displayModeBar: false, responsive: true });
+  if (!el._clickBound) {
+    el.on("plotly_click", ev => { if (ev.points && ev.points.length) select(ev.points[0].x); });
+    el._clickBound = true;
+  }
+}
+function getCss(name) { return getComputedStyle(document.documentElement).getPropertyValue(name).trim(); }
+
+function renderTable(scroll) {
+  const maxP = Math.max(...R.probs) || 1;
+  const rows = R.ks.map((k, i) => {
+    const p = R.probs[i];
+    const cls = [R.modes.includes(k) ? "mode" : "", k === state.sel ? "sel" : "", (k < R.kmin || k > R.kmax) ? "zero" : ""].join(" ").trim();
+    return `<tr class="${cls}" data-k="${k}"><td>k = ${k}</td>` +
+      `<td><span class="mini" style="width:${(p / maxP * 36).toFixed(1)}px"></span>${fmtP(p)}</td>` +
+      `<td>${fmtP(R.cdf[i])}</td><td>${fmtP(R.sf[i])}</td></tr>`;
+  });
+  $("tbody").innerHTML = rows.join("");
+  $("tbody").querySelectorAll("tr").forEach(tr => tr.addEventListener("click", () => select(+tr.dataset.k, false)));
+  $("table_sub").textContent = DIST.tableSub(state.v, R);
+  if (scroll) scrollToSel();
+}
+function scrollToSel() {
+  const wrap = $("tablewrap"), row = wrap.querySelector("tr.sel");
+  if (!row) return;
+  const top = row.offsetTop - wrap.clientHeight / 2 + row.clientHeight / 2;
+  wrap.scrollTop = Math.max(0, top);     // scrolls only the table, never the page
+}
+
+function renderDetail() {
+  const k = state.sel, i = R.ks.indexOf(k);
+  if (i < 0) { $("detail").textContent = ""; return; }
+  $("detail").innerHTML = `<span class="tag">k = ${k}</span>` +
+    `P(X = ${k}) = <b>${fmtP(R.probs[i])}</b> &nbsp;·&nbsp; P(X ≤ ${k}) = <b>${fmtP(R.cdf[i])}</b> &nbsp;·&nbsp; P(X ≥ ${k}) = <b>${fmtP(R.sf[i])}</b>`;
+}
+
+function select(k, scroll = true) {
+  state.sel = k;
+  renderPlot(); renderTable(scroll); renderDetail();
+}
+
+// ---------------- embedding: report height to the parent page ----------------
+if (window.self !== window.top) {
+  document.documentElement.classList.add("embedded");
+  let lastH = 0;
+  const reportHeight = () => {
+    const h = Math.ceil(document.body.getBoundingClientRect().height);
+    if (h > 0 && h !== lastH) { lastH = h; window.parent.postMessage({ type: "app-height", height: h }, "*"); }
+  };
+  new ResizeObserver(reportHeight).observe(document.body);
+  window.addEventListener("load", () => { reportHeight(); setTimeout(reportHeight, 500); setTimeout(reportHeight, 1500); });
+}
+
+window.addEventListener("load", update);
+</script>
+</body>
+</html>
