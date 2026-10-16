@@ -19,7 +19,11 @@
   header h1 { margin: 0; font-size: 18px; font-weight: 650; }
   header p { margin: 2px 0 0; color: var(--muted); font-size: 12px; max-width: 1000px; }
 
-  .app { display: grid; grid-template-columns: 260px minmax(0, 1.45fr) minmax(0, 1fr); gap: 12px; padding: 6px 16px 16px; align-items: start; }
+  .app { display: grid; grid-template-columns: 260px minmax(0, 1fr) 290px; gap: 12px; padding: 6px 16px 16px; align-items: start; }
+  .headrow { display: flex; gap: 12px; align-items: flex-start; justify-content: space-between; }
+  .zoombox { width: 190px; flex: none; font-size: 12px; }
+  .zoombox label { display: block; font-weight: 550; margin-bottom: 2px; }
+  .zoombox output { float: right; font-weight: 650; color: var(--accent); font-variant-numeric: tabular-nums; }
   .col { display: grid; gap: 10px; min-width: 0; }
   .card { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 8px 10px; min-width: 0; }
   .card h3 { margin: 0 0 1px; font-size: 13px; font-weight: 650; }
@@ -51,8 +55,7 @@
 
   /* ---------- plots ---------- */
   #plot_pop { height: 190px; }
-  #plot_samp { height: 230px; }
-  #plot_ci { height: 105px; }
+  #plot_samp { height: 330px; }
   #plot_many { height: 330px; }
   .verdict { margin-top: 4px; padding: 6px 9px; border-radius: 8px; font-size: 12.5px; }
   .verdict.hit { background: var(--hit-soft); color: #1b5e2a; }
@@ -80,8 +83,8 @@
   .cover .h b { color: var(--hit); } .cover .m b { color: var(--miss); }
 
   html.embedded body { background: transparent; }
-  @media (max-width: 1250px) { .app { grid-template-columns: 260px minmax(0, 1fr); } .col.right { grid-column: 2; } }
-  @media (max-width: 760px) { .app { grid-template-columns: 1fr; } .col.right { grid-column: auto; } }
+  @media (max-width: 1150px) { .app { grid-template-columns: 260px minmax(0, 1fr); } .col.right { grid-column: 2; } }
+  @media (max-width: 760px) { .app { grid-template-columns: 1fr; } .col.right { grid-column: auto; } .headrow { flex-direction: column; } .zoombox { width: 100%; } }
 </style>
 </head>
 <body>
@@ -103,9 +106,13 @@
         <option value="exp">Exponential (right-skewed)</option>
       </select>
     </div>
-    <div class="cols2">
-      <div class="field"><label for="mu">Mean (μ)</label><input type="number" id="mu" value="50" step="1"></div>
-      <div class="field"><label for="sigma">Std. dev. (σ)</label><input type="number" id="sigma" value="10" min="0.1" step="1"></div>
+    <div class="field">
+      <label for="mu">Mean (μ) <output id="mu_out">50</output></label>
+      <input type="range" id="mu" min="0" max="100" step="1" value="50">
+    </div>
+    <div class="field">
+      <label for="sigma">Std. dev. (σ) <output id="sigma_out">10</output></label>
+      <input type="range" id="sigma" min="1" max="30" step="0.5" value="10">
     </div>
 
     <h2>Sample</h2>
@@ -140,39 +147,33 @@
       <button class="b" id="draw100">+100</button>
       <button class="b" id="clear">Clear</button>
     </div>
-    <label class="check"><input type="checkbox" id="zoom"> Zoom plots 2–3 around μ</label>
-    <p class="help">Changing the confidence level or the method recolors the samples already drawn. Changing the population or n starts over.</p>
+    <p class="help">Changing the confidence level or the method recolors the samples already drawn. Changing the population, μ, σ or n starts over.</p>
   </aside>
 
   <!-- ======================= MIDDLE: stacked plots ======================= -->
   <div class="col">
     <section class="card">
-      <h3>1. Population</h3>
-      <p class="sub" id="pop_sub"></p>
+      <div class="headrow">
+        <div>
+          <h3>1. Population</h3>
+          <p class="sub" id="pop_sub"></p>
+        </div>
+        <div class="zoombox">
+          <label for="zoom">Zoom x-axis (plots 1–2, around 50) <output id="zoom_out">1×</output></label>
+          <input type="range" id="zoom" min="1" max="12" step="0.1" value="1">
+        </div>
+      </div>
       <div id="plot_pop"></div>
     </section>
     <section class="card">
-      <h3>2. Sampling distribution of x̄</h3>
+      <h3>2. Sampling distribution of x̄ and the confidence interval</h3>
       <p class="sub" id="samp_sub"></p>
       <div id="plot_samp"></div>
+      <div class="verdict none" id="verdict">Draw a sample to build an interval.</div>
       <div class="rule" id="rule"></div>
     </section>
     <section class="card">
-      <h3>3. The confidence interval of this sample</h3>
-      <div id="plot_ci"></div>
-      <div class="verdict none" id="verdict">Draw a sample to build an interval.</div>
-    </section>
-  </div>
-
-  <!-- ======================= RIGHT: steps + many intervals ======================= -->
-  <div class="col right">
-    <section class="card">
-      <h3>4. Step by step (last sample)</h3>
-      <ol class="steps" id="steps"></ol>
-      <div class="interp" id="interp"></div>
-    </section>
-    <section class="card">
-      <h3>5. Many intervals</h3>
+      <h3>3. Many intervals</h3>
       <p class="sub">The last 50 intervals · vertical line = μ · red = missed μ</p>
       <div id="plot_many"></div>
       <div class="cover">
@@ -180,6 +181,15 @@
         <div class="m"><b id="c_miss">0</b><span>miss μ</span></div>
         <div><b id="c_pct">—</b><span id="c_exp">expected 95%</span></div>
       </div>
+    </section>
+  </div>
+
+  <!-- ======================= RIGHT: step-by-step report ======================= -->
+  <div class="col right">
+    <section class="card">
+      <h3>4. Step by step (last sample)</h3>
+      <ol class="steps" id="steps"></ol>
+      <div class="interp" id="interp"></div>
     </section>
   </div>
 </div>
@@ -258,20 +268,23 @@ const $ = id => document.getElementById(id);
 const C = { pop: "#9ecae1", center: "#c6dbef", tail: "#fb6a4a", hit: "#2b8a3e", miss: "#d62728", xbar: "#fd8d3c", mu: "#08519c" };
 const FONT = { family: "system-ui, -apple-system, Segoe UI, Roboto, sans-serif", size: 11, color: "#1f2933" };
 const CFG = { displayModeBar: false, responsive: true };
+// plots 1 and 2 use identical margins and x-range, so μ sits at the same horizontal position in both
+const PLOT_MARGIN = { l: 82, r: 12, t: 6, b: 30 };
 const S = { conf: 95, method: "z", samples: [], last: null };
 
 // ---------------- inputs ----------------
 function inputs() {
   return { pop: $("pop").value, mu: parseFloat($("mu").value), sigma: parseFloat($("sigma").value),
-           n: +$("n").value, conf: +$("conf").value, method: S.method, zoom: $("zoom").checked };
+           n: +$("n").value, conf: +$("conf").value, method: S.method, zoom: parseFloat($("zoom").value) };
 }
 function setSeg(id, v) { document.querySelectorAll(`#${id} button`).forEach(b => b.setAttribute("aria-pressed", String(b.dataset.v === v))); }
 
 document.querySelectorAll("#seg_conf button").forEach(b => b.addEventListener("click", () => { $("conf").value = b.dataset.v; render(); }));
 document.querySelectorAll("#seg_method button").forEach(b => b.addEventListener("click", () => { S.method = b.dataset.v; setSeg("seg_method", S.method); render(); }));
 $("conf").addEventListener("input", render);
-$("zoom").addEventListener("change", render);
-["pop", "mu", "sigma"].forEach(id => $(id).addEventListener("change", () => { clearAll(); render(); }));
+$("zoom").addEventListener("input", render);
+$("pop").addEventListener("change", () => { clearAll(); render(); });
+["mu", "sigma"].forEach(id => $(id).addEventListener("input", () => { clearAll(); render(); }));
 $("n").addEventListener("input", () => { $("n_out").textContent = $("n").value; clearAll(); render(); });
 $("draw1").addEventListener("click", () => { draw(1); render(); });
 $("draw20").addEventListener("click", () => { draw(20); render(); });
@@ -291,6 +304,8 @@ function popDensity(I, x) {
   if (I.pop === "unif") { const h = I.sigma * Math.sqrt(3); return Math.abs(x - I.mu) <= h ? 1 / (2 * h) : 0; }
   const lo = I.mu - I.sigma; return x < lo ? 0 : Math.exp(-(x - lo) / I.sigma) / I.sigma;
 }
+// Fixed x-axis: it does not follow μ or σ, so the distributions visibly move and stretch
+const AXIS = [-20, 120], AXIS_CENTER = 50;
 function popRange(I) {
   if (I.pop === "exp") return [I.mu - 1.6 * I.sigma, I.mu + 5 * I.sigma];
   return [I.mu - 4 * I.sigma, I.mu + 4 * I.sigma];
@@ -349,14 +364,16 @@ function render() {
   const ints = S.samples.map(s => ({ ...s, ...interval(s, I, crit) }));
   const last = S.last ? { ...S.last, ...interval(S.last, I, crit) } : null;
 
-  // shared x range for plots 1–3 (or zoom around μ for plots 2–3)
-  const [px0, px1] = popRange(I);
-  const zr = I.zoom ? [I.mu - 4.5 * seSig, I.mu + 4.5 * seSig] : [px0, px1];
-  if (I.zoom && last) { zr[0] = Math.min(zr[0], last.lo - seSig * 0.3); zr[1] = Math.max(zr[1], last.hi + seSig * 0.3); }
+  // plots 1 and 2 share one fixed x-axis; the zoom slider stretches both around the axis center
+  const [px0, px1] = AXIS;
+  const zr = [AXIS_CENTER - (AXIS_CENTER - px0) / I.zoom, AXIS_CENTER + (px1 - AXIS_CENTER) / I.zoom];
+  $("mu_out").textContent = f(I.mu, 0);
+  $("sigma_out").textContent = I.sigma % 1 ? I.sigma.toFixed(1) : I.sigma.toFixed(0);
+  $("zoom_out").textContent = I.zoom.toFixed(1).replace(/\.0$/, "") + "×";
 
-  renderPop(I, px0, px1, last);
+  renderPop(I, px0, px1, last, zr);
   renderSamp(I, zr, seSig, meRef, ints, last, alpha);
-  renderCI(I, zr, last);
+  renderVerdict(I, last);
   renderSteps(I, last, crit, zc, alpha, df);
   renderMany(I, ints, seSig, crit);
 }
@@ -370,13 +387,15 @@ function baseLayout(xr, extra) {
 }
 function seq(a, b, n) { const r = []; for (let i = 0; i < n; i++) r.push(a + (b - a) * i / (n - 1)); return r; }
 
-function renderPop(I, x0, x1, last) {
+function renderPop(I, x0, x1, last, xr) {
   const names = { norm: "Normal", unif: "Uniform", exp: "Exponential (right-skewed)" };
   $("pop_sub").innerHTML = `${names[I.pop]} with μ = ${f(I.mu)} and σ = ${f(I.sigma)}` + (last ? ` · dots = the ${I.n} values of the last sample` : "");
   const xs = I.pop === "unif" ? [x0, I.mu - I.sigma * Math.sqrt(3) - 1e-9, I.mu - I.sigma * Math.sqrt(3), I.mu + I.sigma * Math.sqrt(3), I.mu + I.sigma * Math.sqrt(3) + 1e-9, x1]
-           : seq(x0, x1, 400);
+           : I.pop === "exp" ? [...seq(x0, x1, 800), I.mu - I.sigma - 1e-9, I.mu - I.sigma].sort((a, b) => a - b)
+           : seq(x0, x1, 800);
   const ys = xs.map(x => popDensity(I, x));
-  const ymax = Math.max(...ys) * 1.25;
+  // fixed y-scale (sized for σ ≈ 8), so a smaller σ gives a taller curve and a larger σ a flatter one
+  const ymax = Math.max(Math.max(...ys), dnorm(0, 0, 8)) * 1.25;
   const tr = [{ type: "scatter", mode: "lines", x: xs, y: ys, fill: "tozeroy", fillcolor: "rgba(158,202,225,0.6)", line: { color: "#6baed6", width: 1.5 }, hoverinfo: "skip" }];
   if (last) {
     const jitter = last.vals.map((_, i) => ymax * (0.04 + 0.1 * ((i * 0.618) % 1)));
@@ -388,74 +407,82 @@ function renderPop(I, x0, x1, last) {
     shapes.push({ type: "line", x0: last.xbar, x1: last.xbar, y0: 0, y1: ymax * 0.75, line: { color: C.xbar, width: 2, dash: "dot" } });
     ann.push({ x: last.xbar, y: ymax * 0.75, yanchor: "bottom", text: `x̄ = ${f(last.xbar)}`, showarrow: false, font: { color: "#c4540d" } });
   }
-  Plotly.react($("plot_pop"), tr, baseLayout([x0, x1], { yaxis: { range: [0, ymax], showticklabels: false, gridcolor: "#eef0f2", zeroline: false, title: { text: "density", standoff: 2 } }, shapes, annotations: ann }), CFG);
+  Plotly.react($("plot_pop"), tr, baseLayout(xr, {
+    margin: PLOT_MARGIN,
+    yaxis: { range: [0, ymax], gridcolor: "#eef0f2", zeroline: false, showgrid: false,
+             tickvals: [ymax * 0.5], ticktext: ["population"], tickfont: { size: 10.5, color: "#5f6b7a" } },
+    shapes, annotations: ann }), CFG);
 }
 
+// Plot 2: sampling distribution (top) + earlier means (ticks) + this sample's interval (bottom),
+// all on the same x-axis, so μ and μ ± ME run through both parts
 function renderSamp(I, xr, se, me, ints, last, alpha) {
-  const xs = seq(xr[0], xr[1], 600);
+  const xs = seq(xr[0], xr[1], 700);
   const dens = x => dnorm(x, I.mu, se);
   const peak = dens(I.mu), ymax = peak * 1.3;
   const lo = I.mu - me, hi = I.mu + me;
+  const yTick = -0.08 * ymax, yCI = -0.32 * ymax, yBottom = -0.5 * ymax;
+  const clampX = x => Math.min(xr[1] - (xr[1] - xr[0]) * 0.03, Math.max(xr[0] + (xr[1] - xr[0]) * 0.03, x));
   const piece = (a, b) => { const p = seq(Math.max(a, xr[0]), Math.min(b, xr[1]), 200); return { x: [p[0], ...p, p[p.length - 1]], y: [0, ...p.map(dens), 0] }; };
   const tr = [];
-  const cen = piece(lo, hi), lt = piece(xr[0], lo), rt = piece(hi, xr[1]);
-  tr.push({ type: "scatter", mode: "lines", ...cen, fill: "toself", fillcolor: "rgba(107,174,214,0.45)", line: { width: 0 }, hoverinfo: "skip" });
-  if (lo > xr[0]) tr.push({ type: "scatter", mode: "lines", ...lt, fill: "toself", fillcolor: "rgba(251,106,74,0.75)", line: { width: 0 }, hoverinfo: "skip" });
-  if (hi < xr[1]) tr.push({ type: "scatter", mode: "lines", ...rt, fill: "toself", fillcolor: "rgba(251,106,74,0.75)", line: { width: 0 }, hoverinfo: "skip" });
+  if (hi > xr[0] && lo < xr[1]) tr.push({ type: "scatter", mode: "lines", ...piece(lo, hi), fill: "toself", fillcolor: "rgba(107,174,214,0.45)", line: { width: 0 }, hoverinfo: "skip" });
+  if (lo > xr[0]) tr.push({ type: "scatter", mode: "lines", ...piece(xr[0], lo), fill: "toself", fillcolor: "rgba(251,106,74,0.75)", line: { width: 0 }, hoverinfo: "skip" });
+  if (hi < xr[1]) tr.push({ type: "scatter", mode: "lines", ...piece(hi, xr[1]), fill: "toself", fillcolor: "rgba(251,106,74,0.75)", line: { width: 0 }, hoverinfo: "skip" });
   tr.push({ type: "scatter", mode: "lines", x: xs, y: xs.map(dens), line: { color: "#2171b5", width: 2 }, hovertemplate: "x̄ = %{x:.2f}<extra></extra>" });
 
-  // previous sample means as ticks under the axis (green = interval hit μ, red = missed)
+  // earlier sample means as ticks just under the axis (green = interval hit μ, red = missed)
   const recent = ints.slice(-200);
   const hitX = recent.filter(s => s.hit).map(s => s.xbar), missX = recent.filter(s => !s.hit).map(s => s.xbar);
-  const tickY = -ymax * 0.07;
-  if (hitX.length) tr.push({ type: "scatter", mode: "markers", x: hitX, y: hitX.map(() => tickY), marker: { symbol: "line-ns-open", size: 10, color: C.hit, line: { width: 1.5 } }, hovertemplate: "x̄ = %{x:.2f}<extra>interval contains μ</extra>" });
-  if (missX.length) tr.push({ type: "scatter", mode: "markers", x: missX, y: missX.map(() => tickY), marker: { symbol: "line-ns-open", size: 12, color: C.miss, line: { width: 2 } }, hovertemplate: "x̄ = %{x:.2f}<extra>interval misses μ</extra>" });
-  if (last) tr.push({ type: "scatter", mode: "markers", x: [last.xbar], y: [dens(last.xbar)], marker: { size: 13, color: last.hit ? C.hit : C.miss, line: { color: "#fff", width: 2 } }, hovertemplate: "this x̄ = %{x:.2f}<extra></extra>" });
+  if (hitX.length) tr.push({ type: "scatter", mode: "markers", x: hitX, y: hitX.map(() => yTick), marker: { symbol: "line-ns-open", size: 10, color: C.hit, line: { width: 1.5 } }, hovertemplate: "x̄ = %{x:.2f}<extra>interval contains μ</extra>" });
+  if (missX.length) tr.push({ type: "scatter", mode: "markers", x: missX, y: missX.map(() => yTick), marker: { symbol: "line-ns-open", size: 12, color: C.miss, line: { width: 2 } }, hovertemplate: "x̄ = %{x:.2f}<extra>interval misses μ</extra>" });
 
   const shapes = [
-    { type: "line", x0: I.mu, x1: I.mu, y0: 0, y1: ymax, line: { color: C.mu, width: 2 } },
-    { type: "line", x0: lo, x1: lo, y0: 0, y1: dens(lo) + peak * 0.25, line: { color: "#a1251f", width: 1.5, dash: "dash" } },
-    { type: "line", x0: hi, x1: hi, y0: 0, y1: dens(hi) + peak * 0.25, line: { color: "#a1251f", width: 1.5, dash: "dash" } }
+    { type: "rect", xref: "paper", x0: 0, x1: 1, y0: yBottom, y1: -0.18 * ymax, fillcolor: "#f7f9fb", line: { width: 0 }, layer: "below" },
+    { type: "line", x0: I.mu, x1: I.mu, y0: yBottom, y1: ymax, line: { color: C.mu, width: 2 } },
+    { type: "line", x0: lo, x1: lo, y0: yBottom, y1: dens(lo) + peak * 0.25, line: { color: "#a1251f", width: 1.2, dash: "dash" } },
+    { type: "line", x0: hi, x1: hi, y0: yBottom, y1: dens(hi) + peak * 0.25, line: { color: "#a1251f", width: 1.2, dash: "dash" } }
   ];
-  if (last) shapes.push({ type: "line", x0: last.xbar, x1: last.xbar, y0: tickY, y1: dens(last.xbar), line: { color: last.hit ? C.hit : C.miss, width: 2, dash: "dot" } });
+  const lvl = (100 - alpha * 100).toFixed(1).replace(/\.0$/, "");
   const a2 = (alpha / 2 * 100).toFixed(alpha * 100 < 1 ? 2 : 1).replace(/\.0$/, "");
-  const sym = I.method === "z" ? "z*" : "t*";
   const ann = [
-    { x: I.mu, y: peak * 0.42, text: `<b>${(100 - alpha * 100).toFixed(1).replace(/\.0$/, "")}%</b><br>central area`, showarrow: false, font: { size: 11, color: "#08306b" } },
+    { x: I.mu, y: ymax, yanchor: "top", xanchor: "left", text: ` μ = ${f(I.mu)}`, showarrow: false, font: { color: C.mu } },
+    { x: I.mu, y: peak * 0.42, text: `<b>${lvl}%</b><br>central area`, showarrow: false, font: { size: 11, color: "#08306b" } },
     { x: lo, y: dens(lo) + peak * 0.25, yanchor: "bottom", text: `μ − ME<br>${f(lo)}`, showarrow: false, font: { size: 10, color: "#a1251f" } },
-    { x: hi, y: dens(hi) + peak * 0.25, yanchor: "bottom", text: `μ + ME<br>${f(hi)}`, showarrow: false, font: { size: 10, color: "#a1251f" } },
-    { x: (Math.max(xr[0], lo - 3 * se) + lo) / 2 - (lo - xr[0] > 4 * se ? 0 : 0), y: peak * 0.12, xanchor: "right", text: `α/2 = ${a2}%`, showarrow: false, font: { size: 11, color: "#a1251f" } },
-    { x: hi + Math.min(1.2 * se, (xr[1] - hi) / 2), y: peak * 0.12, xanchor: "left", text: `α/2 = ${a2}%`, showarrow: false, font: { size: 11, color: "#a1251f" } }
+    { x: hi, y: dens(hi) + peak * 0.25, yanchor: "bottom", text: `μ + ME<br>${f(hi)}`, showarrow: false, font: { size: 10, color: "#a1251f" } }
   ];
-  ann[3].x = lo - Math.min(1.2 * se, (lo - xr[0]) / 2);
+  if (lo > xr[0]) ann.push({ x: lo - Math.min(1.2 * se, (lo - xr[0]) / 2), y: peak * 0.12, xanchor: "right", text: `α/2 = ${a2}%`, showarrow: false, font: { size: 11, color: "#a1251f" } });
+  if (hi < xr[1]) ann.push({ x: hi + Math.min(1.2 * se, (xr[1] - hi) / 2), y: peak * 0.12, xanchor: "left", text: `α/2 = ${a2}%`, showarrow: false, font: { size: 11, color: "#a1251f" } });
+
+  if (last) {
+    const col = last.hit ? C.hit : C.miss;
+    // x̄ on the curve, dropping down to the interval row
+    tr.push({ type: "scatter", mode: "markers", x: [last.xbar], y: [dens(last.xbar)], marker: { size: 13, color: col, line: { color: "#fff", width: 2 } }, hovertemplate: "this x̄ = %{x:.2f}<extra></extra>" });
+    shapes.push({ type: "line", x0: last.xbar, x1: last.xbar, y0: yCI, y1: dens(last.xbar), line: { color: col, width: 1.5, dash: "dot" } });
+    // the interval x̄ ± ME
+    tr.push({ type: "scatter", mode: "lines", x: [last.lo, last.hi], y: [yCI, yCI], line: { color: col, width: 7 }, hoverinfo: "skip" });
+    tr.push({ type: "scatter", mode: "markers", x: [last.lo, last.hi], y: [yCI, yCI], marker: { symbol: "line-ns-open", size: 22, color: col, line: { width: 3 } }, hovertemplate: "%{x:.2f}<extra>interval limit</extra>" });
+    tr.push({ type: "scatter", mode: "markers", x: [last.xbar], y: [yCI], marker: { size: 12, color: C.xbar, line: { color: "#fff", width: 2 } }, hovertemplate: "x̄ = %{x:.2f}<extra></extra>" });
+    ann.push({ x: clampX(last.lo), y: yCI - 0.05 * ymax, yanchor: "top", text: f(last.lo), showarrow: false, font: { color: col } });
+    ann.push({ x: clampX(last.hi), y: yCI - 0.05 * ymax, yanchor: "top", text: f(last.hi), showarrow: false, font: { color: col } });
+    ann.push({ x: clampX((last.lo + last.xbar) / 2), y: yCI + 0.035 * ymax, yanchor: "bottom", text: `ME ${f(last.me)}`, showarrow: false, font: { size: 10, color: "#5f6b7a" } });
+    ann.push({ x: clampX((last.xbar + last.hi) / 2), y: yCI + 0.035 * ymax, yanchor: "bottom", text: `ME ${f(last.me)}`, showarrow: false, font: { size: 10, color: "#5f6b7a" } });
+  }
+
   Plotly.react($("plot_samp"), tr, baseLayout(xr, {
-    yaxis: { range: [tickY * 1.9, ymax], showticklabels: false, gridcolor: "#eef0f2", zeroline: false, title: { text: "density", standoff: 2 } },
+    margin: PLOT_MARGIN,
+    yaxis: { range: [yBottom, ymax], gridcolor: "#eef0f2", zeroline: true, zerolinecolor: "#9aa5b1",
+             tickvals: [ymax * 0.5, yTick, yCI], ticktext: ["density of x̄", "earlier x̄", "this interval"], tickfont: { size: 10.5, color: "#5f6b7a" }, showgrid: false },
     shapes, annotations: ann }), CFG);
 
   $("samp_sub").innerHTML = I.method === "z"
-    ? `x̄ ~ N(μ, σ/√n) with SE = ${f(se, 3)} · blue = central ${(100 - alpha * 100).toFixed(1).replace(/\.0$/, "")}% · red = the two tails of α/2 · ticks = means of earlier samples`
-    : `Shaded with the reference margin t*·σ/√n = ${f(me, 3)} · each sample uses its own s, so the exact cut moves a little per sample · ticks = earlier means`;
+    ? `Top: x̄ ~ N(μ, σ/√n), SE = ${f(se, 3)} · blue = central ${lvl}% · red = the two α/2 tails. Bottom: this sample's interval x̄ ± ME on the same axis.`
+    : `Top: shaded with the reference margin t*·σ/√n = ${f(me, 3)} (each sample uses its own s). Bottom: this sample's interval x̄ ± t*·s/√n.`;
   $("rule").innerHTML = I.method === "z"
-    ? `<b>The rule:</b> the interval contains μ ⇔ |x̄ − μ| ≤ ME ⇔ x̄ lands in the blue area between ${f(lo)} and ${f(hi)}. It misses μ only when x̄ falls in a red tail — which happens with probability α.`
-    : `<b>The rule:</b> the interval contains μ ⇔ |x̄ − μ| ≤ t*·s/√n. With σ unknown the cut-off depends on each sample's s, so the red tails here are a reference drawn with σ.`;
+    ? `<b>The rule:</b> the interval contains μ ⇔ |x̄ − μ| ≤ ME ⇔ x̄ lands in the blue area between the dashed lines (${f(lo)} to ${f(hi)}). Follow the dashed lines down: the interval reaches the blue μ line only while x̄ is between them. It misses μ only when x̄ falls in a red tail — probability α.`
+    : `<b>The rule:</b> the interval contains μ ⇔ |x̄ − μ| ≤ t*·s/√n. With σ unknown the cut-off depends on each sample's s, so the dashed lines and red tails are a reference drawn with σ.`;
 }
 
-function renderCI(I, xr, last) {
-  const tr = [], shapes = [{ type: "line", x0: I.mu, x1: I.mu, y0: -1, y1: 1, line: { color: C.mu, width: 2 } }];
-  const ann = [{ x: I.mu, y: 1, yanchor: "top", xanchor: "left", text: ` μ`, showarrow: false, font: { color: C.mu } }];
-  if (last) {
-    const col = last.hit ? C.hit : C.miss;
-    tr.push({ type: "scatter", mode: "lines", x: [last.lo, last.hi], y: [0, 0], line: { color: col, width: 6 }, hoverinfo: "skip" });
-    tr.push({ type: "scatter", mode: "markers", x: [last.lo, last.hi], y: [0, 0], marker: { symbol: "line-ns-open", size: 22, color: col, line: { width: 3 } }, hovertemplate: "%{x:.2f}<extra></extra>" });
-    tr.push({ type: "scatter", mode: "markers", x: [last.xbar], y: [0], marker: { size: 12, color: C.xbar, line: { color: "#fff", width: 2 } }, hovertemplate: "x̄ = %{x:.2f}<extra></extra>" });
-    ann.push({ x: last.lo, y: -0.35, yanchor: "top", text: f(last.lo), showarrow: false, font: { color: col } });
-    ann.push({ x: last.hi, y: -0.35, yanchor: "top", text: f(last.hi), showarrow: false, font: { color: col } });
-    ann.push({ x: (last.xbar + last.hi) / 2, y: 0.25, yanchor: "bottom", text: `ME = ${f(last.me)}`, showarrow: false, font: { size: 10.5, color: "#5f6b7a" } });
-    ann.push({ x: (last.lo + last.xbar) / 2, y: 0.25, yanchor: "bottom", text: `ME = ${f(last.me)}`, showarrow: false, font: { size: 10.5, color: "#5f6b7a" } });
-    ann.push({ x: last.xbar, y: -0.35, yanchor: "top", text: `x̄ ${f(last.xbar)}`, showarrow: false, font: { color: "#c4540d", size: 10.5 } });
-  }
-  Plotly.react($("plot_ci"), tr, baseLayout(xr, { margin: { l: 46, r: 12, t: 4, b: 22 }, yaxis: { range: [-1, 1], visible: false }, shapes, annotations: ann }), CFG);
-
+function renderVerdict(I, last) {
   const v = $("verdict");
   if (!last) { v.className = "verdict none"; v.textContent = "Draw a sample to build an interval."; return; }
   const side = last.xbar > I.mu ? "right" : "left";
