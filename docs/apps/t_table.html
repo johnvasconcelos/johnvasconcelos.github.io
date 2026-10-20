@@ -1,0 +1,555 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Student's t Table (T-Table)</title>
+<script src="https://cdn.jsdelivr.net/npm/plotly.js-dist-min@2.35.2/plotly.min.js"></script>
+<style>
+  :root {
+    --bg: #f5f6f8; --card: #ffffff; --ink: #1f2933; --muted: #5f6b7a;
+    --line: #e2e6ea; --accent: #08519c; --accent-soft: #e8f0f9;
+    --shade: #fd8d3c; --shade-soft: #fff1e6; --tcol: #e6550d;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: var(--bg); color: var(--ink);
+    font: 13px/1.4 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  header { padding: 10px 16px 6px; }
+  header h1 { margin: 0; font-size: 18px; font-weight: 650; }
+  header p { margin: 2px 0 0; color: var(--muted); font-size: 12px; }
+
+  .wrap { display: grid; gap: 10px; padding: 6px 16px 16px; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 10px;
+    padding: 10px 12px; min-width: 0; }
+  .card h3 { margin: 0 0 2px; font-size: 13px; font-weight: 650; }
+  .card .sub { color: var(--muted); font-size: 11.5px; margin: 0 0 4px; }
+
+  /* ---------- top controls ---------- */
+  .controls { display: grid; grid-template-columns: auto auto minmax(170px, .8fr) minmax(200px, 1fr) minmax(260px, 1.3fr);
+    gap: 14px 18px; align-items: start; }
+  .lab { display: block; font-weight: 600; margin-bottom: 4px; font-size: 11px;
+    text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
+  .seg { display: inline-flex; border: 1px solid #c9d0d7; border-radius: 8px; overflow: hidden; }
+  .seg button { font: inherit; border: 0; background: #fff; color: var(--ink); padding: 7px 14px;
+    cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 3px; min-width: 78px; }
+  .seg button + button { border-left: 1px solid #c9d0d7; }
+  .seg button:hover { background: #f0f2f4; }
+  .seg button[aria-pressed="true"] { background: var(--accent); color: #fff; }
+  .seg svg { width: 38px; height: 16px; display: block; }
+  .seg button .t { font-weight: 600; font-size: 12px; }
+  .seg button[aria-pressed="true"] svg .curve { stroke: #fff; }
+  .seg button[aria-pressed="true"] svg .area { fill: #ffd1ad; }
+
+  input.num { width: 100%; padding: 7px 9px; border: 1px solid #c9d0d7; border-radius: 8px;
+    font: inherit; font-size: 16px; font-variant-numeric: tabular-nums; background: #fff; color: var(--ink); }
+  input.num:focus { outline: 2px solid var(--accent-soft); border-color: var(--accent); }
+  input.bad { border-color: #d64545; background: #fff6f6; }
+  .chips { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 6px; }
+  .chips button { font: inherit; font-size: 11.5px; padding: 2px 8px; border-radius: 999px;
+    border: 1px solid #c9d0d7; background: #fff; color: var(--ink); cursor: pointer;
+    font-variant-numeric: tabular-nums; }
+  .chips button:hover { background: var(--accent-soft); border-color: var(--accent); }
+  .msg { color: #a1251f; font-size: 11.5px; margin-top: 4px; min-height: 0; }
+
+  .result { background: var(--accent-soft); border-radius: 8px; padding: 8px 12px; }
+  .result .main { font-size: 20px; font-weight: 650; font-variant-numeric: tabular-nums; line-height: 1.25; }
+  .result .main b { color: var(--accent); }
+  .result .extra { font-size: 12px; color: var(--muted); margin-top: 3px; font-variant-numeric: tabular-nums; }
+
+  /* ---------- plot + table ---------- */
+  .grid-main { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr); gap: 10px; }
+  #plot { width: 100%; height: 420px; }
+  .plothead { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .check { display: inline-flex; gap: 6px; align-items: center; font-size: 12px; cursor: pointer; }
+  .check input { accent-color: var(--accent); margin: 0; }
+
+  .tscroll { overflow-x: auto; }
+  table.tt { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; font-size: 12px; }
+  table.tt th, table.tt td { padding: 3px 4px; text-align: center; border-bottom: 1px solid var(--line); white-space: nowrap; }
+  table.tt thead th { color: var(--muted); font-weight: 650; font-size: 11px; }
+  table.tt thead tr:last-child th { border-bottom: 2px solid var(--line); }
+  table.tt thead th.rowlab { text-align: left; font-weight: 600; font-size: 10.5px; text-transform: uppercase; letter-spacing: .03em; }
+  table.tt thead tr.main th { color: var(--ink); }
+  table.tt tbody th { color: var(--muted); font-weight: 650; text-align: left; padding-left: 6px; }
+  table.tt td { cursor: pointer; }
+  table.tt td:hover { background: #f0f2f4; }
+  table.tt .hl-row, table.tt .hl-col { background: var(--shade-soft); }
+  table.tt td.hl-cell { background: var(--shade); color: #fff; font-weight: 700; border-radius: 4px; }
+  table.tt td.hl-bracket { background: #fdd0a2; font-weight: 700; color: #7f2704; border-radius: 4px; }
+  table.tt th.hl-head { color: #c4540d; }
+  table.tt tr.inf th, table.tt tr.inf td { border-top: 2px solid var(--line); }
+  .tnote { color: var(--muted); font-size: 11.5px; margin-top: 6px; }
+  .tnav { display: flex; gap: 6px; align-items: center; justify-content: space-between; margin-bottom: 4px; }
+  .tnav button { font: inherit; font-size: 11.5px; padding: 2px 8px; border-radius: 6px;
+    border: 1px solid #c9d0d7; background: #fff; cursor: pointer; }
+  .tnav button:hover { background: #f0f2f4; }
+  .tnav button:disabled { opacity: .4; cursor: default; }
+
+  html.embedded body { background: transparent; }
+
+  @media (max-width: 1250px) {
+    .controls { grid-template-columns: auto auto 1fr; }
+    .controls .result { grid-column: 1 / -1; }
+  }
+  @media (max-width: 1100px) { .grid-main { grid-template-columns: 1fr; } }
+  @media (max-width: 620px) {
+    .controls { grid-template-columns: 1fr; }
+    .seg button { min-width: 0; padding: 6px 9px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Student's t Table (T-Table)</h1>
+  <p>Find the area under the t curve for a t-score and degrees of freedom, or the critical value t* that gives a chosen area. T ~ t(df), df = n − 1.</p>
+</header>
+
+<div class="wrap">
+  <!-- ======================= CONTROLS ======================= -->
+  <section class="card controls">
+    <div>
+      <span class="lab">Area</span>
+      <div class="seg" id="seg_tail" role="group" aria-label="Area">
+        <button data-v="left" aria-pressed="false" title="Area to the left of t: P(T ≤ t)">
+          <svg viewBox="0 0 38 16"><path class="area" d="M1 15 C8 15 12 2 19 2 L19 15 Z" fill="#fdbb84"/><path class="curve" d="M1 15 C8 15 12 2 19 2 C26 2 30 15 37 15" fill="none" stroke="#e6550d" stroke-width="1.4"/></svg>
+          <span class="t">Left</span>
+        </button>
+        <button data-v="central" aria-pressed="false" title="Area between −t and t: P(−t ≤ T ≤ t)">
+          <svg viewBox="0 0 38 16"><path class="area" d="M12 15 C14 8 16 2 19 2 C22 2 24 8 26 15 Z" fill="#fdbb84"/><path class="curve" d="M1 15 C8 15 12 2 19 2 C26 2 30 15 37 15" fill="none" stroke="#e6550d" stroke-width="1.4"/></svg>
+          <span class="t">Central</span>
+        </button>
+        <button data-v="right" aria-pressed="true" title="Area to the right of t: P(T ≥ t)">
+          <svg viewBox="0 0 38 16"><path class="area" d="M19 2 C26 2 30 15 37 15 L19 15 Z" fill="#fdbb84"/><path class="curve" d="M1 15 C8 15 12 2 19 2 C26 2 30 15 37 15" fill="none" stroke="#e6550d" stroke-width="1.4"/></svg>
+          <span class="t">Right</span>
+        </button>
+      </div>
+    </div>
+
+    <div>
+      <span class="lab">Direction</span>
+      <div class="seg" id="seg_dir" role="group" aria-label="Direction">
+        <button data-v="t2p" aria-pressed="false" title="Enter t, get the probability"><span class="t">t → p</span></button>
+        <button data-v="p2t" aria-pressed="true" title="Enter the probability, get t*"><span class="t">p → t</span></button>
+      </div>
+    </div>
+
+    <div>
+      <label class="lab" for="df">Degrees of freedom (df)</label>
+      <input type="text" class="num" id="df" value="10" inputmode="numeric" autocomplete="off">
+      <div class="chips" id="df_chips"></div>
+    </div>
+
+    <div>
+      <label class="lab" for="val" id="val_label">Probability p</label>
+      <input type="number" class="num" id="val" value="0.025" step="0.001" inputmode="decimal">
+      <div class="chips" id="chips"></div>
+      <div class="msg" id="msg"></div>
+    </div>
+
+    <div class="result" aria-live="polite">
+      <div class="main" id="res_main"></div>
+      <div class="extra" id="res_extra"></div>
+    </div>
+  </section>
+
+  <!-- ======================= PLOT + TABLE ======================= -->
+  <div class="grid-main">
+    <section class="card">
+      <div class="plothead">
+        <h3 id="plot_title">Area under the t curve</h3>
+        <label class="check"><input type="checkbox" id="show_norm"> Overlay N(0, 1)</label>
+      </div>
+      <div id="plot"></div>
+    </section>
+    <section class="card">
+      <div class="tnav">
+        <div>
+          <h3>T-table: critical values t*</h3>
+          <p class="sub">Each cell is the t with the given area to its right (one tail), or ±t with the given area outside (two tails).</p>
+        </div>
+        <div style="display:flex; gap:4px">
+          <button id="t_up" title="Show smaller df">▲</button>
+          <button id="t_down" title="Show larger df">▼</button>
+        </div>
+      </div>
+      <div class="tscroll"><table class="tt" id="ttable"></table></div>
+      <div class="tnote" id="table_note"></div>
+    </section>
+  </div>
+</div>
+
+<script id="stats-lib">
+// ---------- normal ----------
+function pnorm(z) {
+  const x = Math.abs(z); let c;
+  if (x > 37) c = 0;
+  else {
+    const e = Math.exp(-x * x / 2);
+    if (x < 7.07106781186547) {
+      let b = 3.52624965998911e-02 * x + 0.700383064443688;
+      b = b * x + 6.37396220353165; b = b * x + 33.912866078383; b = b * x + 112.079291497871;
+      b = b * x + 221.213596169931; b = b * x + 220.206867912376; c = e * b;
+      b = 8.83883476483184e-02 * x + 1.75566716318264; b = b * x + 16.064177579207; b = b * x + 86.7807322029461;
+      b = b * x + 296.564248779674; b = b * x + 637.333633378831; b = b * x + 793.826512519948; b = b * x + 440.413735824752;
+      c = c / b;
+    } else { let b = x + 0.65; b = x + 4 / b; b = x + 3 / b; b = x + 2 / b; b = x + 1 / b; c = e / b / 2.506628274631; }
+  }
+  return z > 0 ? 1 - c : c;
+}
+function qnorm(p) {
+  if (p <= 0) return -Infinity;
+  if (p >= 1) return Infinity;
+  const a = [-3.969683028665376e+01, 2.209460984245205e+02, -2.759285104469687e+02, 1.383577518672690e+02, -3.066479806614716e+01, 2.506628277459239e+00];
+  const b = [-5.447609879822406e+01, 1.615858368580409e+02, -1.556989798598866e+02, 6.680131188771972e+01, -1.328068155288572e+01];
+  const c = [-7.784894002430293e-03, -3.223964580411365e-01, -2.400758277161838e+00, -2.549732539343734e+00, 4.374664141464968e+00, 2.938163982698783e+00];
+  const d = [7.784695709041462e-03, 3.224671290700398e-01, 2.445134137142996e+00, 3.754408661907416e+00];
+  const pl = 0.02425; let q, r, x;
+  if (p < pl) { q = Math.sqrt(-2 * Math.log(p)); x = (((((c[0] * q + c[1]) * q + c[2]) * q + c[3]) * q + c[4]) * q + c[5]) / ((((d[0] * q + d[1]) * q + d[2]) * q + d[3]) * q + 1); }
+  else if (p <= 1 - pl) { q = p - 0.5; r = q * q; x = (((((a[0] * r + a[1]) * r + a[2]) * r + a[3]) * r + a[4]) * r + a[5]) * q / (((((b[0] * r + b[1]) * r + b[2]) * r + b[3]) * r + b[4]) * r + 1); }
+  else { q = Math.sqrt(-2 * Math.log(1 - p)); x = -(((((c[0] * q + c[1]) * q + c[2]) * q + c[3]) * q + c[4]) * q + c[5]) / ((((d[0] * q + d[1]) * q + d[2]) * q + d[3]) * q + 1); }
+  const e = pnorm(x) - p, u = e * Math.sqrt(2 * Math.PI) * Math.exp(x * x / 2);
+  return x - u / (1 + x * u / 2);
+}
+const dnorm = x => Math.exp(-0.5 * x * x) / Math.sqrt(2 * Math.PI);
+
+// ---------- Student t ----------
+const LG = [0.99999999999980993, 676.5203681218851, -1259.1392167224028, 771.32342877765313, -176.61502916214059, 12.507343278686905, -0.13857109526572012, 9.9843695780195716e-6, 1.5056327351493116e-7];
+function lgamma(x) {
+  if (x < 0.5) return Math.log(Math.PI / Math.abs(Math.sin(Math.PI * x))) - lgamma(1 - x);
+  x -= 1; let a = LG[0]; const t = x + 7.5;
+  for (let i = 1; i < 9; i++) a += LG[i] / (x + i);
+  return 0.5 * Math.log(2 * Math.PI) + (x + 0.5) * Math.log(t) - t + Math.log(a);
+}
+function betacf(a, b, x) {
+  const FPMIN = 1e-300; let qab = a + b, qap = a + 1, qam = a - 1, c = 1, d = 1 - qab * x / qap;
+  if (Math.abs(d) < FPMIN) d = FPMIN; d = 1 / d; let h = d;
+  for (let m = 1; m <= 300; m++) {
+    const m2 = 2 * m; let aa = m * (b - m) * x / ((qam + m2) * (a + m2));
+    d = 1 + aa * d; if (Math.abs(d) < FPMIN) d = FPMIN; c = 1 + aa / c; if (Math.abs(c) < FPMIN) c = FPMIN; d = 1 / d; h *= d * c;
+    aa = -(a + m) * (qab + m) * x / ((a + m2) * (qap + m2));
+    d = 1 + aa * d; if (Math.abs(d) < FPMIN) d = FPMIN; c = 1 + aa / c; if (Math.abs(c) < FPMIN) c = FPMIN; d = 1 / d;
+    const del = d * c; h *= del; if (Math.abs(del - 1) < 1e-15) break;
+  }
+  return h;
+}
+function ibeta(a, b, x) {
+  if (x <= 0) return 0; if (x >= 1) return 1;
+  const bt = Math.exp(lgamma(a + b) - lgamma(a) - lgamma(b) + a * Math.log(x) + b * Math.log(1 - x));
+  return x < (a + 1) / (a + b + 2) ? bt * betacf(a, b, x) / a : 1 - bt * betacf(b, a, 1 - x) / b;
+}
+// df = Infinity means the standard normal
+function tUpper(t, df) {                       // P(T ≥ t), no cancellation in the right tail
+  if (!Number.isFinite(df)) return pnorm(-t);
+  const tail = 0.5 * ibeta(df / 2, 0.5, df / (df + t * t));
+  return t >= 0 ? tail : 1 - tail;
+}
+const tLower = (t, df) => tUpper(-t, df);
+function dt(x, df) {
+  if (!Number.isFinite(df)) return dnorm(x);
+  return Math.exp(lgamma((df + 1) / 2) - lgamma(df / 2) - 0.5 * Math.log(df * Math.PI) - (df + 1) / 2 * Math.log(1 + x * x / df));
+}
+function qtUpper(q, df) {                      // t such that P(T ≥ t) = q
+  if (q <= 0) return Infinity; if (q >= 1) return -Infinity;
+  if (!Number.isFinite(df)) return -qnorm(q);
+  if (q > 0.5) return -qtUpper(1 - q, df);
+  if (q === 0.5) return 0;
+  let lo = 0, hi = 1;
+  while (tUpper(hi, df) > q) hi *= 2;
+  for (let i = 0; i < 200; i++) { const mid = (lo + hi) / 2; if (tUpper(mid, df) > q) lo = mid; else hi = mid; }
+  return (lo + hi) / 2;
+}
+
+function area(tail, t, df) {
+  if (tail === "left") return tLower(t, df);
+  if (tail === "right") return tUpper(t, df);
+  return 1 - 2 * tUpper(Math.abs(t), df);
+}
+function tFor(tail, p, df) {
+  if (tail === "left") return -qtUpper(p, df);
+  if (tail === "right") return qtUpper(p, df);
+  return qtUpper((1 - p) / 2, df);
+}
+</script>
+
+<script>
+const $ = id => document.getElementById(id);
+const state = { tail: "right", dir: "p2t", df: 10, t: NaN, p: 0.025, rowStart: null };
+const CHIPS = {
+  t2p: { left: ["-2.5", "-2", "-1", "0", "1", "2"], right: ["0", "1", "1.5", "2", "2.5", "3"], central: ["1", "1.5", "2", "2.5", "3"] },
+  p2t: { left: ["0.90", "0.95", "0.975", "0.99", "0.995"], right: ["0.10", "0.05", "0.025", "0.01", "0.005"], central: ["0.80", "0.90", "0.95", "0.98", "0.99"] }
+};
+const DF_CHIPS = ["1", "2", "5", "10", "20", "30", "60", "120", "∞"];
+const SHADE = "#fd8d3c", CURVE = "#e6550d";
+
+// table layout: rows = df, columns = one-tail areas
+const ONE = [0.25, 0.20, 0.15, 0.10, 0.05, 0.025, 0.02, 0.01, 0.005, 0.0025, 0.001, 0.0005];
+const ROWS = [];
+for (let d = 1; d <= 30; d++) ROWS.push(d);
+[40, 50, 60, 70, 80, 90, 100, 120, 150, 200, Infinity].forEach(d => ROWS.push(d));
+const WINDOW = 14;
+
+function fmtP(p) {
+  if (p === 0) return "0";
+  if (p < 5e-5) return p.toExponential(3);
+  if (1 - p < 5e-5 && p < 1) return "1 − " + (1 - p).toExponential(3);
+  return p.toFixed(4);
+}
+const fmtT = (t, d = 4) => (t < 0 ? "−" : "") + Math.abs(t).toFixed(d);
+const fmtA = a => String(a).replace(/^0/, "");               // 0.025 -> .025
+const dfLabel = d => (Number.isFinite(d) ? String(d) : "∞");
+
+// ---------------- controls ----------------
+function setSeg(id, v) { document.querySelectorAll(`#${id} button`).forEach(b => b.setAttribute("aria-pressed", String(b.dataset.v === v))); }
+document.querySelectorAll("#seg_tail button").forEach(b => b.addEventListener("click", () => {
+  if (state.tail === b.dataset.v) return;
+  const prev = state.tail; state.tail = b.dataset.v; setSeg("seg_tail", state.tail);
+  // keep the same t in t→p; in p→t translate the probability to the equivalent for the new area type
+  if (state.dir === "p2t" && !state.error) {
+    const t = Math.abs(state.t), up = tUpper(t, state.df);
+    const np = state.tail === "right" ? up : state.tail === "left" ? 1 - up : 1 - 2 * up;
+    $("val").value = +np.toFixed(4);
+  }
+  setupInput(); recompute(); render();
+}));
+document.querySelectorAll("#seg_dir button").forEach(b => b.addEventListener("click", () => {
+  if (state.dir === b.dataset.v) return;
+  state.dir = b.dataset.v; setSeg("seg_dir", state.dir);
+  const v = state.dir === "t2p" ? state.t : state.p;
+  if (Number.isFinite(v)) $("val").value = +v.toFixed(4);
+  setupInput(); recompute(); render();
+}));
+$("val").addEventListener("input", () => { recompute(); render(); });
+$("df").addEventListener("input", () => { recompute(); render(); });
+$("show_norm").addEventListener("change", () => renderPlot());
+$("df_chips").innerHTML = DF_CHIPS.map(v => `<button type="button" data-v="${v}">${v === "∞" ? "∞ (z)" : v}</button>`).join("");
+$("df_chips").querySelectorAll("button").forEach(b => b.addEventListener("click", () => { $("df").value = b.dataset.v; recompute(); render(); }));
+
+function setupInput() {
+  const t2p = state.dir === "t2p";
+  $("val_label").textContent = t2p ? "t value" : "Probability p (between 0 and 1)";
+  $("val").step = t2p ? "0.01" : "0.001";
+  if (t2p) { $("val").removeAttribute("min"); $("val").removeAttribute("max"); }
+  else { $("val").min = "0"; $("val").max = "1"; }
+  $("chips").innerHTML = CHIPS[state.dir][state.tail].map(v => `<button type="button" data-v="${v}">${v}</button>`).join("");
+  $("chips").querySelectorAll("button").forEach(b => b.addEventListener("click", () => { $("val").value = b.dataset.v; recompute(); render(); }));
+}
+
+function parseDf(raw) {
+  const s = raw.trim().toLowerCase();
+  if (["∞", "inf", "infinity", "z"].includes(s)) return Infinity;
+  const v = Number(s);
+  return s !== "" && Number.isFinite(v) && v > 0 ? v : NaN;
+}
+
+function recompute() {
+  const df = parseDf($("df").value);
+  const raw = $("val").value.trim(), v = parseFloat(raw);
+  state.error = null;
+  if (Number.isNaN(df)) state.error = "df must be a positive number (or ∞).";
+  else if (raw === "" || !Number.isFinite(v)) state.error = state.dir === "t2p" ? "Enter a t value." : "Enter a probability.";
+  else if (state.dir === "t2p") { state.df = df; state.t = v; state.p = area(state.tail, v, df); }
+  else if (!(v > 0 && v < 1)) state.error = "The probability must be strictly between 0 and 1.";
+  else { state.df = df; state.p = v; state.t = tFor(state.tail, v, df); }
+  $("df").classList.toggle("bad", Number.isNaN(df));
+  $("val").classList.toggle("bad", !!state.error && !Number.isNaN(df));
+  $("msg").textContent = state.error || "";
+}
+
+// ---------------- result text ----------------
+function decimalsOf(s) { const m = String(s).split(".")[1]; return m ? Math.min(m.length, 4) : 0; }
+function renderResult() {
+  if (state.error) { $("res_main").textContent = "—"; $("res_extra").textContent = ""; return; }
+  const { tail, dir, t, p, df } = state;
+  const sub = `<sub>${dfLabel(df)}</sub>`;
+  const dd = dir === "t2p" ? Math.max(2, decimalsOf($("val").value)) : 4;
+  const ts = fmtT(t, dd), ta = fmtT(Math.abs(t), dd);
+  let main, extra;
+  if (dir === "t2p") {
+    if (tail === "left") main = `P(T${sub} ≤ ${ts}) = <b>${fmtP(p)}</b>`;
+    if (tail === "right") main = `P(T${sub} ≥ ${ts}) = <b>${fmtP(p)}</b>`;
+    if (tail === "central") main = `P(−${ta} ≤ T${sub} ≤ ${ta}) = <b>${fmtP(p)}</b>`;
+  } else {
+    if (tail === "left") main = `<b>t = ${ts}</b> &nbsp;so that P(T${sub} ≤ t) = ${fmtP(p)}`;
+    if (tail === "right") main = `<b>t* = ${ts}</b> &nbsp;so that P(T${sub} ≥ t*) = ${fmtP(p)}`;
+    if (tail === "central") main = `<b>t* = ±${ta}</b> &nbsp;so that P(−t* ≤ T${sub} ≤ t*) = ${fmtP(p)}`;
+  }
+  const up = tUpper(Math.abs(t), df), z = Number.isFinite(df) ? null : true;
+  if (tail === "central") extra = `Each tail = ${fmtP(up)} · both tails = ${fmtP(2 * up)}`;
+  else extra = `Complement: ${tail === "left" ? "P(T ≥ t)" : "P(T ≤ t)"} = ${fmtP(1 - p)}`;
+  if (!z) {
+    const zEq = dir === "p2t" ? (tail === "central" ? `±${fmtT(-qnorm(up), 4)}` : fmtT(tail === "left" ? qnorm(p) : -qnorm(p), 4)) : null;
+    extra += dir === "p2t"
+      ? ` · normal would give z = ${zEq}`
+      : ` · under N(0, 1): ${fmtP(tail === "left" ? pnorm(t) : tail === "right" ? pnorm(-t) : 1 - 2 * pnorm(-Math.abs(t)))}`;
+  } else extra += " · df = ∞ is the standard normal";
+  $("res_main").innerHTML = main;
+  $("res_extra").innerHTML = extra;
+}
+
+// ---------------- plot ----------------
+function seq(a, b, n) { const r = []; for (let i = 0; i < n; i++) r.push(a + (b - a) * i / (n - 1)); return r; }
+function renderPlot() {
+  const df = state.error ? 10 : state.df;
+  const lim = state.error ? 5 : Math.min(8, Math.max(5, Math.abs(state.t) + 0.8));
+  const xs = seq(-lim, lim, 600);
+  const dens = x => dt(x, df);
+  const traces = [], shapes = [], ann = [];
+  if (!state.error) {
+    const t = state.t, at = Math.abs(t);
+    const clip = v => Math.max(-lim, Math.min(lim, v));
+    let parts;
+    if (state.tail === "left") parts = [[-lim, clip(t)]];
+    else if (state.tail === "right") parts = [[clip(t), lim]];
+    else parts = [[-Math.min(at, lim), Math.min(at, lim)]];
+    parts.forEach(([a, b]) => {
+      if (b > a) {
+        const p = seq(a, b, 200);
+        traces.push({ type: "scatter", mode: "lines", x: [a, ...p, b], y: [0, ...p.map(dens), 0], fill: "toself",
+          fillcolor: "rgba(253,141,60,0.55)", line: { width: 0 }, hoverinfo: "skip" });
+      }
+    });
+    (state.tail === "central" ? [-at, at] : [t]).forEach(v => {
+      if (Math.abs(v) <= lim) {
+        shapes.push({ type: "line", x0: v, x1: v, y0: 0, y1: dens(v), line: { color: "#c4540d", width: 2, dash: "dash" } });
+        ann.push({ x: v, y: 0, text: `<b>${fmtT(v, 3)}</b>`, showarrow: false, yshift: -12, font: { color: "#c4540d", size: 12 } });
+      }
+    });
+    let lx;
+    if (state.tail === "left") lx = Math.max(-lim + 0.9, Math.min(t - 0.9, 0));
+    else if (state.tail === "right") lx = Math.min(lim - 0.9, Math.max(t + 0.9, 0));
+    else lx = 0;
+    const ly = state.tail === "central" ? Math.min(dens(0) * 0.45, dens(Math.min(at, 1)) * 0.6) : Math.max(0.05, dens(lx) * 0.45);
+    ann.push({ x: lx, y: Math.max(0.04, ly), text: `<b>area = ${fmtP(state.p)}</b>`, showarrow: false,
+      font: { size: 14, color: "#1f2933" }, bgcolor: "rgba(255,255,255,0.85)", borderpad: 3 });
+  }
+  if ($("show_norm").checked) traces.push({ type: "scatter", mode: "lines", x: xs, y: xs.map(dnorm), line: { color: "#08519c", width: 2, dash: "dash" },
+    hovertemplate: "z = %{x:.2f}<br>N(0,1) density = %{y:.4f}<extra></extra>" });
+  traces.push({ type: "scatter", mode: "lines", x: xs, y: xs.map(dens), line: { color: CURVE, width: 2.5 },
+    hovertemplate: "t = %{x:.2f}<br>density = %{y:.4f}<extra></extra>" });
+  if ($("show_norm").checked) ann.push({ xref: "paper", yref: "paper", x: 1, y: 1, xanchor: "right", yanchor: "top", showarrow: false,
+    text: `<span style="color:#e6550d">— t(${dfLabel(df)})</span>   <span style="color:#08519c">- - N(0, 1)</span>`, font: { size: 11 } });
+
+  Plotly.react($("plot"), traces, {
+    margin: { l: 44, r: 10, t: 6, b: 46 },
+    font: { family: "system-ui, -apple-system, Segoe UI, Roboto, sans-serif", size: 11, color: "#1f2933" },
+    paper_bgcolor: "#fff", plot_bgcolor: "#fff", showlegend: false,
+    xaxis: { title: { text: "t", standoff: 18 }, range: [-lim, lim], gridcolor: "#eef0f2", zeroline: false, dtick: 1 },
+    yaxis: { title: { text: "Density", standoff: 4 }, range: [0, 0.43], gridcolor: "#eef0f2", zeroline: false },
+    shapes, annotations: ann, hovermode: "closest"
+  }, { displayModeBar: false, responsive: true });
+  const titles = { left: "Area to the left of t", right: "Area to the right of t", central: "Area between −t and t" };
+  $("plot_title").textContent = `${titles[state.tail]} (shaded) · df = ${dfLabel(df)}`;
+}
+
+// ---------------- t-table ----------------
+// the table row to use: exact df, or the next smaller df listed (conservative choice)
+function rowFor(df) {
+  if (!Number.isFinite(df)) return ROWS.length - 1;
+  let r = -1;
+  ROWS.forEach((d, i) => { if (d <= df + 1e-9) r = i; });
+  return r;
+}
+// one-tail area that corresponds to the current probability
+function oneTail() {
+  if (state.tail === "right") return state.p;
+  if (state.tail === "left") return Math.min(state.p, 1 - state.p);
+  return (1 - state.p) / 2;
+}
+
+function renderTable() {
+  let hr = -1, hc = -1, br = null;               // highlighted row, column, or bracket [c1, c2]
+  if (!state.error) {
+    hr = rowFor(state.df);
+    if (state.dir === "p2t") {
+      const a = oneTail();
+      hc = ONE.findIndex(x => Math.abs(x - a) < 1e-9);
+    } else if (hr >= 0) {
+      const at = Math.abs(state.t), crit = ONE.map(a => qtUpper(a, ROWS[hr]));
+      const k = crit.findIndex(c => at < c);   // first column whose t* exceeds |t|
+      br = k === -1 ? [ONE.length - 1, ONE.length] : k === 0 ? [-1, 0] : [k - 1, k];
+    }
+  }
+  if (state.rowStart === null) {
+    const center = hr >= 0 ? hr : 0;
+    state.rowStart = Math.max(0, Math.min(ROWS.length - WINDOW, center - Math.floor(WINDOW / 2)));
+  }
+  const start = state.rowStart, end = Math.min(ROWS.length, start + WINDOW);
+  $("t_up").disabled = start === 0;
+  $("t_down").disabled = end >= ROWS.length;
+
+  const colHl = j => j === hc || (br && (j === br[0] || j === br[1]));
+  let html = "<thead>";
+  html += `<tr class="main"><th class="rowlab">One tail</th>${ONE.map((a, j) => `<th class="${colHl(j) ? "hl-head" : ""}">${fmtA(a)}</th>`).join("")}</tr>`;
+  html += `<tr><th class="rowlab">Two tails</th>${ONE.map((a, j) => `<th class="${colHl(j) ? "hl-head" : ""}">${fmtA(+(2 * a).toFixed(4))}</th>`).join("")}</tr>`;
+  html += `<tr><th class="rowlab">Conf. level</th>${ONE.map((a, j) => `<th class="${colHl(j) ? "hl-head" : ""}">${+(100 * (1 - 2 * a)).toFixed(1)}%</th>`).join("")}</tr>`;
+  html += `<tr><th class="rowlab">df</th><th colspan="${ONE.length}" style="font-weight:400">t*</th></tr></thead><tbody>`;
+  for (let i = start; i < end; i++) {
+    const d = ROWS[i];
+    html += `<tr class="${Number.isFinite(d) ? "" : "inf"}"><th class="${i === hr ? "hl-head" : ""}">${Number.isFinite(d) ? d : "∞ (z)"}</th>`;
+    ONE.forEach((a, j) => {
+      let cls = "";
+      if (i === hr && j === hc) cls = "hl-cell";
+      else if (i === hr && br && (j === br[0] || j === br[1])) cls = "hl-bracket";
+      else if (i === hr) cls = "hl-row";
+      else if (hr >= 0 && colHl(j)) cls = "hl-col";
+      html += `<td class="${cls}" data-i="${i}" data-j="${j}">${qtUpper(a, d).toFixed(3)}</td>`;
+    });
+    html += "</tr>";
+  }
+  html += "</tbody>";
+  $("ttable").innerHTML = html;
+  $("ttable").querySelectorAll("td").forEach(td => td.addEventListener("click", () => {
+    const d = ROWS[+td.dataset.i], a = ONE[+td.dataset.j];
+    if (state.dir !== "p2t") { state.dir = "p2t"; setSeg("seg_dir", "p2t"); }
+    $("df").value = dfLabel(d);
+    $("val").value = state.tail === "right" ? a : state.tail === "left" ? +(1 - a).toFixed(4) : +(1 - 2 * a).toFixed(4);
+    setupInput(); recompute(); render(false);
+  }));
+
+  // note under the table
+  let note = "Row = degrees of freedom; columns = area. Click any cell to use it.";
+  if (!state.error) {
+    const d = state.df, used = hr >= 0 ? ROWS[hr] : null;
+    const off = Number.isFinite(d) && used !== d;
+    if (hr < 0) note = `df = ${d} is below 1, so it is not in the table; the result above is still exact.`;
+    else if (state.dir === "p2t") {
+      note = hc >= 0 ? `Highlighted: df = ${dfLabel(used)}, one-tail area ${fmtA(ONE[hc])}.` : `The one-tail area ${fmtP(oneTail())} is not a table column; the result above is exact.`;
+      if (off) note += ` df = ${d} is not listed, so the table uses the next smaller df (${used}), a slightly conservative t*.`;
+    } else {
+      const up = tUpper(Math.abs(state.t), d);
+      const two = state.tail === "central";
+      const lab = j => fmtA(two ? +(2 * ONE[j]).toFixed(4) : ONE[j]);
+      const where = br[0] === -1 ? `above ${lab(0)}` : br[1] === ONE.length ? `below ${lab(ONE.length - 1)}` : `between ${lab(br[1])} and ${lab(br[0])}`;
+      note = `With the table alone: |t| = ${fmtT(Math.abs(state.t), 3)} on row df = ${dfLabel(used)} gives a ${two ? "two-tail" : "one-tail"} area ${where} (exact for df = ${dfLabel(d)}: ${fmtP(two ? 2 * up : up)}).`;
+      if (off) note += ` df = ${d} is not listed, so the next smaller df (${used}) is used.`;
+    }
+  }
+  $("table_note").textContent = note;
+}
+$("t_up").addEventListener("click", () => { state.rowStart = Math.max(0, state.rowStart - 7); renderTable(); });
+$("t_down").addEventListener("click", () => { state.rowStart = Math.min(ROWS.length - WINDOW, state.rowStart + 7); renderTable(); });
+
+function render(resetWindow = true) {
+  if (resetWindow) state.rowStart = null;
+  renderResult(); renderPlot(); renderTable();
+}
+
+// ---------------- embedding: report height to the parent page ----------------
+if (window.self !== window.top) {
+  document.documentElement.classList.add("embedded");
+  let lastH = 0;
+  const reportHeight = () => {
+    const h = Math.ceil(document.body.getBoundingClientRect().height);
+    if (h > 0 && h !== lastH) { lastH = h; window.parent.postMessage({ type: "t-table-height", height: h }, "*"); }
+  };
+  new ResizeObserver(reportHeight).observe(document.body);
+  window.addEventListener("load", () => { reportHeight(); setTimeout(reportHeight, 500); setTimeout(reportHeight, 1500); });
+}
+
+setupInput();
+recompute();
+window.addEventListener("load", () => render());
+</script>
+</body>
+</html>

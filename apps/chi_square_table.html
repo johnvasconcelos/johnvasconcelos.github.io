@@ -1,0 +1,532 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Chi-Square Table</title>
+<script src="https://cdn.jsdelivr.net/npm/plotly.js-dist-min@2.35.2/plotly.min.js"></script>
+<style>
+  :root {
+    --bg: #f5f6f8; --card: #ffffff; --ink: #1f2933; --muted: #5f6b7a;
+    --line: #e2e6ea; --accent: #08519c; --accent-soft: #e8f0f9;
+    --shade: #fd8d3c; --shade-soft: #fff1e6; --ccol: #6a51a3;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: var(--bg); color: var(--ink);
+    font: 13px/1.4 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  header { padding: 10px 16px 6px; }
+  header h1 { margin: 0; font-size: 18px; font-weight: 650; }
+  header p { margin: 2px 0 0; color: var(--muted); font-size: 12px; }
+
+  .wrap { display: grid; gap: 10px; padding: 6px 16px 16px; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 10px;
+    padding: 10px 12px; min-width: 0; }
+  .card h3 { margin: 0 0 2px; font-size: 13px; font-weight: 650; }
+  .card .sub { color: var(--muted); font-size: 11.5px; margin: 0 0 4px; }
+
+  /* ---------- top controls ---------- */
+  .controls { display: grid; grid-template-columns: auto auto minmax(170px, .8fr) minmax(200px, 1fr) minmax(260px, 1.3fr);
+    gap: 14px 18px; align-items: start; }
+  .lab { display: block; font-weight: 600; margin-bottom: 4px; font-size: 11px;
+    text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
+  .seg { display: inline-flex; border: 1px solid #c9d0d7; border-radius: 8px; overflow: hidden; }
+  .seg button { font: inherit; border: 0; background: #fff; color: var(--ink); padding: 7px 14px;
+    cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 3px; min-width: 78px; }
+  .seg button + button { border-left: 1px solid #c9d0d7; }
+  .seg button:hover { background: #f0f2f4; }
+  .seg button[aria-pressed="true"] { background: var(--accent); color: #fff; }
+  .seg svg { width: 38px; height: 16px; display: block; }
+  .seg button .t { font-weight: 600; font-size: 12px; }
+  .seg button[aria-pressed="true"] svg .curve { stroke: #fff; }
+  .seg button[aria-pressed="true"] svg .area { fill: #ffd1ad; }
+
+  input.num { width: 100%; padding: 7px 9px; border: 1px solid #c9d0d7; border-radius: 8px;
+    font: inherit; font-size: 16px; font-variant-numeric: tabular-nums; background: #fff; color: var(--ink); }
+  input.num:focus { outline: 2px solid var(--accent-soft); border-color: var(--accent); }
+  input.bad { border-color: #d64545; background: #fff6f6; }
+  .chips { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 6px; }
+  .chips button { font: inherit; font-size: 11.5px; padding: 2px 8px; border-radius: 999px;
+    border: 1px solid #c9d0d7; background: #fff; color: var(--ink); cursor: pointer;
+    font-variant-numeric: tabular-nums; }
+  .chips button:hover { background: var(--accent-soft); border-color: var(--accent); }
+  .msg { color: #a1251f; font-size: 11.5px; margin-top: 4px; min-height: 0; }
+
+  .result { background: var(--accent-soft); border-radius: 8px; padding: 8px 12px; }
+  .result .main { font-size: 20px; font-weight: 650; font-variant-numeric: tabular-nums; line-height: 1.25; }
+  .result .main b { color: var(--accent); }
+  .result .extra { font-size: 12px; color: var(--muted); margin-top: 3px; font-variant-numeric: tabular-nums; }
+
+  /* ---------- plot + table ---------- */
+  .grid-main { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr); gap: 10px; }
+  #plot { width: 100%; height: 420px; }
+  .plothead { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .check { display: inline-flex; gap: 6px; align-items: center; font-size: 12px; cursor: pointer; }
+  .check input { accent-color: var(--accent); margin: 0; }
+
+  .tscroll { overflow-x: auto; }
+  table.tt { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; font-size: 12px; }
+  table.tt th, table.tt td { padding: 3px 4px; text-align: center; border-bottom: 1px solid var(--line); white-space: nowrap; }
+  table.tt thead th { color: var(--muted); font-weight: 650; font-size: 11px; }
+  table.tt thead tr:last-child th { border-bottom: 2px solid var(--line); }
+  table.tt thead th.rowlab { text-align: left; font-weight: 600; font-size: 10.5px; text-transform: uppercase; letter-spacing: .03em; }
+  table.tt thead tr.main th { color: var(--ink); }
+  table.tt tbody th { color: var(--muted); font-weight: 650; text-align: left; padding-left: 6px; }
+  table.tt td { cursor: pointer; }
+  table.tt td:hover { background: #f0f2f4; }
+  table.tt .hl-row, table.tt .hl-col { background: var(--shade-soft); }
+  table.tt td.hl-cell { background: var(--shade); color: #fff; font-weight: 700; border-radius: 4px; }
+  table.tt td.hl-bracket { background: #fdd0a2; font-weight: 700; color: #7f2704; border-radius: 4px; }
+  table.tt th.hl-head { color: #c4540d; }
+  table.tt .gapcol { border-left: 2px solid var(--line); }
+  .tnote { color: var(--muted); font-size: 11.5px; margin-top: 6px; }
+  .tnav { display: flex; gap: 6px; align-items: center; justify-content: space-between; margin-bottom: 4px; }
+  .tnav button { font: inherit; font-size: 11.5px; padding: 2px 8px; border-radius: 6px;
+    border: 1px solid #c9d0d7; background: #fff; cursor: pointer; }
+  .tnav button:hover { background: #f0f2f4; }
+  .tnav button:disabled { opacity: .4; cursor: default; }
+
+  html.embedded body { background: transparent; }
+
+  @media (max-width: 1250px) {
+    .controls { grid-template-columns: auto auto 1fr; }
+    .controls .result { grid-column: 1 / -1; }
+  }
+  @media (max-width: 1100px) { .grid-main { grid-template-columns: 1fr; } }
+  @media (max-width: 620px) {
+    .controls { grid-template-columns: 1fr; }
+    .seg button { min-width: 0; padding: 6px 9px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Chi-Square Table (χ²-Table)</h1>
+  <p>Find the area under the chi-square curve for a value and degrees of freedom, or the critical value χ² that gives a chosen area. X ~ χ²(df). The distribution is skewed right and takes only positive values, so the left and right critical values are not symmetric.</p>
+</header>
+
+<div class="wrap">
+  <!-- ======================= CONTROLS ======================= -->
+  <section class="card controls">
+    <div>
+      <span class="lab">Area</span>
+      <div class="seg" id="seg_tail" role="group" aria-label="Area">
+        <button data-v="left" aria-pressed="false" title="Area to the left of x: P(X ≤ x)">
+          <svg viewBox="0 0 38 16"><path class="area" d="M1 15 C3 10 6 2 10 2 C13 2 15 6 16 9 L16 15 Z" fill="#fdbb84"/><path class="curve" d="M1 15 C3 10 6 2 10 2 C16 2 22 13 37 15" fill="none" stroke="#6a51a3" stroke-width="1.4"/></svg>
+          <span class="t">Left</span>
+        </button>
+        <button data-v="central" aria-pressed="false" title="Middle area between the lower and upper critical values (equal tails)">
+          <svg viewBox="0 0 38 16"><path class="area" d="M4 7 C6 3 8 2 10 2 C16 2 20 11 26 14 L26 15 L4 15 Z" fill="#fdbb84"/><path class="curve" d="M1 15 C3 10 6 2 10 2 C16 2 22 13 37 15" fill="none" stroke="#6a51a3" stroke-width="1.4"/></svg>
+          <span class="t">Central</span>
+        </button>
+        <button data-v="right" aria-pressed="true" title="Area to the right of x: P(X ≥ x)">
+          <svg viewBox="0 0 38 16"><path class="area" d="M20 9 C24 12 28 14 37 15 L20 15 Z" fill="#fdbb84"/><path class="curve" d="M1 15 C3 10 6 2 10 2 C16 2 22 13 37 15" fill="none" stroke="#6a51a3" stroke-width="1.4"/></svg>
+          <span class="t">Right</span>
+        </button>
+      </div>
+    </div>
+
+    <div>
+      <span class="lab">Direction</span>
+      <div class="seg" id="seg_dir" role="group" aria-label="Direction">
+        <button data-v="x2p" aria-pressed="false" title="Enter χ², get the probability"><span class="t">χ² → p</span></button>
+        <button data-v="p2x" aria-pressed="true" title="Enter the probability, get χ²"><span class="t">p → χ²</span></button>
+      </div>
+    </div>
+
+    <div>
+      <label class="lab" for="df">Degrees of freedom (df)</label>
+      <input type="text" class="num" id="df" value="10" inputmode="numeric" autocomplete="off">
+      <div class="chips" id="df_chips"></div>
+    </div>
+
+    <div>
+      <label class="lab" for="val" id="val_label">Probability p</label>
+      <input type="number" class="num" id="val" value="0.05" step="0.001" inputmode="decimal">
+      <div class="chips" id="chips"></div>
+      <div class="msg" id="msg"></div>
+    </div>
+
+    <div class="result" aria-live="polite">
+      <div class="main" id="res_main"></div>
+      <div class="extra" id="res_extra"></div>
+    </div>
+  </section>
+
+  <!-- ======================= PLOT + TABLE ======================= -->
+  <div class="grid-main">
+    <section class="card">
+      <div class="plothead">
+        <h3 id="plot_title">Area under the chi-square curve</h3>
+        <label class="check"><input type="checkbox" id="show_norm"> Overlay normal approx. N(df, 2·df)</label>
+      </div>
+      <div id="plot"></div>
+    </section>
+    <section class="card">
+      <div class="tnav">
+        <div>
+          <h3>χ²-table: critical values</h3>
+          <p class="sub">Each cell is the χ² value with the given area to its right.</p>
+        </div>
+        <div style="display:flex; gap:4px">
+          <button id="t_up" title="Show smaller df">▲</button>
+          <button id="t_down" title="Show larger df">▼</button>
+        </div>
+      </div>
+      <div class="tscroll"><table class="tt" id="ttable"></table></div>
+      <div class="tnote" id="table_note"></div>
+    </section>
+  </div>
+</div>
+
+<script id="stats-lib">
+const LG = [0.99999999999980993, 676.5203681218851, -1259.1392167224028, 771.32342877765313, -176.61502916214059, 12.507343278686905, -0.13857109526572012, 9.9843695780195716e-6, 1.5056327351493116e-7];
+function lgamma(x) {
+  if (x < 0.5) return Math.log(Math.PI / Math.abs(Math.sin(Math.PI * x))) - lgamma(1 - x);
+  x -= 1; let a = LG[0]; const t = x + 7.5;
+  for (let i = 1; i < 9; i++) a += LG[i] / (x + i);
+  return 0.5 * Math.log(2 * Math.PI) + (x + 0.5) * Math.log(t) - t + Math.log(a);
+}
+// regularized incomplete gamma: returns [P(a,x), Q(a,x)] without cancellation
+function gammaPQ(a, x) {
+  if (x <= 0) return [0, 1];
+  const lnPre = a * Math.log(x) - x - lgamma(a);
+  if (x < a + 1) {                              // series for P
+    let ap = a, sum = 1 / a, del = sum;
+    for (let n = 0; n < 1000; n++) { ap += 1; del *= x / ap; sum += del; if (Math.abs(del) < Math.abs(sum) * 1e-15) break; }
+    const P = sum * Math.exp(lnPre); return [P, 1 - P];
+  }
+  const FPMIN = 1e-300;                         // continued fraction for Q (Lentz)
+  let b = x + 1 - a, c = 1 / FPMIN, d = 1 / b, h = d;
+  for (let i = 1; i < 1000; i++) {
+    const an = -i * (i - a); b += 2;
+    d = an * d + b; if (Math.abs(d) < FPMIN) d = FPMIN;
+    c = b + an / c; if (Math.abs(c) < FPMIN) c = FPMIN;
+    d = 1 / d; const del = d * c; h *= del; if (Math.abs(del - 1) < 1e-15) break;
+  }
+  const Q = Math.exp(lnPre) * h; return [1 - Q, Q];
+}
+const cLower = (x, df) => gammaPQ(df / 2, x / 2)[0];   // P(X ≤ x)
+const cUpper = (x, df) => gammaPQ(df / 2, x / 2)[1];   // P(X ≥ x)
+function dchisq(x, df) {
+  if (x < 0) return 0;
+  if (x === 0) return df < 2 ? Infinity : df === 2 ? 0.5 : 0;
+  return Math.exp((df / 2 - 1) * Math.log(x) - x / 2 - (df / 2) * Math.LN2 - lgamma(df / 2));
+}
+// x such that P(X ≥ x) = q (bisection; uses whichever tail is smaller for precision)
+function qcUpper(q, df) {
+  if (q >= 1) return 0; if (q <= 0) return Infinity;
+  let hi = Math.max(1, df);
+  while (cUpper(hi, df) > q) hi *= 2;
+  let lo = 0;
+  const useLow = q > 0.5, target = 1 - q;
+  for (let i = 0; i < 300; i++) {
+    const mid = (lo + hi) / 2;
+    const tooSmall = useLow ? cLower(mid, df) < target : cUpper(mid, df) > q;
+    if (tooSmall) lo = mid; else hi = mid;
+    if (hi - lo < 1e-13 * Math.max(1, hi)) break;
+  }
+  return (lo + hi) / 2;
+}
+const dnormMS = (x, m, s) => Math.exp(-0.5 * ((x - m) / s) ** 2) / (s * Math.sqrt(2 * Math.PI));
+</script>
+
+<script>
+const $ = id => document.getElementById(id);
+const state = { tail: "right", dir: "p2x", df: 10, x: NaN, x2: NaN, p: 0.05, rowStart: null };
+const CHIPS = {
+  x2p: { left: ["1", "2", "3.94", "5", "10"], right: ["5", "10", "15", "18.31", "20"], central: ["3.25", "5", "15", "20.48"] },
+  p2x: { left: ["0.01", "0.025", "0.05", "0.10", "0.90"], right: ["0.10", "0.05", "0.025", "0.01", "0.005"], central: ["0.80", "0.90", "0.95", "0.98", "0.99"] }
+};
+const DF_CHIPS = ["1", "2", "3", "4", "5", "10", "20", "30", "50", "100"];
+const CURVE = "#6a51a3";
+
+// table layout: rows = df, columns = area to the right
+const RIGHT = [0.995, 0.99, 0.975, 0.95, 0.90, 0.10, 0.05, 0.025, 0.01, 0.005, 0.001];
+const ROWS = [];
+for (let d = 1; d <= 30; d++) ROWS.push(d);
+[35, 40, 45, 50, 60, 70, 80, 90, 100, 120, 150, 200].forEach(d => ROWS.push(d));
+const WINDOW = 14;
+
+function fmtP(p) {
+  if (p === 0) return "0";
+  if (p < 5e-5) return p.toExponential(3);
+  if (1 - p < 5e-5 && p < 1) return "1 − " + (1 - p).toExponential(3);
+  return p.toFixed(4);
+}
+const fmtX = (x, d = 4) => x < 1e-3 && x > 0 ? x.toExponential(3) : x.toFixed(d);
+const fmtA = a => String(a).replace(/^0/, "");
+const cell = x => x < 0.001 ? x.toExponential(2).replace("e-", "e−") : x.toFixed(3);
+
+// ---------------- controls ----------------
+function setSeg(id, v) { document.querySelectorAll(`#${id} button`).forEach(b => b.setAttribute("aria-pressed", String(b.dataset.v === v))); }
+document.querySelectorAll("#seg_tail button").forEach(b => b.addEventListener("click", () => {
+  if (state.tail === b.dataset.v) return;
+  state.tail = b.dataset.v; setSeg("seg_tail", state.tail);
+  if (state.dir === "p2x" && !state.error) {
+    // keep the same point: translate the probability to the new area type
+    const up = cUpper(state.x, state.df);
+    const np = state.tail === "right" ? up : state.tail === "left" ? 1 - up : 1 - 2 * Math.min(up, 1 - up);
+    $("val").value = +np.toFixed(4);
+  }
+  setupInput(); recompute(); render();
+}));
+document.querySelectorAll("#seg_dir button").forEach(b => b.addEventListener("click", () => {
+  if (state.dir === b.dataset.v) return;
+  state.dir = b.dataset.v; setSeg("seg_dir", state.dir);
+  const v = state.dir === "x2p" ? (state.tail === "central" ? Math.max(state.x, state.x2) : state.x) : state.p;
+  if (Number.isFinite(v)) $("val").value = +v.toFixed(4);
+  setupInput(); recompute(); render();
+}));
+$("val").addEventListener("input", () => { recompute(); render(); });
+$("df").addEventListener("input", () => { recompute(); render(); });
+$("show_norm").addEventListener("change", () => renderPlot());
+$("df_chips").innerHTML = DF_CHIPS.map(v => `<button type="button" data-v="${v}">${v}</button>`).join("");
+$("df_chips").querySelectorAll("button").forEach(b => b.addEventListener("click", () => { $("df").value = b.dataset.v; recompute(); render(); }));
+
+function setupInput() {
+  const x2p = state.dir === "x2p";
+  $("val_label").textContent = x2p ? "χ² value (≥ 0)" : "Probability p (between 0 and 1)";
+  $("val").step = x2p ? "0.01" : "0.001";
+  $("val").min = "0";
+  if (x2p) $("val").removeAttribute("max"); else $("val").max = "1";
+  $("chips").innerHTML = CHIPS[state.dir][state.tail].map(v => `<button type="button" data-v="${v}">${v}</button>`).join("");
+  $("chips").querySelectorAll("button").forEach(b => b.addEventListener("click", () => { $("val").value = b.dataset.v; recompute(); render(); }));
+}
+
+function parseDf(raw) {
+  const v = Number(raw.trim());
+  return raw.trim() !== "" && Number.isFinite(v) && v > 0 && v <= 10000 ? v : NaN;
+}
+
+function recompute() {
+  const df = parseDf($("df").value);
+  const raw = $("val").value.trim(), v = parseFloat(raw);
+  state.error = null;
+  if (Number.isNaN(df)) state.error = "df must be a positive number.";
+  else if (raw === "" || !Number.isFinite(v)) state.error = state.dir === "x2p" ? "Enter a χ² value." : "Enter a probability.";
+  else if (state.dir === "x2p") {
+    if (v < 0) state.error = "χ² values cannot be negative.";
+    else {
+      state.df = df; state.x = v;
+      if (state.tail === "left") state.p = cLower(v, df);
+      else if (state.tail === "right") state.p = cUpper(v, df);
+      else {
+        // the other critical value with the same tail area on the opposite side
+        const lo = cLower(v, df), up = 1 - lo, tail = Math.min(lo, up);
+        state.x2 = lo < up ? qcUpper(tail, df) : qcUpper(1 - tail, df);
+        state.p = 1 - 2 * tail;
+      }
+    }
+  }
+  else if (!(v > 0 && v < 1)) state.error = "The probability must be strictly between 0 and 1.";
+  else {
+    state.df = df; state.p = v;
+    if (state.tail === "left") state.x = qcUpper(1 - v, df);
+    else if (state.tail === "right") state.x = qcUpper(v, df);
+    else { const a = (1 - v) / 2; state.x = qcUpper(1 - a, df); state.x2 = qcUpper(a, df); }
+  }
+  $("df").classList.toggle("bad", Number.isNaN(df));
+  $("val").classList.toggle("bad", !!state.error && !Number.isNaN(df));
+  $("msg").textContent = state.error || "";
+}
+// lower and upper cut-offs of the central region
+const bounds = () => [Math.min(state.x, state.x2), Math.max(state.x, state.x2)];
+
+// ---------------- result text ----------------
+function decimalsOf(s) { const m = String(s).split(".")[1]; return m ? Math.min(m.length, 4) : 0; }
+function renderResult() {
+  if (state.error) { $("res_main").textContent = "—"; $("res_extra").textContent = ""; return; }
+  const { tail, dir, x, p, df } = state;
+  const X = `χ²<sub>${df}</sub>`;
+  const dd = dir === "x2p" ? Math.max(2, decimalsOf($("val").value)) : 4;
+  let main, extra;
+  if (tail === "central") {
+    const [L, U] = bounds(), t = (1 - p) / 2;
+    main = dir === "x2p"
+      ? `P(${fmtX(L, dd)} ≤ ${X} ≤ ${fmtX(U, dd)}) = <b>${fmtP(p)}</b>`
+      : `<b>${fmtX(L)}</b> and <b>${fmtX(U)}</b> &nbsp;hold the middle ${fmtP(p)}`;
+    extra = `Each tail = ${fmtP(t)} · both tails = ${fmtP(1 - p)}` + (dir === "x2p" ? ` · the matching cut-off on the other side is ${fmtX(dir === "x2p" ? state.x2 : x)}` : ` · lower = χ²(right area ${fmtP(1 - t)}), upper = χ²(right area ${fmtP(t)})`);
+  } else {
+    const sym = tail === "left" ? "≤" : "≥";
+    main = dir === "x2p" ? `P(${X} ${sym} ${fmtX(x, dd)}) = <b>${fmtP(p)}</b>` : `<b>χ² = ${fmtX(x)}</b> &nbsp;so that P(${X} ${sym} χ²) = ${fmtP(p)}`;
+    extra = `Complement: P(X ${tail === "left" ? "≥" : "≤"} x) = ${fmtP(1 - p)}`;
+  }
+  extra += ` · mean = ${+df.toFixed(4)}, sd = ${Math.sqrt(2 * df).toFixed(3)}`;
+  $("res_main").innerHTML = main;
+  $("res_extra").innerHTML = extra;
+}
+
+// ---------------- plot ----------------
+function seq(a, b, n) { const r = []; for (let i = 0; i < n; i++) r.push(a + (b - a) * i / (n - 1)); return r; }
+function renderPlot() {
+  const df = state.error ? 10 : state.df;
+  const dens = x => dchisq(x, df);
+  let xmax = Math.max(qcUpper(0.0005, df), df + 4);
+  if (!state.error) xmax = Math.max(xmax, (state.tail === "central" ? Math.max(state.x, state.x2) : state.x) * 1.08);
+  const xs = seq(0, xmax, 700); xs[0] = Math.min(xmax / 4000, 1e-3);
+  const showN = $("show_norm").checked;
+  // y range: highest point of the curve, capped when df < 2 (density goes to infinity at 0)
+  const peakX = Math.max(df - 2, 0);
+  let ymax = df > 2 ? dens(peakX) * 1.18 : df === 2 ? 0.58 : Math.max(0.6, dens(xmax / 60) * 0.6);
+  if (showN) ymax = Math.max(ymax, dnormMS(df, df, Math.sqrt(2 * df)) * 1.12);
+  const traces = [], shapes = [], ann = [];
+  if (!state.error) {
+    const clip = v => Math.max(0, Math.min(xmax, v));
+    let parts;
+    if (state.tail === "left") parts = [[0, clip(state.x)]];
+    else if (state.tail === "right") parts = [[clip(state.x), xmax]];
+    else parts = [bounds().map(clip)];
+    parts.forEach(([a, b]) => {
+      if (b > a) {
+        const p = seq(Math.max(a, xs[0]), b, 250);
+        traces.push({ type: "scatter", mode: "lines", x: [p[0], ...p, b], y: [0, ...p.map(v => Math.min(dens(v), ymax)), 0], fill: "toself",
+          fillcolor: "rgba(253,141,60,0.55)", line: { width: 0 }, hoverinfo: "skip" });
+      }
+    });
+    (state.tail === "central" ? bounds() : [state.x]).forEach(v => {
+      if (v <= xmax) {
+        shapes.push({ type: "line", x0: v, x1: v, y0: 0, y1: Math.min(dens(v), ymax), line: { color: "#c4540d", width: 2, dash: "dash" } });
+        ann.push({ x: v, y: 0, text: `<b>${v < 0.01 ? v.toExponential(1) : v.toFixed(3)}</b>`, showarrow: false, yshift: -12, font: { color: "#c4540d", size: 12 } });
+      }
+    });
+    let lx;
+    if (state.tail === "left") lx = state.x < xmax * 0.3 ? state.x + xmax * 0.18 : Math.max(xmax * 0.12, Math.min(state.x * 0.6, peakX || state.x * 0.5));
+    else if (state.tail === "right") lx = Math.min(xmax * 0.86, Math.max(state.x + xmax * 0.12, peakX));
+    else lx = Math.max(peakX, (bounds()[0] + bounds()[1]) / 2 * 0.9);
+    ann.push({ x: lx, y: ymax * 0.5, text: `<b>area = ${fmtP(state.p)}</b>`, showarrow: false,
+      font: { size: 14, color: "#1f2933" }, bgcolor: "rgba(255,255,255,0.85)", borderpad: 3 });
+  }
+  if (showN) {
+    const s = Math.sqrt(2 * df), nx = seq(Math.max(-xmax * 0.15, df - 4 * s), xmax, 400);
+    traces.push({ type: "scatter", mode: "lines", x: nx, y: nx.map(v => dnormMS(v, df, s)), line: { color: "#08519c", width: 2, dash: "dash" },
+      hovertemplate: "x = %{x:.2f}<br>normal approx. = %{y:.4f}<extra></extra>" });
+    ann.push({ xref: "paper", yref: "paper", x: 1, y: 1, xanchor: "right", yanchor: "top", showarrow: false,
+      text: `<span style="color:#6a51a3">— χ²(${df})</span>   <span style="color:#08519c">- - N(${df}, ${+(2 * df).toFixed(2)})</span>`, font: { size: 11 } });
+  }
+  traces.push({ type: "scatter", mode: "lines", x: xs, y: xs.map(v => Math.min(dens(v), ymax * 1.5)), line: { color: CURVE, width: 2.5 }, cliponaxis: true,
+    hovertemplate: "χ² = %{x:.2f}<br>density = %{y:.4f}<extra></extra>" });
+
+  Plotly.react($("plot"), traces, {
+    margin: { l: 48, r: 10, t: 6, b: 46 },
+    font: { family: "system-ui, -apple-system, Segoe UI, Roboto, sans-serif", size: 11, color: "#1f2933" },
+    paper_bgcolor: "#fff", plot_bgcolor: "#fff", showlegend: false,
+    xaxis: { title: { text: "χ²", standoff: 18 }, range: [showN ? Math.max(-xmax * 0.15, df - 4 * Math.sqrt(2 * df)) : 0, xmax], gridcolor: "#eef0f2", zeroline: true, zerolinecolor: "#c9d0d7" },
+    yaxis: { title: { text: "Density", standoff: 4 }, range: [0, ymax], gridcolor: "#eef0f2", zeroline: false },
+    shapes, annotations: ann, hovermode: "closest"
+  }, { displayModeBar: false, responsive: true });
+  const titles = { left: "Area to the left of χ²", right: "Area to the right of χ²", central: "Middle area between the two critical values" };
+  $("plot_title").textContent = `${titles[state.tail]} (shaded) · df = ${df}`;
+}
+
+// ---------------- table ----------------
+// the table row to use: exact df, or the closest listed df (a smaller df is not "conservative" for χ²,
+// because it shifts both tails, so the closest row is the usual rule)
+function rowFor(df) {
+  if (df < 1) return -1;
+  let best = 0; ROWS.forEach((d, i) => { if (Math.abs(d - df) < Math.abs(ROWS[best] - df) - 1e-9) best = i; }); return best;
+}
+const near = (a, b) => Math.abs(a - b) < 1e-9;
+
+function renderTable() {
+  let hr = -1, hcs = [], br = null;
+  if (!state.error) {
+    hr = rowFor(state.df);
+    if (state.dir === "p2x") {
+      // right-tail areas that the current answer corresponds to
+      const areas = state.tail === "right" ? [state.p] : state.tail === "left" ? [1 - state.p] : [(1 + state.p) / 2, (1 - state.p) / 2];
+      hcs = areas.map(a => RIGHT.findIndex(r => near(r, a))).filter(j => j >= 0);
+    } else if (hr >= 0) {
+      const xs = state.tail === "central" ? bounds() : [state.x];
+      br = [];
+      xs.forEach(x => {
+        const crit = RIGHT.map(a => qcUpper(a, ROWS[hr]));
+        const k = crit.findIndex(c => x < c);
+        if (k === -1) br.push(RIGHT.length - 1); else if (k === 0) br.push(0); else br.push(k - 1, k);
+      });
+    }
+  }
+  if (state.rowStart === null) {
+    const center = hr >= 0 ? hr : 0;
+    state.rowStart = Math.max(0, Math.min(ROWS.length - WINDOW, center - Math.floor(WINDOW / 2)));
+  }
+  const start = state.rowStart, end = Math.min(ROWS.length, start + WINDOW);
+  $("t_up").disabled = start === 0;
+  $("t_down").disabled = end >= ROWS.length;
+
+  const colHl = j => hcs.includes(j) || (br && br.includes(j));
+  const gap = j => (j === 5 ? "gapcol" : "");
+  let html = "<thead>";
+  html += `<tr class="main"><th class="rowlab">Area to the right</th>${RIGHT.map((a, j) => `<th class="${gap(j)} ${colHl(j) ? "hl-head" : ""}">${fmtA(a)}</th>`).join("")}</tr>`;
+  html += `<tr><th class="rowlab">Area to the left</th>${RIGHT.map((a, j) => `<th class="${gap(j)} ${colHl(j) ? "hl-head" : ""}">${fmtA(+(1 - a).toFixed(4))}</th>`).join("")}</tr>`;
+  html += `<tr><th class="rowlab">df</th><th colspan="5" style="font-weight:400">lower tail (small χ²)</th><th colspan="${RIGHT.length - 5}" class="gapcol" style="font-weight:400">upper tail (large χ²)</th></tr></thead><tbody>`;
+  for (let i = start; i < end; i++) {
+    const d = ROWS[i];
+    html += `<tr><th class="${i === hr ? "hl-head" : ""}">${d}</th>`;
+    RIGHT.forEach((a, j) => {
+      let cls = gap(j);
+      if (i === hr && hcs.includes(j)) cls += " hl-cell";
+      else if (i === hr && br && br.includes(j)) cls += " hl-bracket";
+      else if (i === hr) cls += " hl-row";
+      else if (hr >= 0 && colHl(j)) cls += " hl-col";
+      html += `<td class="${cls}" data-i="${i}" data-j="${j}">${cell(qcUpper(a, d))}</td>`;
+    });
+    html += "</tr>";
+  }
+  html += "</tbody>";
+  $("ttable").innerHTML = html;
+  $("ttable").querySelectorAll("td").forEach(td => td.addEventListener("click", () => {
+    const d = ROWS[+td.dataset.i], a = RIGHT[+td.dataset.j];
+    if (state.dir !== "p2x") { state.dir = "p2x"; setSeg("seg_dir", "p2x"); }
+    $("df").value = d;
+    $("val").value = state.tail === "right" ? a : state.tail === "left" ? +(1 - a).toFixed(4) : +(1 - 2 * Math.min(a, 1 - a)).toFixed(4);
+    setupInput(); recompute(); render(false);
+  }));
+
+  let note = "Row = degrees of freedom; columns = area to the right. Click any cell to use it.";
+  if (!state.error) {
+    const d = state.df, used = hr >= 0 ? ROWS[hr] : null, off = used !== null && used !== d;
+    if (hr < 0) note = `df = ${d} is below 1, so it is not in the table; the result above is still exact.`;
+    else if (state.dir === "p2x") {
+      note = hcs.length ? `Highlighted: df = ${used}, ${hcs.map(j => "right area " + fmtA(RIGHT[j])).join(" and ")}.`
+                        : "This probability is not a table column; the result above is exact.";
+      if (state.tail === "left" && hcs.length) note += " A left area of p is the column with right area 1 − p.";
+      if (state.tail === "central" && hcs.length) note += " Central area: the lower value uses right area 1 − α/2, the upper uses α/2.";
+      if (off) note += ` df = ${d} is not listed, so the table uses the closest listed df (${used}).`;
+    } else {
+      const x = state.tail === "central" ? bounds()[1] : state.x;
+      const crit = RIGHT.map(a => qcUpper(a, used));
+      const k = crit.findIndex(c => x < c);
+      const where = k === 0 ? `above ${fmtA(RIGHT[0])}` : k === -1 ? `below ${fmtA(RIGHT[RIGHT.length - 1])}` : `between ${fmtA(RIGHT[k])} and ${fmtA(RIGHT[k - 1])}`;
+      note = `With the table alone: χ² = ${x.toFixed(3)} on row df = ${used} has a right-tail area ${where} (exact for df = ${d}: ${fmtP(cUpper(x, d))}).`;
+      if (off) note += ` df = ${d} is not listed, so the closest listed df (${used}) is used.`;
+    }
+  }
+  $("table_note").textContent = note;
+}
+$("t_up").addEventListener("click", () => { state.rowStart = Math.max(0, state.rowStart - 7); renderTable(); });
+$("t_down").addEventListener("click", () => { state.rowStart = Math.min(ROWS.length - WINDOW, state.rowStart + 7); renderTable(); });
+
+function render(resetWindow = true) {
+  if (resetWindow) state.rowStart = null;
+  renderResult(); renderPlot(); renderTable();
+}
+
+// ---------------- embedding: report height to the parent page ----------------
+if (window.self !== window.top) {
+  document.documentElement.classList.add("embedded");
+  let lastH = 0;
+  const reportHeight = () => {
+    const h = Math.ceil(document.body.getBoundingClientRect().height);
+    if (h > 0 && h !== lastH) { lastH = h; window.parent.postMessage({ type: "chi-table-height", height: h }, "*"); }
+  };
+  new ResizeObserver(reportHeight).observe(document.body);
+  window.addEventListener("load", () => { reportHeight(); setTimeout(reportHeight, 500); setTimeout(reportHeight, 1500); });
+}
+
+setupInput();
+recompute();
+window.addEventListener("load", () => render());
+</script>
+</body>
+</html>

@@ -446,7 +446,7 @@ function renderSamp(I, xr, se, me, ints, last, alpha) {
   const a2 = (alpha / 2 * 100).toFixed(alpha * 100 < 1 ? 2 : 1).replace(/\.0$/, "");
   const ann = [
     { x: I.mu, y: ymax, yanchor: "top", xanchor: "left", text: ` μ = ${f(I.mu)}`, showarrow: false, font: { color: C.mu } },
-    { x: I.mu, y: peak * 0.42, text: `<b>${lvl}%</b><br>central area`, showarrow: false, font: { size: 11, color: "#08306b" } },
+    { x: I.mu, y: peak * 0.42, text: `<b>${lvl}%</b>`, showarrow: false, font: { size: 11, color: "#08306b" } },
     { x: lo, y: dens(lo) + peak * 0.25, yanchor: "bottom", text: `μ − ME<br>${f(lo)}`, showarrow: false, font: { size: 10, color: "#a1251f" } },
     { x: hi, y: dens(hi) + peak * 0.25, yanchor: "bottom", text: `μ + ME<br>${f(hi)}`, showarrow: false, font: { size: 10, color: "#a1251f" } }
   ];

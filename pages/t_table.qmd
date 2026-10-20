@@ -1,0 +1,21 @@
+---
+page-layout: full
+---
+
+```{=html}
+<iframe id="t-frame" src="../apps/t_table.html"
+        style="width:100%; height:820px; border:0; display:block;"
+        title="Student's t table (t-table)"></iframe>
+
+<script>
+// The app reports its own height; the iframe is resized to fit it,
+// so only the page scrolls
+window.addEventListener("message", function (e) {
+  var frame = document.getElementById("t-frame");
+  if (!frame || e.source !== frame.contentWindow) return;
+  if (e.data && e.data.type === "t-table-height") {
+    frame.style.height = (e.data.height + 2) + "px";
+  }
+});
+</script>
+```

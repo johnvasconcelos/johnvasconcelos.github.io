@@ -1,0 +1,389 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Normal vs. Student t</title>
+<script src="https://cdn.jsdelivr.net/npm/plotly.js-dist-min@2.35.2/plotly.min.js"></script>
+<style>
+  :root {
+    --bg: #f5f6f8; --card: #ffffff; --ink: #1f2933; --muted: #5f6b7a;
+    --line: #e2e6ea; --accent: #08519c; --accent-soft: #e8f0f9;
+    --tcol: #e6550d; --t-soft: #fdeee4; --tail: #fb6a4a; --tail-soft: #fde2e1;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: var(--bg); color: var(--ink);
+    font: 13px/1.4 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  header { padding: 10px 16px 6px; }
+  header h1 { margin: 0; font-size: 18px; font-weight: 650; }
+  header p { margin: 2px 0 0; color: var(--muted); font-size: 12px; max-width: 1000px; }
+
+  .app { display: grid; grid-template-columns: 260px minmax(0, 1fr) 290px; gap: 12px; padding: 6px 16px 16px; align-items: start; }
+  .col { display: grid; gap: 10px; min-width: 0; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 8px 10px; min-width: 0; }
+  .card h3 { margin: 0 0 1px; font-size: 13px; font-weight: 650; }
+  .card .sub { color: var(--muted); font-size: 11.5px; margin: 0; }
+
+  /* ---------- controls ---------- */
+  .controls h2 { font-size: 11px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); margin: 12px 0 6px; font-weight: 650; }
+  .controls h2:first-child { margin-top: 0; }
+  .field { margin-bottom: 9px; }
+  .field label { display: block; font-weight: 550; margin-bottom: 3px; font-size: 12px; }
+  .field output { float: right; font-weight: 650; color: var(--tcol); font-variant-numeric: tabular-nums; font-size: 14px; }
+  input[type=range] { width: 100%; margin: 0; accent-color: var(--tcol); }
+  .seg { display: flex; border: 1px solid #c9d0d7; border-radius: 6px; overflow: hidden; }
+  .seg button { flex: 1; font: inherit; font-size: 12px; border: 0; background: #fff; color: var(--ink); padding: 4px 2px; cursor: pointer; }
+  .seg button + button { border-left: 1px solid #c9d0d7; }
+  .seg button[aria-pressed="true"] { background: var(--accent); color: #fff; }
+  .btns { display: grid; grid-template-columns: 1fr 1.4fr 1fr; gap: 6px; margin-top: 6px; }
+  button.b { font: inherit; padding: 5px 8px; border-radius: 6px; cursor: pointer; border: 1px solid #c9d0d7; background: #fff; color: var(--ink); }
+  button.b:hover { background: #f0f2f4; }
+  button.b.play[aria-pressed="true"] { background: var(--tcol); border-color: var(--tcol); color: #fff; }
+  .chips { display: flex; flex-wrap: wrap; gap: 3px; margin-top: 6px; }
+  .chips button { font: inherit; font-size: 11px; font-variant-numeric: tabular-nums; min-width: 30px; padding: 2px 4px; border-radius: 5px;
+    border: 1px solid #d5dbe1; background: #fff; color: var(--ink); cursor: pointer; }
+  .chips button:hover { background: #f0f2f4; }
+  .chips button[aria-pressed="true"] { background: var(--tcol); border-color: var(--tcol); color: #fff; font-weight: 650; }
+  .chips .gap { flex-basis: 100%; height: 0; }
+  .check { display: flex; gap: 7px; align-items: center; font-size: 12.5px; margin: 5px 0; cursor: pointer; }
+  .check input { accent-color: var(--accent); width: 15px; height: 15px; margin: 0; }
+  .check.big { font-weight: 600; background: var(--accent-soft); border-radius: 6px; padding: 6px 8px; }
+  .help { color: var(--muted); font-size: 11px; margin: 4px 0 0; }
+
+  /* ---------- plots ---------- */
+  #plot_main { height: 420px; }
+  #plot_crit { height: 230px; }
+  .legend { display: flex; flex-wrap: wrap; gap: 14px; font-size: 12px; margin: 4px 0 0; }
+  .legend span { display: inline-flex; align-items: center; gap: 6px; }
+  .legend i { display: inline-block; width: 22px; height: 0; border-top: 3px solid var(--tcol); }
+  .legend i.n { border-top: 2.5px dashed var(--accent); }
+  .legend i.g { border-top: 2px solid #f3b893; }
+  .legend .off { opacity: .35; }
+
+  /* ---------- comparison table ---------- */
+  table.cmp { width: 100%; border-collapse: collapse; margin-top: 6px; font-variant-numeric: tabular-nums; font-size: 12px; }
+  table.cmp th { text-align: right; font-size: 10.5px; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); font-weight: 650; padding: 3px 4px; border-bottom: 1px solid var(--line); }
+  table.cmp th:first-child, table.cmp td:first-child { text-align: left; }
+  table.cmp td { text-align: right; padding: 5px 4px; border-bottom: 1px dashed var(--line); }
+  table.cmp td.t { color: var(--tcol); font-weight: 650; }
+  table.cmp td.n { color: var(--accent); }
+  table.cmp td small { display: block; color: var(--muted); font-size: 10.5px; font-weight: 400; }
+  table.cmp tr:last-child td { border-bottom: 0; }
+  .interp { margin-top: 8px; font-size: 11.5px; background: var(--t-soft); border-radius: 6px; padding: 7px 9px; }
+  .interp b { color: #a63603; }
+  .formula { margin-top: 8px; font-size: 11.5px; color: var(--muted); background: #f5f7f9; border-radius: 6px; padding: 6px 8px; }
+  .formula .f { font-family: ui-monospace, "SF Mono", Consolas, monospace; color: var(--ink); font-size: 11.5px; }
+
+  html.embedded body { background: transparent; }
+  @media (max-width: 1150px) { .app { grid-template-columns: 260px minmax(0, 1fr); } .col.right { grid-column: 2; } }
+  @media (max-width: 760px) { .app { grid-template-columns: 1fr; } .col.right { grid-column: auto; } }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>The Normal Distribution vs. Student's t</h1>
+  <p>The t distribution looks like the standard normal but has <b>heavier tails</b>: with few degrees of freedom, extreme values are much more likely. As the degrees of freedom (df = n − 1) grow, t gets closer and closer to N(0, 1).</p>
+</header>
+
+<div class="app">
+  <!-- ======================= CONTROLS ======================= -->
+  <aside class="card controls">
+    <h2>Degrees of freedom</h2>
+    <div class="field">
+      <label for="dfi">df <output id="df_out">1</output></label>
+      <input type="range" id="dfi" min="0" max="0" step="1" value="0">
+    </div>
+    <div class="btns">
+      <button class="b" id="prev" title="Previous df">◀</button>
+      <button class="b play" id="play" aria-pressed="false">▶ Play</button>
+      <button class="b" id="next" title="Next df">▶</button>
+    </div>
+    <div class="chips" id="chips"></div>
+    <p class="help">Steps: 1 to 5, then every 5 up to 50, then every 20 up to 200.</p>
+
+    <h2>Overlay</h2>
+    <label class="check big"><input type="checkbox" id="show_norm" checked> Overlay the standard normal N(0, 1)</label>
+    <label class="check"><input type="checkbox" id="show_trail"> Keep earlier t curves (ghosts)</label>
+    <label class="check"><input type="checkbox" id="show_crit" checked> Mark critical values ±t* and ±z*</label>
+
+    <h2>Confidence level (for t* and z*)</h2>
+    <div class="seg" id="seg_conf">
+      <button data-v="90" aria-pressed="false">90%</button>
+      <button data-v="95" aria-pressed="true">95%</button>
+      <button data-v="99" aria-pressed="false">99%</button>
+    </div>
+
+    <h2>Vertical axis</h2>
+    <div class="seg" id="seg_scale">
+      <button data-v="linear" aria-pressed="true">Linear</button>
+      <button data-v="log" aria-pressed="false">Log (see tails)</button>
+    </div>
+    <p class="help">On the log scale the tails stop looking like zero, so the gap between t and the normal far from the center becomes visible.</p>
+  </aside>
+
+  <!-- ======================= MIDDLE: plots ======================= -->
+  <div class="col">
+    <section class="card">
+      <h3>1. Density curves</h3>
+      <p class="sub" id="main_sub"></p>
+      <div id="plot_main"></div>
+      <div class="legend" id="legend">
+        <span><i></i> <span id="leg_t">t (df = 1)</span></span>
+        <span id="leg_n"><i class="n"></i> Standard normal N(0, 1)</span>
+        <span id="leg_g" class="off"><i class="g"></i> earlier df</span>
+      </div>
+    </section>
+    <section class="card">
+      <h3>2. Critical value t* as df grows</h3>
+      <p class="sub" id="crit_sub"></p>
+      <div id="plot_crit"></div>
+    </section>
+  </div>
+
+  <!-- ======================= RIGHT: comparison ======================= -->
+  <div class="col right">
+    <section class="card">
+      <h3>3. t vs. normal at <span id="df_title">df = 1</span></h3>
+      <table class="cmp" id="cmp"></table>
+      <div class="interp" id="interp"></div>
+      <div class="formula">
+        <div><span class="f">T = (x̄ − μ) / (s / √n)</span>, df = n − 1</div>
+        <div style="margin-top:3px">Using s instead of σ adds extra uncertainty; the heavier tails of t pay for it. When n is large, s ≈ σ and T ≈ Z.</div>
+      </div>
+    </section>
+  </div>
+</div>
+
+<script id="stats-lib">
+// ---------- normal ----------
+function pnorm(z) {
+  const x = Math.abs(z); let c;
+  if (x > 37) c = 0;
+  else {
+    const e = Math.exp(-x * x / 2);
+    if (x < 7.07106781186547) {
+      let b = 3.52624965998911e-02 * x + 0.700383064443688;
+      b = b * x + 6.37396220353165; b = b * x + 33.912866078383; b = b * x + 112.079291497871;
+      b = b * x + 221.213596169931; b = b * x + 220.206867912376; c = e * b;
+      b = 8.83883476483184e-02 * x + 1.75566716318264; b = b * x + 16.064177579207; b = b * x + 86.7807322029461;
+      b = b * x + 296.564248779674; b = b * x + 637.333633378831; b = b * x + 793.826512519948; b = b * x + 440.413735824752;
+      c = c / b;
+    } else { let b = x + 0.65; b = x + 4 / b; b = x + 3 / b; b = x + 2 / b; b = x + 1 / b; c = e / b / 2.506628274631; }
+  }
+  return z > 0 ? 1 - c : c;
+}
+function qnorm(p) {
+  const a = [-3.969683028665376e+01, 2.209460984245205e+02, -2.759285104469687e+02, 1.383577518672690e+02, -3.066479806614716e+01, 2.506628277459239e+00];
+  const b = [-5.447609879822406e+01, 1.615858368580409e+02, -1.556989798598866e+02, 6.680131188771972e+01, -1.328068155288572e+01];
+  const c = [-7.784894002430293e-03, -3.223964580411365e-01, -2.400758277161838e+00, -2.549732539343734e+00, 4.374664141464968e+00, 2.938163982698783e+00];
+  const d = [7.784695709041462e-03, 3.224671290700398e-01, 2.445134137142996e+00, 3.754408661907416e+00];
+  const pl = 0.02425; let q, r, x;
+  if (p < pl) { q = Math.sqrt(-2 * Math.log(p)); x = (((((c[0] * q + c[1]) * q + c[2]) * q + c[3]) * q + c[4]) * q + c[5]) / ((((d[0] * q + d[1]) * q + d[2]) * q + d[3]) * q + 1); }
+  else if (p <= 1 - pl) { q = p - 0.5; r = q * q; x = (((((a[0] * r + a[1]) * r + a[2]) * r + a[3]) * r + a[4]) * r + a[5]) * q / (((((b[0] * r + b[1]) * r + b[2]) * r + b[3]) * r + b[4]) * r + 1); }
+  else { q = Math.sqrt(-2 * Math.log(1 - p)); x = -(((((c[0] * q + c[1]) * q + c[2]) * q + c[3]) * q + c[4]) * q + c[5]) / ((((d[0] * q + d[1]) * q + d[2]) * q + d[3]) * q + 1); }
+  const e = pnorm(x) - p, u = e * Math.sqrt(2 * Math.PI) * Math.exp(x * x / 2);
+  return x - u / (1 + x * u / 2);
+}
+const dnorm = x => Math.exp(-0.5 * x * x) / Math.sqrt(2 * Math.PI);
+
+// ---------- Student t ----------
+const LG = [0.99999999999980993, 676.5203681218851, -1259.1392167224028, 771.32342877765313, -176.61502916214059, 12.507343278686905, -0.13857109526572012, 9.9843695780195716e-6, 1.5056327351493116e-7];
+function lgamma(x) {
+  if (x < 0.5) return Math.log(Math.PI / Math.abs(Math.sin(Math.PI * x))) - lgamma(1 - x);
+  x -= 1; let a = LG[0]; const t = x + 7.5;
+  for (let i = 1; i < 9; i++) a += LG[i] / (x + i);
+  return 0.5 * Math.log(2 * Math.PI) + (x + 0.5) * Math.log(t) - t + Math.log(a);
+}
+function betacf(a, b, x) {
+  const FPMIN = 1e-300; let qab = a + b, qap = a + 1, qam = a - 1, c = 1, d = 1 - qab * x / qap;
+  if (Math.abs(d) < FPMIN) d = FPMIN; d = 1 / d; let h = d;
+  for (let m = 1; m <= 300; m++) {
+    const m2 = 2 * m; let aa = m * (b - m) * x / ((qam + m2) * (a + m2));
+    d = 1 + aa * d; if (Math.abs(d) < FPMIN) d = FPMIN; c = 1 + aa / c; if (Math.abs(c) < FPMIN) c = FPMIN; d = 1 / d; h *= d * c;
+    aa = -(a + m) * (qab + m) * x / ((a + m2) * (qap + m2));
+    d = 1 + aa * d; if (Math.abs(d) < FPMIN) d = FPMIN; c = 1 + aa / c; if (Math.abs(c) < FPMIN) c = FPMIN; d = 1 / d;
+    const del = d * c; h *= del; if (Math.abs(del - 1) < 1e-15) break;
+  }
+  return h;
+}
+function ibeta(a, b, x) {
+  if (x <= 0) return 0; if (x >= 1) return 1;
+  const bt = Math.exp(lgamma(a + b) - lgamma(a) - lgamma(b) + a * Math.log(x) + b * Math.log(1 - x));
+  return x < (a + 1) / (a + b + 2) ? bt * betacf(a, b, x) / a : 1 - bt * betacf(b, a, 1 - x) / b;
+}
+function pt(t, df) { const tail = 0.5 * ibeta(df / 2, 0.5, df / (df + t * t)); return t > 0 ? 1 - tail : tail; }
+function qt(p, df) {
+  let lo = 0, hi = 1;
+  while (pt(hi, df) < p) hi *= 2;
+  for (let i = 0; i < 200; i++) { const mid = (lo + hi) / 2; if (pt(mid, df) < p) lo = mid; else hi = mid; }
+  return (lo + hi) / 2;
+}
+function dt(x, df) {
+  return Math.exp(lgamma((df + 1) / 2) - lgamma(df / 2) - 0.5 * Math.log(df * Math.PI) - (df + 1) / 2 * Math.log(1 + x * x / df));
+}
+</script>
+
+<script>
+const $ = id => document.getElementById(id);
+const C = { t: "#e6550d", tFill: "rgba(230,85,13,0.12)", ghost: "rgba(243,184,147,0.55)", norm: "#08519c", tail: "rgba(251,106,74,0.35)" };
+const FONT = { family: "system-ui, -apple-system, Segoe UI, Roboto, sans-serif", size: 11, color: "#1f2933" };
+const CFG = { displayModeBar: false, responsive: true };
+
+// df sequence: 1–5, every 5 to 50, every 20 to 190, then 200
+const DFS = [1, 2, 3, 4, 5];
+for (let d = 10; d <= 50; d += 5) DFS.push(d);
+for (let d = 70; d <= 190; d += 20) DFS.push(d);
+DFS.push(200);
+
+const S = { conf: 95, scale: "linear", timer: null };
+const XR = [-5, 5];
+const XS = (() => { const r = []; for (let i = 0; i <= 600; i++) r.push(XR[0] + (XR[1] - XR[0]) * i / 600); return r; })();
+
+// ---------------- controls ----------------
+$("dfi").max = DFS.length - 1;
+$("chips").innerHTML = DFS.map((d, i) => (d === 10 || d === 70 ? '<span class="gap"></span>' : "") + `<button data-i="${i}">${d}</button>`).join("");
+document.querySelectorAll("#chips button").forEach(b => b.addEventListener("click", () => { stop(); $("dfi").value = b.dataset.i; render(); }));
+$("dfi").addEventListener("input", () => { stop(); render(); });
+$("prev").addEventListener("click", () => { stop(); step(-1); });
+$("next").addEventListener("click", () => { stop(); step(1); });
+$("play").addEventListener("click", () => (S.timer ? stop() : play()));
+["show_norm", "show_trail", "show_crit"].forEach(id => $(id).addEventListener("change", render));
+function setSeg(id, v) { document.querySelectorAll(`#${id} button`).forEach(b => b.setAttribute("aria-pressed", String(b.dataset.v === v))); }
+document.querySelectorAll("#seg_conf button").forEach(b => b.addEventListener("click", () => { S.conf = +b.dataset.v; setSeg("seg_conf", b.dataset.v); render(); }));
+document.querySelectorAll("#seg_scale button").forEach(b => b.addEventListener("click", () => { S.scale = b.dataset.v; setSeg("seg_scale", b.dataset.v); render(); }));
+
+function step(k) { const i = Math.min(DFS.length - 1, Math.max(0, +$("dfi").value + k)); $("dfi").value = i; render(); }
+function play() {
+  if (+$("dfi").value >= DFS.length - 1) $("dfi").value = 0;
+  $("play").setAttribute("aria-pressed", "true"); $("play").textContent = "❚❚ Pause";
+  render();
+  S.timer = setInterval(() => { if (+$("dfi").value >= DFS.length - 1) return stop(); step(1); }, 700);
+}
+function stop() { clearInterval(S.timer); S.timer = null; $("play").setAttribute("aria-pressed", "false"); $("play").textContent = "▶ Play"; }
+
+// ---------------- helpers ----------------
+const f = (x, d = 3) => (Number.isFinite(x) ? x.toFixed(d) : "—");
+const pct = p => (p >= 0.0995 ? (100 * p).toFixed(1) : p >= 0.000995 ? (100 * p).toFixed(2) : (100 * p).toFixed(3)) + "%";
+const tailT = (c, df) => 2 * (1 - pt(c, df));
+const tailZ = c => 2 * (1 - pnorm(c));
+
+// ---------------- render ----------------
+function render() {
+  const i = +$("dfi").value, df = DFS[i];
+  const showN = $("show_norm").checked, showG = $("show_trail").checked, showC = $("show_crit").checked;
+  const alpha = 1 - S.conf / 100;
+  const zc = qnorm(1 - alpha / 2), tc = qt(1 - alpha / 2, df);
+
+  $("df_out").textContent = df;
+  $("df_title").textContent = `df = ${df}`;
+  $("leg_t").textContent = `t (df = ${df})`;
+  $("leg_n").classList.toggle("off", !showN);
+  $("leg_g").classList.toggle("off", !showG);
+  document.querySelectorAll("#chips button").forEach(b => b.setAttribute("aria-pressed", String(+b.dataset.i === i)));
+
+  renderMain(df, i, showN, showG, showC, zc, tc, alpha);
+  renderCrit(df, zc, alpha);
+  renderTable(df, zc, tc, alpha);
+}
+
+function renderMain(df, i, showN, showG, showC, zc, tc, alpha) {
+  const log = S.scale === "log";
+  const tr = [];
+  if (showG) DFS.slice(0, i).forEach(d => tr.push({ type: "scatter", mode: "lines", x: XS, y: XS.map(x => dt(x, d)), line: { color: C.ghost, width: 1 }, hoverinfo: "skip" }));
+
+  // shaded tails of t beyond ±t*
+  if (showC && tc < XR[1]) {
+    const piece = (a, b) => { const p = XS.filter(x => x >= a && x <= b); return { x: [p[0], ...p, p[p.length - 1]], y: [log ? 1e-6 : 0, ...p.map(x => dt(x, df)), log ? 1e-6 : 0] }; };
+    tr.push({ type: "scatter", mode: "lines", ...piece(XR[0], -tc), fill: "toself", fillcolor: C.tail, line: { width: 0 }, hoverinfo: "skip" });
+    tr.push({ type: "scatter", mode: "lines", ...piece(tc, XR[1]), fill: "toself", fillcolor: C.tail, line: { width: 0 }, hoverinfo: "skip" });
+  }
+  tr.push({ type: "scatter", mode: "lines", x: XS, y: XS.map(x => dt(x, df)), line: { color: C.t, width: 3 }, fill: log ? "none" : "tozeroy", fillcolor: C.tFill,
+            hovertemplate: `x = %{x:.2f}<br>t(df=${df}) density = %{y:.4f}<extra></extra>` });
+  if (showN) tr.push({ type: "scatter", mode: "lines", x: XS, y: XS.map(dnorm), line: { color: C.norm, width: 2.5, dash: "dash" },
+            hovertemplate: "x = %{x:.2f}<br>N(0,1) density = %{y:.4f}<extra></extra>" });
+
+  const ymax = 0.45;
+  const shapes = [], ann = [];
+  const lvl = S.conf;
+  if (showC) {
+    const tIn = tc <= XR[1];
+    if (tIn) [-tc, tc].forEach(v => shapes.push({ type: "line", x0: v, x1: v, y0: log ? 1e-5 : 0, y1: log ? 0.3 : 0.3, line: { color: C.t, width: 1.5, dash: "dot" } }));
+    if (tIn) ann.push({ x: tc, y: log ? Math.log10(0.3) : 0.3, yanchor: "bottom", text: `t* = ${f(tc)}`, showarrow: false, font: { size: 11, color: C.t } });
+    else ann.push({ x: XR[1], y: log ? Math.log10(0.3) : 0.3, xanchor: "right", yanchor: "bottom", text: `t* = ${f(tc)} →<br>(off the chart)`, showarrow: false, font: { size: 11, color: C.t } });
+    if (showN) {
+      [-zc, zc].forEach(v => shapes.push({ type: "line", x0: v, x1: v, y0: log ? 1e-5 : 0, y1: 0.2, line: { color: C.norm, width: 1.5, dash: "dot" } }));
+      ann.push({ x: -zc, y: log ? Math.log10(0.2) : 0.2, yanchor: "bottom", text: `−z* = ${f(-zc)}`, showarrow: false, font: { size: 11, color: C.norm } });
+    }
+    ann.push({ x: 0, y: log ? Math.log10(0.02) : 0.06, text: `<b>${lvl}%</b> between ±t*`, showarrow: false, font: { size: 11, color: "#a63603" } });
+  }
+
+  Plotly.react($("plot_main"), tr, {
+    margin: { l: 50, r: 12, t: 8, b: 34 }, font: FONT, paper_bgcolor: "#fff", plot_bgcolor: "#fff", showlegend: false, hovermode: "closest",
+    xaxis: { range: XR, dtick: 1, gridcolor: "#eef0f2", zeroline: false, title: { text: "x", standoff: 4 } },
+    yaxis: log ? { type: "log", range: [-5, Math.log10(0.6)], gridcolor: "#eef0f2", title: { text: "density (log)", standoff: 4 }, exponentformat: "power" }
+               : { range: [0, ymax], gridcolor: "#eef0f2", zeroline: false, title: { text: "density", standoff: 4 } },
+    shapes, annotations: ann
+  }, CFG);
+
+  $("main_sub").innerHTML = `Orange = t with df = <b>${df}</b>` + (showN ? " · dashed blue = N(0, 1)" : "") +
+    (showC ? ` · red = the two tails beyond ±t* (α/2 = ${(alpha / 2 * 100).toFixed(1).replace(/\.0$/, "")}% each)` : "");
+}
+
+function renderCrit(df, zc, alpha) {
+  const tcs = DFS.map(d => qt(1 - alpha / 2, d));
+  const tr = [
+    { type: "scatter", mode: "lines+markers", x: DFS, y: tcs, line: { color: C.t, width: 2 }, marker: { size: 5, color: C.t },
+      hovertemplate: "df = %{x}<br>t* = %{y:.3f}<extra></extra>" },
+    { type: "scatter", mode: "markers", x: [df], y: [qt(1 - alpha / 2, df)], marker: { size: 13, color: C.t, line: { color: "#fff", width: 2 } }, hoverinfo: "skip" }
+  ];
+  const ymax = Math.min(Math.max(...tcs) * 1.05, 14);
+  Plotly.react($("plot_crit"), tr, {
+    margin: { l: 50, r: 12, t: 8, b: 34 }, font: FONT, paper_bgcolor: "#fff", plot_bgcolor: "#fff", showlegend: false, hovermode: "closest",
+    xaxis: { type: "log", tickvals: [1, 2, 3, 5, 10, 20, 50, 100, 200], gridcolor: "#eef0f2", title: { text: "degrees of freedom (log scale)", standoff: 4 } },
+    yaxis: { range: [0, ymax], gridcolor: "#eef0f2", zeroline: false, title: { text: "critical value", standoff: 4 } },
+    shapes: [{ type: "line", xref: "paper", x0: 0, x1: 1, y0: zc, y1: zc, line: { color: C.norm, width: 2, dash: "dash" } }],
+    annotations: [{ xref: "paper", x: 1, y: zc, xanchor: "right", yanchor: "bottom", text: `z* = ${f(zc)} (normal)`, showarrow: false, font: { color: C.norm } }]
+  }, CFG);
+  const t1 = qt(1 - alpha / 2, 1);
+  $("crit_sub").innerHTML = `${S.conf}% level · t* falls from ${f(t1, 2)} (df = 1) toward z* = ${f(zc)} · y-axis capped at ${f(ymax, 0)}`;
+}
+
+function renderTable(df, zc, tc, alpha) {
+  const varT = df > 2 ? df / (df - 2) : NaN;
+  const varTxt = df === 1 ? "undefined" : df === 2 ? "∞" : f(varT);
+  const p2 = tailT(2, df), p3 = tailT(3, df), pz = tailT(zc, df);
+  const peakT = dt(0, df), peakN = dnorm(0);
+  $("cmp").innerHTML = `
+    <tr><th></th><th>t (df = ${df})</th><th>N(0, 1)</th></tr>
+    <tr><td>Critical value (${S.conf}%)</td><td class="t">${f(tc)}<small>${f(100 * (tc / zc - 1), 1)}% wider</small></td><td class="n">${f(zc)}</td></tr>
+    <tr><td>Area beyond ±z* = ±${f(zc, 2)}</td><td class="t">${pct(pz)}</td><td class="n">${pct(alpha)}</td></tr>
+    <tr><td>P(|X| &gt; 2)</td><td class="t">${pct(p2)}<small>${f(p2 / tailZ(2), 2)}× the normal</small></td><td class="n">${pct(tailZ(2))}</td></tr>
+    <tr><td>P(|X| &gt; 3)</td><td class="t">${pct(p3)}<small>${f(p3 / tailZ(3), 1)}× the normal</small></td><td class="n">${pct(tailZ(3))}</td></tr>
+    <tr><td>Height at 0</td><td class="t">${f(peakT)}</td><td class="n">${f(peakN)}</td></tr>
+    <tr><td>Variance</td><td class="t">${varTxt}</td><td class="n">1</td></tr>`;
+
+  const close = Math.abs(tc - zc) < 0.02;
+  $("interp").innerHTML = df <= 5
+    ? `<b>Very heavy tails.</b> With df = ${df}, values beyond ±3 happen ${f(p3 / tailZ(3), 0)} times more often than under the normal. Using z* = ${f(zc, 2)} here would leave ${pct(pz)} outside instead of ${pct(alpha)}, so a "${S.conf}%" interval would be too narrow.`
+    : close
+      ? `<b>Practically normal.</b> With df = ${df}, t* = ${f(tc)} differs from z* by only ${f(tc - zc)}. The curves are almost on top of each other.`
+      : `<b>Getting closer.</b> With df = ${df}, t* is ${f(100 * (tc / zc - 1), 1)}% larger than z*. The centers almost match; the remaining difference is in the tails (try the log scale).`;
+}
+
+// ---------------- embedding ----------------
+if (window.self !== window.top) {
+  document.documentElement.classList.add("embedded");
+  let lastH = 0;
+  const reportHeight = () => {
+    const h = Math.ceil(document.body.getBoundingClientRect().height);
+    if (h > 0 && h !== lastH) { lastH = h; window.parent.postMessage({ type: "app-height", height: h }, "*"); }
+  };
+  new ResizeObserver(reportHeight).observe(document.body);
+  window.addEventListener("load", () => { reportHeight(); setTimeout(reportHeight, 500); setTimeout(reportHeight, 1500); });
+}
+
+window.addEventListener("load", render);
+</script>
+</body>
+</html>
