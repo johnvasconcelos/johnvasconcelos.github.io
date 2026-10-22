@@ -18,20 +18,26 @@
   header h1 { margin: 0; font-size: 18px; font-weight: 650; }
   header p { margin: 2px 0 0; color: var(--muted); font-size: 12px; }
 
-  .wrap { display: grid; gap: 10px; padding: 6px 16px 16px; }
+  .app { display: grid; grid-template-columns: 272px minmax(0, 1fr); gap: 12px; padding: 6px 16px 16px; }
   .card { background: var(--card); border: 1px solid var(--line); border-radius: 10px;
     padding: 10px 12px; min-width: 0; }
   .card h3 { margin: 0 0 2px; font-size: 13px; font-weight: 650; }
   .card .sub { color: var(--muted); font-size: 11.5px; margin: 0 0 4px; }
 
   /* ---------- top controls ---------- */
-  .controls { display: grid; grid-template-columns: auto auto minmax(220px, 1fr) minmax(260px, 1.3fr);
-    gap: 14px 18px; align-items: start; }
+  .controls { align-self: start; }
+  .controls > div { margin-bottom: 12px; }
+  .controls > div:last-child { margin-bottom: 0; }
+  .resetrow { display: flex; justify-content: flex-end; }
+  .resetbtn { font: inherit; font-size: 11.5px; padding: 3px 10px; border-radius: 999px; border: 1px solid var(--accent);
+    background: var(--accent-soft); color: var(--accent); cursor: pointer; font-weight: 600; }
+  .resetbtn:hover { background: var(--accent); color: #fff; }
+  .resetbtn:disabled { border-color: #c9d0d7; background: #fff; color: var(--muted); cursor: default; font-weight: 400; }
   .lab { display: block; font-weight: 600; margin-bottom: 4px; font-size: 11px;
     text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
-  .seg { display: inline-flex; border: 1px solid #c9d0d7; border-radius: 8px; overflow: hidden; }
-  .seg button { font: inherit; border: 0; background: #fff; color: var(--ink); padding: 7px 14px;
-    cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 3px; min-width: 78px; }
+  .seg { display: flex; width: 100%; border: 1px solid #c9d0d7; border-radius: 8px; overflow: hidden; }
+  .seg button { font: inherit; border: 0; background: #fff; color: var(--ink); padding: 7px 6px;
+    cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 3px; flex: 1; min-width: 0; }
   .seg button + button { border-left: 1px solid #c9d0d7; }
   .seg button:hover { background: #f0f2f4; }
   .seg button[aria-pressed="true"] { background: var(--accent); color: #fff; }
@@ -52,12 +58,12 @@
   .msg { color: #a1251f; font-size: 11.5px; margin-top: 4px; min-height: 0; }
 
   .result { background: var(--accent-soft); border-radius: 8px; padding: 8px 12px; }
-  .result .main { font-size: 20px; font-weight: 650; font-variant-numeric: tabular-nums; line-height: 1.25; }
+  .result .main { font-size: 16px; font-weight: 650; font-variant-numeric: tabular-nums; line-height: 1.25; }
   .result .main b { color: var(--accent); }
   .result .extra { font-size: 12px; color: var(--muted); margin-top: 3px; font-variant-numeric: tabular-nums; }
 
   /* ---------- plot + table ---------- */
-  .grid-main { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr); gap: 10px; }
+  .results { display: grid; gap: 10px; min-width: 0; align-content: start; }
   #plot { width: 100%; height: 360px; }
 
   table.zt { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; font-size: 12px; }
@@ -78,14 +84,9 @@
 
   html.embedded body { background: transparent; }
 
-  @media (max-width: 1100px) {
-    .controls { grid-template-columns: auto auto; }
-    .grid-main { grid-template-columns: 1fr; }
+    .results { display: grid; gap: 10px; min-width: 0; align-content: start; }
   }
-  @media (max-width: 620px) {
-    .controls { grid-template-columns: 1fr; }
-    .seg button { min-width: 0; padding: 6px 9px; }
-  }
+  @media (max-width: 760px) { .app { grid-template-columns: 1fr; } }
 </style>
 </head>
 <body>
@@ -95,9 +96,9 @@
   <p>Find the area under the standard normal curve for a z-score, or the z-score that gives a chosen area. Z ~ N(0, 1).</p>
 </header>
 
-<div class="wrap">
-  <!-- ======================= CONTROLS ======================= -->
-  <section class="card controls">
+<div class="app">
+  <!-- ======================= CONTROLS (left) ======================= -->
+  <aside class="card controls">
     <div>
       <span class="lab">Area</span>
       <div class="seg" id="seg_tail" role="group" aria-label="Area">
@@ -135,10 +136,10 @@
       <div class="main" id="res_main"></div>
       <div class="extra" id="res_extra"></div>
     </div>
-  </section>
+  </aside>
 
-  <!-- ======================= PLOT + TABLE ======================= -->
-  <div class="grid-main">
+  <!-- ======================= PLOT (top) + TABLE (below) ======================= -->
+  <main class="results">
     <section class="card">
       <h3 id="plot_title">Area under the standard normal curve</h3>
       <div id="plot"></div>
@@ -157,7 +158,7 @@
       <table class="zt" id="ztable"></table>
       <div class="tnote" id="table_note">Row = z to one decimal; column = second decimal. Click any cell to use that z.</div>
     </section>
-  </div>
+  </main>
 </div>
 
 <script id="stats-lib">

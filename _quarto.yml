@@ -34,14 +34,16 @@ website:
             text: "Hypergeometric Distribution"
           - href: pages/w6_poisson_distribution.qmd
             text: "Poisson Distribution"
-          - href: pages/z_table.qmd
-            text: "Z-Table"
           - href: pages/w8_sampling_distribution.qmd
             text: "Sampling Distributions"
           - href: pages/w9_confidence_intervals.qmd
             text: "Confidence Intervals"
           - href: pages/w9_t_distribution.qmd
             text: "Normal vs. t Distribution"
+      - text: StatTables
+        menu:
+          - href: pages/z_table.qmd
+            text: "Z-Table"
           - href: pages/t_table.qmd
             text: "T-Table"
           - href: pages/chi_square_table.qmd
