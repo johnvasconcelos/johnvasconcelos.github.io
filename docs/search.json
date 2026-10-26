@@ -140,6 +140,55 @@
     "text": "Terms: immigration\nCountries: United States, Great Britain, Taiwan\nGroup: alll\nTime window: alll\nCategory: all\n\n\nquery3 &lt;- gtrends(\"immigration\", geo = c(\"US\", \"GB\", \"TW\"), time = \"all\")\nplot(query3)\n\n\n\n\n\n\n\nDT::datatable(query3$interest_over_time)"
   },
   {
+    "objectID": "pages/teaching.html",
+    "href": "pages/teaching.html",
+    "title": "Teaching",
+    "section": "",
+    "text": "EPPS 2302 - Quantitative Analysis in the Social and Policy Sciences\nFall, 2026 - T/TH 2:30–3:45, GR 4.204"
+  },
+  {
+    "objectID": "pages/teaching.html#teaching-assistant",
+    "href": "pages/teaching.html#teaching-assistant",
+    "title": "Teaching",
+    "section": "",
+    "text": "EPPS 2302 - Quantitative Analysis in the Social and Policy Sciences\nFall, 2026 - T/TH 2:30–3:45, GR 4.204"
+  },
+  {
+    "objectID": "pages/powerbi.html",
+    "href": "pages/powerbi.html",
+    "title": "Power BI",
+    "section": "",
+    "text": "Financial Statments and Index Analysis Multiple Companies\n\n  \n    \n  \n\n\nFinancial Indicators Dashboard\n\n  \n    \n  \n\n\nHR & Payroll Analysis\n\n  \n    \n  \n\n\nUS Elections\nFinal data for 2024 to be updated\n\n  \n    \n  \n\n\nSummarized Financial Reports"
+  },
+  {
+    "objectID": "LICENSE.html",
+    "href": "LICENSE.html",
+    "title": "John Vasconcelos",
+    "section": "",
+    "text": "Usage Notice\nAll content on this website is freely available for anyone to use, share, modify, or build upon in any way — no permission needed, no attribution required. This is my fourth personal academic website, and I believe in open access to knowledge and resources.\nIf you find something here useful, feel free to take it."
+  },
+  {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "John Vasconcelos",
+    "section": "",
+    "text": "I am a PhD student in Public and Nonprofit Management at the University of Texas at Dallas. My research interests cover topics associated with public financial and performance accountability oversight, such as public sector auditing and financial compliance, utilizing advanced statistics and artificial intelligence."
+  },
+  {
+    "objectID": "pages/apps.html",
+    "href": "pages/apps.html",
+    "title": "Apps",
+    "section": "",
+    "text": "Effect of extreve values on the Mean and the Median\n\n  \n\n\nBinomial Distribution Simulations\n\n  \n\n\nNormal Distribution Simulations\n\n  \n\n\nHypothesis Tests"
+  },
+  {
+    "objectID": "pages/cv.html",
+    "href": "pages/cv.html",
+    "title": "CV",
+    "section": "",
+    "text": "Download PDF"
+  },
+  {
     "objectID": "pages/research.html",
     "href": "pages/research.html",
     "title": "Research",
@@ -159,55 +208,6 @@
     "title": "Research",
     "section": "Publications",
     "text": "Publications\nComing soon…"
-  },
-  {
-    "objectID": "pages/cv.html",
-    "href": "pages/cv.html",
-    "title": "CV",
-    "section": "",
-    "text": "Download PDF"
-  },
-  {
-    "objectID": "pages/apps.html",
-    "href": "pages/apps.html",
-    "title": "Apps",
-    "section": "",
-    "text": "Effect of extreve values on the Mean and the Median\n\n  \n\n\nBinomial Distribution Simulations\n\n  \n\n\nNormal Distribution Simulations\n\n  \n\n\nHypothesis Tests"
-  },
-  {
-    "objectID": "index.html",
-    "href": "index.html",
-    "title": "John Vasconcelos",
-    "section": "",
-    "text": "I am a PhD student in Public and Nonprofit Management at the University of Texas at Dallas. My research interests cover topics associated with public financial and performance accountability oversight, such as public sector auditing and financial compliance, utilizing advanced statistics and artificial intelligence."
-  },
-  {
-    "objectID": "LICENSE.html",
-    "href": "LICENSE.html",
-    "title": "John Vasconcelos",
-    "section": "",
-    "text": "Usage Notice\nAll content on this website is freely available for anyone to use, share, modify, or build upon in any way — no permission needed, no attribution required. This is my fourth personal academic website, and I believe in open access to knowledge and resources.\nIf you find something here useful, feel free to take it."
-  },
-  {
-    "objectID": "pages/powerbi.html",
-    "href": "pages/powerbi.html",
-    "title": "Power BI",
-    "section": "",
-    "text": "Financial Statments and Index Analysis Multiple Companies\n\n  \n    \n  \n\n\nFinancial Indicators Dashboard\n\n  \n    \n  \n\n\nHR & Payroll Analysis\n\n  \n    \n  \n\n\nUS Elections\nFinal data for 2024 to be updated\n\n  \n    \n  \n\n\nSummarized Financial Reports"
-  },
-  {
-    "objectID": "pages/teaching.html",
-    "href": "pages/teaching.html",
-    "title": "Teaching",
-    "section": "",
-    "text": "EPPS 2302 - Quantitative Analysis in the Social and Policy Sciences\nFall, 2026 - T/TH 2:30–3:45, GR 4.204"
-  },
-  {
-    "objectID": "pages/teaching.html#teaching-assistant",
-    "href": "pages/teaching.html#teaching-assistant",
-    "title": "Teaching",
-    "section": "",
-    "text": "EPPS 2302 - Quantitative Analysis in the Social and Policy Sciences\nFall, 2026 - T/TH 2:30–3:45, GR 4.204"
   },
   {
     "objectID": "pages_epps_6302/assign03_Data_Collection.html",

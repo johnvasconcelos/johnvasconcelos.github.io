@@ -11,6 +11,7 @@ project:
     - apps/w8_sampling_distribution.html
     - apps/w9_confidence_intervals.html
     - apps/w9_t_distribution.html
+    - apps/w10_hypothesis_testing.html
     - apps/t_table.html
     - apps/chi_square_table.html
 
@@ -40,6 +41,8 @@ website:
             text: "Confidence Intervals"
           - href: pages/w9_t_distribution.qmd
             text: "Normal vs. t Distribution"
+          - href: pages/w10_hypothesis_testing.qmd
+            text: "Hypothesis Testing"
       - text: StatTables
         menu:
           - href: pages/z_table.qmd

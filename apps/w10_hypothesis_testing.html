@@ -1,0 +1,629 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hypothesis Testing</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/plotly.js-dist-min@2.35.2/plotly.min.js"></script>
+<style>
+  :root {
+    --bg: #f5f6f8; --card: #ffffff; --ink: #1f2933; --muted: #5f6b7a;
+    --line: #e2e6ea; --accent: #08519c; --accent-soft: #e8f0f9;
+    --pcol: #e6550d; --p-soft: #fdeee4; --p-dark: #a63603;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: var(--bg); color: var(--ink);
+    font: 13px/1.4 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  header { padding: 10px 16px 6px; }
+  header h1 { margin: 0; font-size: 18px; font-weight: 650; }
+  header p { margin: 2px 0 0; color: var(--muted); font-size: 12px; max-width: 1050px; }
+
+  .app { display: grid; grid-template-columns: 330px minmax(0, 1fr) minmax(0, 1fr); gap: 12px; padding: 6px 16px 16px;
+    grid-template-areas: "sig tstat pval" "samp crit atail" "dec dec dec"; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 8px 10px; min-width: 0; }
+  .card h3 { margin: 0 0 1px; font-size: 13px; font-weight: 650; }
+  .card .sub { color: var(--muted); font-size: 11.5px; margin: 0; }
+  .card .eq { background: #f5f7f9; border-radius: 6px; padding: 4px 8px; margin: 6px 0 0; min-height: 44px;
+    display: flex; align-items: center; justify-content: center; }
+  .card .eq .katex { font-size: 1.05em; }
+  .plot { height: 200px; }
+  .tag { display: inline-block; font-size: 10.5px; font-weight: 650; text-transform: uppercase; letter-spacing: .05em;
+    border-radius: 999px; padding: 1px 7px; margin-left: 6px; vertical-align: 1px; }
+  .tag.d { background: var(--p-soft); color: var(--p-dark); }
+  .tag.a { background: var(--accent-soft); color: var(--accent); }
+
+  #c_sig { grid-area: sig; } #c_samp { grid-area: samp; }
+  #c_tstat { grid-area: tstat; } #c_crit { grid-area: crit; }
+  #c_pval { grid-area: pval; } #c_atail { grid-area: atail; }
+
+  /* ---------- controls ---------- */
+  .ctl { display: grid; grid-template-columns: 1fr 1fr; gap: 9px 14px; margin-top: 8px; }
+  .ctl .full { grid-column: 1 / -1; }
+  .lab { display: block; font-weight: 600; margin-bottom: 4px; font-size: 11px;
+    text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
+  .lab .sym { text-transform: none; font-size: 12.5px; letter-spacing: 0; }
+  .lab output { float: right; font-weight: 650; color: var(--accent); font-variant-numeric: tabular-nums; font-size: 14px;
+    text-transform: none; letter-spacing: 0; }
+  input[type=range] { width: 100%; margin: 0; accent-color: var(--accent); }
+  .range-ends { display: flex; justify-content: space-between; font-size: 10.5px; color: var(--muted); font-variant-numeric: tabular-nums; }
+  .seg { display: flex; width: 100%; border: 1px solid #c9d0d7; border-radius: 8px; overflow: hidden; }
+  .seg button { flex: 1; min-width: 0; font: inherit; font-size: 12px; font-weight: 600; border: 0; background: #fff; color: var(--ink);
+    padding: 6px 4px; cursor: pointer; font-variant-numeric: tabular-nums; }
+  .seg button + button { border-left: 1px solid #c9d0d7; }
+  .seg button:hover { background: #f0f2f4; }
+  .seg button[aria-pressed="true"] { background: var(--accent); color: #fff; }
+  .hyp { background: var(--accent-soft); border-radius: 8px; padding: 6px 10px; display: flex; gap: 22px; justify-content: center; flex-wrap: wrap; }
+  .hyp .katex { font-size: 1.1em; }
+  .help { color: var(--muted); font-size: 11.5px; margin: 0; text-align: center; background: #f5f7f9; border-radius: 6px; padding: 5px 8px; }
+  .help .katex { font-size: 1.05em; }
+
+  /* ---------- decision ---------- */
+  #c_dec { grid-area: dec; display: grid; grid-template-columns: 1.1fr 1fr 1fr; gap: 10px; align-items: stretch; padding: 10px 12px;
+    border: 2px solid var(--accent); }
+  #c_dec.reject { border-color: var(--pcol); }
+  .verdict { display: flex; flex-direction: column; justify-content: center; border-radius: 8px; padding: 8px 12px; background: var(--accent-soft); }
+  #c_dec.reject .verdict { background: var(--p-soft); }
+  .verdict .big { font-size: 18px; font-weight: 700; color: var(--accent); }
+  #c_dec.reject .verdict .big { color: var(--p-dark); }
+  .verdict .why { font-size: 12px; color: var(--muted); margin-top: 2px; }
+  .rule { background: #f5f7f9; border-radius: 8px; padding: 7px 10px; text-align: center; }
+  .rule .t { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; }
+  .rule .m { margin-top: 4px; font-size: 14px; }
+  .rule .r { font-size: 11.5px; margin-top: 3px; color: var(--muted); }
+  .legend { display: flex; gap: 16px; justify-content: center; font-size: 12px; color: var(--muted); grid-column: 1 / -1; }
+  .legend span { display: inline-flex; align-items: center; gap: 6px; }
+  .legend i { width: 14px; height: 12px; border-radius: 2px; display: inline-block; }
+
+  html.embedded body { background: transparent; }
+  @media (max-width: 1100px) {
+    .app { grid-template-columns: 300px minmax(0, 1fr) minmax(0, 1fr); }
+    .seg button { font-size: 11px; padding: 6px 2px; }
+  }
+  @media (max-width: 860px) {
+    .app { grid-template-columns: 1fr; grid-template-areas: "sig" "samp" "tstat" "pval" "crit" "atail" "dec"; }
+    #c_dec { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Hypothesis Testing: Two Routes to the Same Decision</h1>
+  <p>Set α, the null value and the direction of the test <b>before</b> collecting data; then enter what the sample gave. The top row is <b>calculated from the sample</b>; the bottom row is <b>chosen before collecting data</b>. Each card pairs with the one above it: <b>P vs. α</b> (areas) and <b>test statistic vs. critical value</b> (scores). Both comparisons always reach the same decision.</p>
+</header>
+
+<div class="app">
+  <!-- ================= ROW 1 LEFT: significance level ================= -->
+  <aside class="card" id="c_sig">
+    <h3>Significance level <span class="tag a">set in advance</span></h3>
+    <p class="sub">Decisions made before looking at the data.</p>
+    <div class="ctl">
+      <div class="full">
+        <span class="lab">Significance level <span class="sym">α</span></span>
+        <div class="seg" id="seg_alpha">
+          <button data-v="0.10">0.10</button>
+          <button data-v="0.05" aria-pressed="true">0.05</button>
+          <button data-v="0.025">0.025</button>
+          <button data-v="0.01">0.01</button>
+          <button data-v="0.001">0.001</button>
+        </div>
+      </div>
+      <div class="full">
+        <span class="lab">Type of test</span>
+        <div class="seg" id="seg_tail">
+          <button data-v="two" aria-pressed="true">Two-tailed</button>
+          <button data-v="left">Left-tailed</button>
+          <button data-v="right">Right-tailed</button>
+        </div>
+      </div>
+      <div class="full">
+        <label class="lab" for="h0"><span id="h0_lab">Null value <span class="sym">μ₀</span></span> <output id="h0_out"></output></label>
+        <input type="range" id="h0">
+        <div class="range-ends"><span id="h0_min"></span><span id="h0_max"></span></div>
+      </div>
+      <div class="full hyp"><span id="tex_h0"></span><span id="tex_h1"></span></div>
+    </div>
+  </aside>
+
+  <!-- ================= ROW 1 RIGHT: sample statistic ================= -->
+  <aside class="card" id="c_samp">
+    <h3>Sample statistic <span class="tag d">from the data</span></h3>
+    <p class="sub">What the sample gave us.</p>
+    <div class="ctl">
+      <div class="full">
+        <span class="lab">Parameter being tested</span>
+        <div class="seg" id="seg_stat">
+          <button data-v="mean" aria-pressed="true">Mean</button>
+          <button data-v="prop">Proportion</button>
+          <button data-v="var">Variance</button>
+        </div>
+      </div>
+      <div class="full" id="row_sigma">
+        <span class="lab">Population <span class="sym">σ</span></span>
+        <div class="seg" id="seg_sigma">
+          <button data-v="known" aria-pressed="true">Known → z test</button>
+          <button data-v="unknown">Unknown → t test</button>
+        </div>
+      </div>
+      <div class="full">
+        <label class="lab" for="sv"><span id="sv_lab">Sample mean <span class="sym">x̄</span></span> <output id="sv_out"></output></label>
+        <input type="range" id="sv">
+        <div class="range-ends"><span id="sv_min"></span><span id="sv_max"></span></div>
+      </div>
+      <div class="full">
+        <label class="lab" for="se"><span id="se_lab">Standard error</span> <output id="se_out"></output></label>
+        <input type="range" id="se">
+        <div class="range-ends"><span id="se_min"></span><span id="se_max"></span></div>
+      </div>
+      <div class="full" id="row_n">
+        <label class="lab" for="nn">Sample size <span class="sym">n</span> <output id="nn_out"></output></label>
+        <input type="range" id="nn" min="3" max="100" step="1" value="25">
+        <div class="range-ends"><span>3</span><span>100</span></div>
+      </div>
+      <div class="full"><p class="help" id="se_help"></p></div>
+    </div>
+  </aside>
+
+  <!-- ================= TOP ROW: calculated from the sample ================= -->
+  <section class="card" id="c_tstat">
+    <h3>Test statistic</h3>
+    <p class="sub" id="tstat_sub"></p>
+    <div class="eq" id="tex_tstat"></div>
+    <div class="plot" id="p_tstat"></div>
+  </section>
+
+  <section class="card" id="c_pval">
+    <h3>P-value</h3>
+    <p class="sub" id="pval_sub"></p>
+    <div class="eq" id="tex_pval"></div>
+    <div class="plot" id="p_pval"></div>
+  </section>
+
+  <!-- ================= BOTTOM ROW: chosen before collecting data ================= -->
+  <section class="card" id="c_crit">
+    <h3>Critical value</h3>
+    <p class="sub" id="crit_sub"></p>
+    <div class="eq" id="tex_crit"></div>
+    <div class="plot" id="p_crit"></div>
+  </section>
+
+  <section class="card" id="c_atail">
+    <h3>α tail area</h3>
+    <p class="sub" id="atail_sub"></p>
+    <div class="eq" id="tex_atail"></div>
+    <div class="plot" id="p_atail"></div>
+  </section>
+
+  <!-- ================= DECISION ================= -->
+  <section class="card" id="c_dec">
+    <div class="verdict">
+      <div class="big" id="dec_big"></div>
+      <div class="why" id="dec_why"></div>
+    </div>
+    <div class="rule">
+      <div class="t">Compare areas</div>
+      <div class="m" id="tex_rule_p"></div>
+      <div class="r" id="rule_p_txt"></div>
+    </div>
+    <div class="rule">
+      <div class="t">Compare scores</div>
+      <div class="m" id="tex_rule_z"></div>
+      <div class="r" id="rule_z_txt"></div>
+    </div>
+    <div class="legend">
+      <span><i style="background:#e6550d"></i> Area from the data (P)</span>
+      <span><i style="background:#08519c"></i> Area set in advance (α)</span>
+    </div>
+  </section>
+</div>
+
+<script id="stats-lib">
+// ---------- normal ----------
+function pnorm(z) {
+  const x = Math.abs(z); let c;
+  if (x > 37) c = 0;
+  else {
+    const e = Math.exp(-x * x / 2);
+    if (x < 7.07106781186547) {
+      let b = 3.52624965998911e-02 * x + 0.700383064443688;
+      b = b * x + 6.37396220353165; b = b * x + 33.912866078383; b = b * x + 112.079291497871;
+      b = b * x + 221.213596169931; b = b * x + 220.206867912376; c = e * b;
+      b = 8.83883476483184e-02 * x + 1.75566716318264; b = b * x + 16.064177579207; b = b * x + 86.7807322029461;
+      b = b * x + 296.564248779674; b = b * x + 637.333633378831; b = b * x + 793.826512519948; b = b * x + 440.413735824752;
+      c = c / b;
+    } else { let b = x + 0.65; b = x + 4 / b; b = x + 3 / b; b = x + 2 / b; b = x + 1 / b; c = e / b / 2.506628274631; }
+  }
+  return z > 0 ? 1 - c : c;
+}
+function qnorm(p) {
+  const a = [-3.969683028665376e+01, 2.209460984245205e+02, -2.759285104469687e+02, 1.383577518672690e+02, -3.066479806614716e+01, 2.506628277459239e+00];
+  const b = [-5.447609879822406e+01, 1.615858368580409e+02, -1.556989798598866e+02, 6.680131188771972e+01, -1.328068155288572e+01];
+  const c = [-7.784894002430293e-03, -3.223964580411365e-01, -2.400758277161838e+00, -2.549732539343734e+00, 4.374664141464968e+00, 2.938163982698783e+00];
+  const d = [7.784695709041462e-03, 3.224671290700398e-01, 2.445134137142996e+00, 3.754408661907416e+00];
+  const pl = 0.02425; let q, r, x;
+  if (p < pl) { q = Math.sqrt(-2 * Math.log(p)); x = (((((c[0] * q + c[1]) * q + c[2]) * q + c[3]) * q + c[4]) * q + c[5]) / ((((d[0] * q + d[1]) * q + d[2]) * q + d[3]) * q + 1); }
+  else if (p <= 1 - pl) { q = p - 0.5; r = q * q; x = (((((a[0] * r + a[1]) * r + a[2]) * r + a[3]) * r + a[4]) * r + a[5]) * q / (((((b[0] * r + b[1]) * r + b[2]) * r + b[3]) * r + b[4]) * r + 1); }
+  else { q = Math.sqrt(-2 * Math.log(1 - p)); x = -(((((c[0] * q + c[1]) * q + c[2]) * q + c[3]) * q + c[4]) * q + c[5]) / ((((d[0] * q + d[1]) * q + d[2]) * q + d[3]) * q + 1); }
+  const e = pnorm(x) - p, u = e * Math.sqrt(2 * Math.PI) * Math.exp(x * x / 2);
+  return x - u / (1 + x * u / 2);
+}
+const dnorm = x => Math.exp(-0.5 * x * x) / Math.sqrt(2 * Math.PI);
+
+// ---------- chi-square ----------
+const LG = [0.99999999999980993, 676.5203681218851, -1259.1392167224028, 771.32342877765313, -176.61502916214059, 12.507343278686905, -0.13857109526572012, 9.9843695780195716e-6, 1.5056327351493116e-7];
+function lgamma(x) {
+  if (x < 0.5) return Math.log(Math.PI / Math.abs(Math.sin(Math.PI * x))) - lgamma(1 - x);
+  x -= 1; let a = LG[0]; const t = x + 7.5;
+  for (let i = 1; i < 9; i++) a += LG[i] / (x + i);
+  return 0.5 * Math.log(2 * Math.PI) + (x + 0.5) * Math.log(t) - t + Math.log(a);
+}
+// regularized lower incomplete gamma P(a, x)
+function gammaP(a, x) {
+  if (x <= 0) return 0;
+  const gln = lgamma(a);
+  if (x < a + 1) {
+    let ap = a, sum = 1 / a, del = sum;
+    for (let n = 0; n < 500; n++) { ap += 1; del *= x / ap; sum += del; if (Math.abs(del) < Math.abs(sum) * 1e-15) break; }
+    return sum * Math.exp(-x + a * Math.log(x) - gln);
+  }
+  const FPMIN = 1e-300; let b = x + 1 - a, c = 1 / FPMIN, d = 1 / b, h = d;
+  for (let i = 1; i < 500; i++) {
+    const an = -i * (i - a); b += 2;
+    d = an * d + b; if (Math.abs(d) < FPMIN) d = FPMIN;
+    c = b + an / c; if (Math.abs(c) < FPMIN) c = FPMIN;
+    d = 1 / d; const del = d * c; h *= del; if (Math.abs(del - 1) < 1e-15) break;
+  }
+  return 1 - Math.exp(-x + a * Math.log(x) - gln) * h;
+}
+const pchisq = (x, k) => gammaP(k / 2, x / 2);
+// ---------- Student t ----------
+function betacf(a, b, x) {
+  const FPMIN = 1e-300; let qab = a + b, qap = a + 1, qam = a - 1, c = 1, d = 1 - qab * x / qap;
+  if (Math.abs(d) < FPMIN) d = FPMIN; d = 1 / d; let h = d;
+  for (let m = 1; m <= 300; m++) {
+    const m2 = 2 * m; let aa = m * (b - m) * x / ((qam + m2) * (a + m2));
+    d = 1 + aa * d; if (Math.abs(d) < FPMIN) d = FPMIN; c = 1 + aa / c; if (Math.abs(c) < FPMIN) c = FPMIN; d = 1 / d; h *= d * c;
+    aa = -(a + m) * (qab + m) * x / ((a + m2) * (qap + m2));
+    d = 1 + aa * d; if (Math.abs(d) < FPMIN) d = FPMIN; c = 1 + aa / c; if (Math.abs(c) < FPMIN) c = FPMIN; d = 1 / d;
+    const del = d * c; h *= del; if (Math.abs(del - 1) < 1e-15) break;
+  }
+  return h;
+}
+function ibeta(a, b, x) {
+  if (x <= 0) return 0; if (x >= 1) return 1;
+  const bt = Math.exp(lgamma(a + b) - lgamma(a) - lgamma(b) + a * Math.log(x) + b * Math.log(1 - x));
+  return x < (a + 1) / (a + b + 2) ? bt * betacf(a, b, x) / a : 1 - bt * betacf(b, a, 1 - x) / b;
+}
+function pt(t, df) { const tail = 0.5 * ibeta(df / 2, 0.5, df / (df + t * t)); return t > 0 ? 1 - tail : tail; }
+function qt(p, df) {
+  if (p === 0.5) return 0;
+  const up = p > 0.5, pp = up ? p : 1 - p; let lo = 0, hi = 1;
+  while (pt(hi, df) < pp) hi *= 2;
+  for (let i = 0; i < 200; i++) { const mid = (lo + hi) / 2; if (pt(mid, df) < pp) lo = mid; else hi = mid; }
+  const r = (lo + hi) / 2; return up ? r : -r;
+}
+const dt = (x, df) => Math.exp(lgamma((df + 1) / 2) - lgamma(df / 2) - 0.5 * Math.log(df * Math.PI) - (df + 1) / 2 * Math.log(1 + x * x / df));
+function qchisq(p, k) {
+  let lo = 0, hi = Math.max(1, k);
+  while (pchisq(hi, k) < p) hi *= 2;
+  for (let i = 0; i < 200; i++) { const m = (lo + hi) / 2; if (pchisq(m, k) < p) lo = m; else hi = m; }
+  return (lo + hi) / 2;
+}
+const dchisq = (x, k) => x <= 0 ? 0 : Math.exp((k / 2 - 1) * Math.log(x) - x / 2 - (k / 2) * Math.LN2 - lgamma(k / 2));
+</script>
+
+<script>
+const $ = id => document.getElementById(id);
+const COL = { curve: "#1f2933", p: "#e6550d", pFill: "#f0884a", a: "#08519c", aFill: "#4f84bd", grey: "#5f6b7a" };
+const FONT = { family: "system-ui, -apple-system, Segoe UI, Roboto, sans-serif", size: 11, color: "#1f2933" };
+const CFG = { displayModeBar: false, responsive: true, staticPlot: false };
+
+// ---------------- configuration of the three tests ----------------
+const CONF = {
+  mean: {
+    par: "\\mu", par0: "\\mu_0", stat: "\\bar{x}", h0Lab: "Null value <span class=\"sym\">μ₀</span>", svLab: "Sample mean <span class=\"sym\">x̄</span>", seLab: "Standard error <span class=\"sym\">SE</span>",
+    sv: { min: 40, max: 60, step: 0.1, val: 52.2, d: 1 }, h0: { min: 40, max: 60, step: 0.5, val: 50, d: 1 },
+    se: { min: 0.2, max: 4, step: 0.1, val: 1, d: 2 }, dist: "z"
+  },
+  prop: {
+    par: "p", par0: "p_0", stat: "\\hat{p}", h0Lab: "Null value <span class=\"sym\">p₀</span>", svLab: "Sample proportion <span class=\"sym\">p̂</span>", seLab: "Standard error <span class=\"sym\">SE</span>",
+    sv: { min: 0, max: 1, step: 0.01, val: 0.56, d: 2 }, h0: { min: 0.05, max: 0.95, step: 0.01, val: 0.5, d: 2 },
+    se: { min: 0.01, max: 0.1, step: 0.005, val: 0.025, d: 3 }, dist: "z"
+  },
+  var: {
+    par: "\\sigma^2", par0: "\\sigma_0^2", stat: "s^2", h0Lab: "Null value <span class=\"sym\">σ₀²</span>", svLab: "Sample variance <span class=\"sym\">s²</span>", seLab: "Sample size <span class=\"sym\">n</span>",
+    sv: { min: 10, max: 250, step: 1, val: 140, d: 0 }, h0: { min: 40, max: 200, step: 5, val: 100, d: 0 },
+    se: { min: 5, max: 60, step: 1, val: 25, d: 0 }, dist: "chi"
+  }
+};
+const S = { stat: "mean", alpha: 0.05, tail: "two", sigma: "known", n: 25, vals: {} };
+Object.keys(CONF).forEach(k => S.vals[k] = { sv: CONF[k].sv.val, h0: CONF[k].h0.val, se: CONF[k].se.val });
+
+// ---------------- helpers ----------------
+const tex = (el, s) => katex.render(s, $(el), { throwOnError: false, displayMode: false });
+const fx = (x, d) => Number(x).toFixed(d);
+const fm = (x, d) => fx(x, d).replace(/^-/, "−");
+const sgn = x => (x < 0 ? "-" : "");
+function fp(p) { // p-value formatting
+  if (p < 0.0001) return "< 0.0001";
+  if (p < 0.001) return p.toFixed(4);
+  return p.toFixed(3);
+}
+function fpEq(p) { return p < 0.0001 ? "< 0.0001" : "\\approx " + fp(p); }
+const trimA = a => String(a);
+
+// distribution helpers for the current test
+const isT = () => S.stat === "mean" && S.sigma === "unknown";
+function D(k) {
+  if (S.stat === "var") return { kind: "chi", pdf: x => dchisq(x, k), cdf: x => pchisq(x, k), q: p => qchisq(p, k),
+    L: "\\chi^2", RV: `\\chi^2_{${k}}`, star: "\\chi^2", word: "χ²" };
+  if (isT()) return { kind: "t", pdf: x => dt(x, k), cdf: x => pt(x, k), q: p => qt(p, k), L: "t", RV: `T_{${k}}`, star: "t", word: "t" };
+  return { kind: "z", pdf: dnorm, cdf: pnorm, q: qnorm, L: "z", RV: "Z", star: "z", word: "z" };
+}
+
+// ---------------- controls ----------------
+function setSeg(id, v) { document.querySelectorAll(`#${id} button`).forEach(b => b.setAttribute("aria-pressed", String(b.dataset.v === v))); }
+function bindSeg(id, fn) { document.querySelectorAll(`#${id} button`).forEach(b => b.addEventListener("click", () => { setSeg(id, b.dataset.v); fn(b.dataset.v); render(); })); }
+bindSeg("seg_alpha", v => S.alpha = +v);
+bindSeg("seg_tail", v => S.tail = v);
+bindSeg("seg_stat", v => { S.stat = v; setupSliders(); });
+bindSeg("seg_sigma", v => { S.sigma = v; setupSliders(); });
+$("nn").addEventListener("input", () => { S.n = +$("nn").value; render(); });
+["sv", "se", "h0"].forEach(id => $(id).addEventListener("input", () => { S.vals[S.stat][id] = +$(id).value; render(); }));
+
+function setupSliders() {
+  const c = CONF[S.stat], v = S.vals[S.stat];
+  ["sv", "se", "h0"].forEach(id => {
+    const r = c[id], el = $(id);
+    el.min = r.min; el.max = r.max; el.step = r.step; el.value = v[id];
+    $(id + "_min").textContent = fx(r.min, r.d); $(id + "_max").textContent = fx(r.max, r.d);
+  });
+  $("sv_lab").innerHTML = c.svLab; $("se_lab").innerHTML = c.seLab; $("h0_lab").innerHTML = c.h0Lab;
+  $("row_sigma").style.display = S.stat === "mean" ? "" : "none";
+  $("row_n").style.display = isT() ? "" : "none";
+  $("nn").value = S.n;
+}
+
+// ---------------- core computation ----------------
+function compute() {
+  const c = CONF[S.stat], v = S.vals[S.stat], a = S.alpha, tail = S.tail;
+  const df = S.stat === "var" ? v.se - 1 : isT() ? S.n - 1 : null;
+  const d = D(df);
+  const ts = S.stat === "var" ? df * v.sv / v.h0 : (v.sv - v.h0) / v.se;
+
+  // critical values (lower and/or upper cut-offs of the rejection region)
+  let lo = null, hi = null;
+  if (tail === "two") { lo = d.q(a / 2); hi = d.q(1 - a / 2); }
+  else if (tail === "left") lo = d.q(a);
+  else hi = d.q(1 - a);
+
+  // p-value and the cut-offs of the "P region"
+  const F = d.cdf(ts);
+  let p, plo = null, phi = null;
+  if (tail === "two") { const pt = Math.min(F, 1 - F); p = Math.min(1, 2 * pt); plo = d.q(pt); phi = d.q(1 - pt); }
+  else if (tail === "left") { p = F; plo = ts; }
+  else { p = 1 - F; phi = ts; }
+
+  const reject = p < a;
+  return { c, v, a, tail, df, d, ts, lo, hi, p, plo, phi, F, reject };
+}
+
+// ---------------- plotting ----------------
+function xRange(R) {
+  if (S.stat !== "var") {
+    const crit = Math.max(Math.abs(R.lo || 0), Math.abs(R.hi || 0));
+    const m = Math.max(4, Math.abs(R.ts) + 0.6, crit * 1.15);
+    return [-Math.min(m, 8), Math.min(m, 8)];
+  }
+  const top = Math.max(R.d.q(0.9995), R.ts * 1.08);
+  return [0, Math.min(top, R.d.q(0.999999))];
+}
+
+function drawDist(el, R, o) {
+  const xr = xRange(R), N = 500, xs = [];
+  for (let i = 0; i <= N; i++) xs.push(xr[0] + (xr[1] - xr[0]) * i / N);
+  const pdf = R.d.pdf;
+  const ys = xs.map(pdf);
+  const ymax = Math.max(...ys) * 1.32;
+  const tr = [];
+  const region = (a, b, fill) => {
+    a = Math.max(a, xr[0]); b = Math.min(b, xr[1]); if (b <= a) return;
+    const px = [a, ...xs.filter(x => x > a && x < b), b];
+    tr.push({ type: "scatter", mode: "lines", x: [a, ...px, b], y: [0, ...px.map(pdf), 0], fill: "toself", fillcolor: fill, line: { width: 0 }, hoverinfo: "skip" });
+  };
+  (o.regions || []).forEach(r => region(r[0], r[1], r[2]));
+  tr.push({ type: "scatter", mode: "lines", x: xs, y: ys, line: { color: COL.curve, width: 1.6 }, hovertemplate: "%{x:.2f}<extra></extra>" });
+
+  const shapes = [], ann = [];
+  (o.lines || []).forEach(l => {
+    if (l.v < xr[0] || l.v > xr[1]) return;
+    shapes.push({ type: "line", x0: l.v, x1: l.v, y0: 0, y1: ymax * 0.12, line: { color: l.color, width: l.w || 1.5 } });
+  });
+  // axis labels drawn as annotations so each can have its own colour
+  (o.ticks || []).forEach(t => {
+    let x = t.v, txt = t.text, xa = "center";
+    if (x < xr[0]) { x = xr[0]; txt = "← " + txt; xa = "left"; }
+    if (x > xr[1]) { x = xr[1]; txt = txt + " →"; xa = "right"; }
+    ann.push({ x, y: 0, yref: "y", yanchor: "top", xanchor: xa, yshift: -3, text: t.bold === false ? txt : `<b>${txt}</b>`, showarrow: false, font: { size: 11.5, color: t.color } });
+  });
+  (o.labels || []).forEach(l => ann.push({ xref: "paper", yref: "paper", x: l.side === "left" ? 0 : 1, y: 1, xanchor: l.side, yanchor: "top",
+    text: `<b>${l.text}</b>`, showarrow: false, font: { size: 12, color: l.color } }));
+
+  Plotly.react($(el), tr, {
+    margin: { l: 6, r: 6, t: 4, b: 24 }, font: FONT, paper_bgcolor: "#fff", plot_bgcolor: "#fff",
+    showlegend: false, hovermode: "closest",
+    xaxis: { range: xr, showgrid: false, zeroline: false, showticklabels: false, showline: true, linecolor: "#c9d0d7", fixedrange: true },
+    yaxis: { range: [0, ymax], visible: false, fixedrange: true },
+    shapes, annotations: ann
+  }, CFG);
+}
+
+// ---------------- render ----------------
+function render() {
+  const R = compute();
+  const { c, v, a, tail, df, d, ts, lo, hi, p, plo, phi, reject } = R;
+  const isVar = S.stat === "var", L = d.L;
+  const center = isVar ? df : 0;
+  const centerTxt = isVar ? `df = ${df}` : "0";
+
+  // ----- slider readouts -----
+  $("sv_out").textContent = fx(v.sv, c.sv.d);
+  $("se_out").textContent = fx(v.se, c.se.d);
+  $("h0_out").textContent = fx(v.h0, c.h0.d);
+  $("nn_out").textContent = S.n;
+
+  // ----- hypotheses -----
+  const op = { two: "\\neq", left: "<", right: ">" }[tail];
+  tex("tex_h0", `H_0:\\ ${c.par} = ${fx(v.h0, c.h0.d)}`);
+  tex("tex_h1", `H_1:\\ ${c.par} ${op} ${fx(v.h0, c.h0.d)}`);
+
+  // ----- SE help -----
+  if (S.stat === "mean" && isT()) tex("se_help", `SE = \\dfrac{s}{\\sqrt{n}} = ${fx(v.se, 2)},\\quad df = n - 1 = ${df}`);
+  else if (S.stat === "mean") tex("se_help", `\\text{Standard error under } H_0:\\ SE = \\dfrac{\\sigma}{\\sqrt{n}} = ${fx(v.se, 2)}`);
+  else if (S.stat === "prop") {
+    const nImp = v.h0 * (1 - v.h0) / (v.se * v.se);
+    tex("se_help", `SE = \\sqrt{\\dfrac{p_0(1-p_0)}{n}} = ${fx(v.se, 3)}\\quad(\\text{implies } n \\approx ${Math.round(nImp)})`);
+  } else tex("se_help", `\\text{For a variance the test uses } \\chi^2 \\text{ with } df = n - 1 = ${df}`);
+
+  // ----- test statistic card -----
+  const tsTxt = fx(ts, 2);
+  if (isVar) {
+    $("tstat_sub").textContent = "chi-square score";
+    tex("tex_tstat", `\\chi^2 = \\dfrac{(n-1)\\,s^2}{\\sigma_0^2} = \\dfrac{${df} \\times ${fx(v.sv, 0)}}{${fx(v.h0, 0)}} = ${tsTxt}`);
+  } else {
+    $("tstat_sub").textContent = isT() ? `t score, df = ${df}` : "standardized score";
+    tex("tex_tstat", `${L} = \\dfrac{${c.stat} - ${c.par0}}{SE} = \\dfrac{${fx(v.sv, c.sv.d)} - ${fx(v.h0, c.h0.d)}}{${fx(v.se, c.se.d)}} = ${tsTxt}`);
+  }
+
+  // P-region pieces with their areas (shown on the test-statistic and p-value plots)
+  const pReg = [], pTicks = [], pLabs = [];
+  if (tail === "two") {
+    const half = p / 2;
+    pReg.push([-1e9, plo, COL.pFill], [phi, 1e9, COL.pFill]);
+    pTicks.push({ v: plo, text: fm(plo, 2), color: COL.p }, { v: phi, text: fm(phi, 2), color: COL.p });
+    pLabs.push({ side: "left", text: fp(half), color: COL.p }, { side: "right", text: fp(half), color: COL.p });
+  } else if (tail === "left") {
+    pReg.push([-1e9, plo, COL.pFill]); pTicks.push({ v: plo, text: fm(plo, 2), color: COL.p });
+    pLabs.push({ side: "left", text: fp(p), color: COL.p });
+  } else {
+    pReg.push([phi, 1e9, COL.pFill]); pTicks.push({ v: phi, text: fm(phi, 2), color: COL.p });
+    pLabs.push({ side: "right", text: fp(p), color: COL.p });
+  }
+  const centerTick = { v: center, text: centerTxt, color: COL.grey, bold: false };
+  drawDist("p_tstat", R, {
+    ticks: [centerTick, ...pTicks],
+    lines: [plo, phi].filter(x => x != null).map(x => ({ v: x, color: COL.p }))
+  });
+
+  // ----- p-value card -----
+  if (tail === "two") {
+    $("pval_sub").textContent = isVar ? "area in both tails, doubled from the nearer one" : `area beyond ±${fx(Math.abs(ts), 2)}`;
+    const side = R.F < 0.5 ? `\\le ${tsTxt}` : `\\ge ${tsTxt}`;
+    tex("tex_pval", isVar ? `P = 2 \\cdot P(${d.RV} ${side}) ${fpEq(p)}` : `P = 2 \\cdot P(${d.RV} \\ge ${fx(Math.abs(ts), 2)}) ${fpEq(p)}`);
+  } else if (tail === "left") {
+    $("pval_sub").textContent = `area below ${tsTxt}`;
+    tex("tex_pval", `P = P(${d.RV} \\le ${tsTxt}) ${fpEq(p)}`);
+  } else {
+    $("pval_sub").textContent = `area above ${tsTxt}`;
+    tex("tex_pval", `P = P(${d.RV} \\ge ${tsTxt}) ${fpEq(p)}`);
+  }
+  // alpha region (drawn under P region)
+  const aReg = [];
+  if (lo != null) aReg.push([-1e9, lo, COL.aFill]);
+  if (hi != null) aReg.push([hi, 1e9, COL.aFill]);
+  // split the axis at every cut-off; each piece gets ONE colour (no overlapping areas).
+  // Where both regions apply, the smaller area keeps its own colour, as in the static figure.
+  const cuts = [-1e9, 1e9, lo, hi, plo, phi].filter(x => x != null).sort((x, y) => x - y);
+  const regs = [];
+  for (let i = 0; i < cuts.length - 1; i++) {
+    const x0 = cuts[i], x1 = cuts[i + 1]; if (x1 <= x0) continue;
+    const m = x0 < -1e8 ? x1 - 1 : x1 > 1e8 ? x0 + 1 : (x0 + x1) / 2;
+    const inP = (plo != null && m < plo) || (phi != null && m > phi);
+    const inA = (lo != null && m < lo) || (hi != null && m > hi);
+    if (!inP && !inA) continue;
+    const col = inP && inA ? (p < a ? COL.pFill : COL.aFill) : inP ? COL.pFill : COL.aFill;
+    regs.push([x0, x1, col]);
+  }
+  const aLines = [lo, hi].filter(x => x != null).map(x => ({ v: x, color: COL.a }));
+  const pvLabSide = tail === "right" ? "right" : "left";
+  drawDist("p_pval", R, {
+    regions: pReg, ticks: [centerTick, ...pTicks],
+    labels: [{ side: pvLabSide, text: `P = ${fp(p)}`, color: COL.p }]
+  });
+
+  // ----- alpha tail area -----
+  const aTicks = [], aLabs = [];
+  if (tail === "two") {
+    $("atail_sub").textContent = "area split over two tails";
+    tex("tex_atail", `\\alpha = ${trimA(a)},\\qquad \\dfrac{\\alpha}{2} = ${trimA(+(a / 2).toPrecision(4))} \\text{ per tail}`);
+    aLabs.push({ side: "left", text: trimA(+(a / 2).toPrecision(4)), color: COL.a }, { side: "right", text: trimA(+(a / 2).toPrecision(4)), color: COL.a });
+  } else {
+    $("atail_sub").textContent = `all of α in the ${tail} tail`;
+    tex("tex_atail", `\\alpha = ${trimA(a)} \\text{ in the ${tail} tail}`);
+    aLabs.push({ side: tail, text: trimA(a), color: COL.a });
+  }
+  [lo, hi].forEach(x => { if (x != null) aTicks.push({ v: x, text: fm(x, 2), color: COL.a }); });
+  drawDist("p_atail", R, { regions: aReg, ticks: [centerTick, ...aTicks] });
+
+  // ----- critical value -----
+  const cSym = L, cStar = d.star;
+  const cTicks = [];
+  [lo, hi].forEach(x => { if (x != null) cTicks.push({ v: x, text: fm(x, 2), color: COL.a }); });
+  if (tail === "two") {
+    $("crit_sub").textContent = isVar ? "values that cut off α/2 in each tail" : `${d.word} that cuts off those tails` + (isT() ? ` (df = ${df})` : "");
+    tex("tex_crit", isVar ? `\\chi^2_{L} = ${fx(lo, 2)},\\quad \\chi^2_{U} = ${fx(hi, 2)}` : `${cStar} = \\pm ${fx(hi, 2)}`);
+  } else {
+    const cv = tail === "left" ? lo : hi;
+    $("crit_sub").textContent = `${d.word} that cuts off the ${tail} tail` + (isT() ? ` (df = ${df})` : "");
+    tex("tex_crit", `${cStar} = ${fx(cv, 2)}`);
+  }
+  drawDist("p_crit", R, { ticks: [centerTick, ...cTicks], lines: aLines });
+
+  // ----- decision -----
+  const dec = $("c_dec");
+  dec.classList.toggle("reject", reject);
+  $("dec_big").innerHTML = reject ? "Reject H<sub>0</sub>" : "Fail to reject H<sub>0</sub>";
+  const parTxt = { mean: "μ", prop: "p", var: "σ²" }[S.stat];
+  const opTxt = { two: "≠", left: "<", right: ">" }[tail];
+  $("dec_why").innerHTML = reject
+    ? `At α = ${a}, the sample gives significant evidence that ${parTxt} ${opTxt} ${fx(v.h0, c.h0.d)}.`
+    : `At α = ${a}, the sample does not give enough evidence that ${parTxt} ${opTxt} ${fx(v.h0, c.h0.d)}. This does not prove H<sub>0</sub> is true.`;
+
+  tex("tex_rule_p", `P = ${fp(p).replace("< ", "")} ${reject ? "<" : "\\ge"} \\alpha = ${a}`);
+  if (p < 0.0001) tex("tex_rule_p", `P < 0.0001 < \\alpha = ${a}`);
+  $("rule_p_txt").textContent = reject ? "the data's tail is smaller than α" : "the data's tail is at least as big as α";
+
+  let zRule, zTxt;
+  if (tail === "two" && !isVar) {
+    zRule = `|${L}| = ${fx(Math.abs(ts), 2)} ${reject ? ">" : "\\le"} ${fx(hi, 2)}`;
+  } else if (tail === "two" && isVar) {
+    zRule = reject ? (ts > hi ? `\\chi^2 = ${tsTxt} > \\chi^2_U = ${fx(hi, 2)}` : `\\chi^2 = ${tsTxt} < \\chi^2_L = ${fx(lo, 2)}`)
+                   : `${fx(lo, 2)} \\le \\chi^2 = ${tsTxt} \\le ${fx(hi, 2)}`;
+  } else if (tail === "left") {
+    zRule = `${cSym} = ${tsTxt} ${reject ? "<" : "\\ge"} ${fx(lo, 2)}`;
+  } else {
+    zRule = `${cSym} = ${tsTxt} ${reject ? ">" : "\\le"} ${fx(hi, 2)}`;
+  }
+  tex("tex_rule_z", zRule);
+  $("rule_z_txt").textContent = reject ? "the test statistic falls in the rejection region" : "the test statistic is outside the rejection region";
+}
+
+// ---------------- embedding ----------------
+if (window.self !== window.top) {
+  document.documentElement.classList.add("embedded");
+  let lastH = 0;
+  const reportHeight = () => {
+    const h = Math.ceil(document.body.getBoundingClientRect().height);
+    if (h > 0 && h !== lastH) { lastH = h; window.parent.postMessage({ type: "app-height", height: h }, "*"); }
+  };
+  new ResizeObserver(reportHeight).observe(document.body);
+  window.addEventListener("load", () => { reportHeight(); setTimeout(reportHeight, 500); setTimeout(reportHeight, 1500); });
+}
+
+setupSliders();
+window.addEventListener("load", render);
+</script>
+</body>
+</html>
