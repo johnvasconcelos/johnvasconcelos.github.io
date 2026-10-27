@@ -71,6 +71,8 @@ website:
             text: Note on Grammar of Graphics     
           - href: pages_epps_6356/assign05_Data_Visualization.qmd
             text: Assignment 05 
+          - href: pages_epps_6356/assign06_Data_Visualization.qmd
+            text: Assignment 06
       - text: EPPS 6302
         menu:
           - href: pages_epps_6302/assign02_Data_Collection.qmd
@@ -81,6 +83,8 @@ website:
             text: Assignment 04 
           - href: pages_epps_6302/assign05_Data_Collection.qmd
             text: Assignment 05 
+          - href: pages_epps_6302/assign06_Data_Collection.qmd
+            text: Assignment 06
     right:
       - icon: github
         href: https://github.com/johnvasconcelos

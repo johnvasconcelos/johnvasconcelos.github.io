@@ -1,0 +1,780 @@
+---
+title: "Assignment 06 - Data Visualization EPPS 6356"
+---
+
+# 1 Changing the font in two ways
+
+## a. With CSS
+
+```{r, eval=FALSE}
+library(shiny)
+library(datasets)
+
+# Data pre-processing ----
+# Nicer labels for the transmission variable (done once, at startup)
+mpgData <- mtcars
+mpgData$am <- factor(mpgData$am, labels = c("Automatic", "Manual"))
+
+
+# UI ----
+ui <- fluidPage(
+
+  # >>> NEW (1b-i): CSS style block with my own fonts ----
+  tags$head(tags$style(HTML("
+    body {
+      background-color: white;
+      color: black;
+      font-family: 'Palatino Linotype', Palatino, serif;
+    }
+    h1, h2, h3 {
+      font-family: 'Gill Sans', 'Gill Sans MT', sans-serif;
+    }
+    .shiny-input-container {
+      color: #000000;
+    }
+  "))),
+  # h3 was added to the heading rule so the caption above the plot
+  # (h3(textOutput(...))) uses the heading font too.
+
+  # App title (an h2, so it gets the heading font) ----
+  titlePanel("Miles Per Gallon"),
+
+  sidebarLayout(
+
+    # Sidebar panel for inputs ----
+    sidebarPanel(
+      # Input: variable to plot against mpg
+      selectInput("variable", "Variable:",
+                  c("Cylinders" = "cyl",
+                    "Transmission" = "am",
+                    "Gears" = "gear")),
+      # Input: whether outliers are shown
+      checkboxInput("outliers", "Show outliers", TRUE)
+    ),
+
+    # Main panel for outputs ----
+    mainPanel(
+      h3(textOutput("caption")),   # formula used as caption
+      plotOutput("mpgPlot")        # box plot
+    )
+  )
+)
+
+
+# Server ----
+server <- function(input, output) {
+
+  # Formula text, shared by the caption and the plot
+  formulaText <- reactive({
+    paste("mpg ~", input$variable)
+  })
+
+  output$caption <- renderText({
+    formulaText()
+  })
+
+  output$mpgPlot <- renderPlot({
+    # CSS only styles the web page; the plot is an image drawn by R.
+    # >>> NEW (1b-i): ask R for its generic serif font so the plot matches the body text
+    par(family = "serif")
+    boxplot(as.formula(formulaText()),
+            data = mpgData,
+            outline = input$outliers,
+            col = "#75AADB", pch = 19,
+            ylab = "Miles per gallon")
+  })
+}
+
+
+# Run the app ----
+shinyApp(ui, server)
+
+```
+
+## b. With bslib
+
+```{r, eval=FALSE}
+library(shiny)
+library(datasets)
+library(bslib)
+library(thematic)
+
+# Data pre-processing ----
+mpgData <- mtcars
+mpgData$am <- factor(mpgData$am, labels = c("Automatic", "Manual"))
+
+
+# UI ----
+ui <- fluidPage(
+
+  # >>> NEW (1b-ii): Bootstrap theme with a Google font ----
+  theme = bs_theme(
+    base_font    = font_google("Lora"),   # body text and inputs
+    heading_font = font_google("Lora")    # titles (optional: could be another font)
+  ),
+
+  titlePanel("Miles Per Gallon"),
+
+  sidebarLayout(
+    sidebarPanel(
+      selectInput("variable", "Variable:",
+                  c("Cylinders" = "cyl",
+                    "Transmission" = "am",
+                    "Gears" = "gear")),
+      checkboxInput("outliers", "Show outliers", TRUE)
+    ),
+    mainPanel(
+      h3(textOutput("caption")),
+      plotOutput("mpgPlot")
+    )
+  )
+)
+
+
+# Server ----
+server <- function(input, output, session) {
+
+  # >>> NEW (1b-ii): plots follow the theme's font and colours.
+  # font = "auto" is required: the default (font = NA) leaves the plot font unchanged.
+  thematic_shiny(font = "auto")
+
+  formulaText <- reactive({
+    paste("mpg ~", input$variable)
+  })
+
+  output$caption <- renderText({
+    formulaText()
+  })
+
+  output$mpgPlot <- renderPlot({
+    boxplot(as.formula(formulaText()),
+            data = mpgData,
+            outline = input$outliers,
+            col = "#75AADB", pch = 19,
+            ylab = "Miles per gallon")
+  })
+}
+
+
+# Run the app ----
+shinyApp(ui, server)
+```
+
+## c. Which I would use
+
+For a production project, I would use bslib. It allows us to manage fonts and colors centrally for all Bootstrap components. font_google() bundles the font directly with the application so every user sees the same typeface regardless of their system settings, while thematic_shiny(font = "auto") applies that same font to R plots, which CSS cannot styling directly. I prefer to keep custom CSS strictly for minor, targeted adjustments, such as styling a specific element.
+
+
+# 2 Bulding my own Shiny Apps
+
+## mtcars
+```{r, eval=FALSE}
+library(shiny)
+library(ggplot2)
+library(dplyr)
+
+ui <- fluidPage(
+  titlePanel("Automotive Performance Dashboard (mtcars)"),
+  
+  # Top-row control panel layout
+  wellPanel(
+    fluidRow(
+      column(6, sliderInput("hp_range", "Select Horsepower (hp) Range:", min = 50, max = 350, value = c(100, 250), step = 10)),
+      column(6, checkboxGroupInput("gear_choice", "Filter by Number of Gears:", choices = c("3 Gears" = 3, "4 Gears" = 4, "5 Gears" = 5), selected = c(3, 4, 5), inline = TRUE))
+    )
+  ),
+  
+  # Tabbed output layout
+  tabsetPanel(
+    tabPanel("Visualization", plotOutput("carPlot")),
+    tabPanel("Data Table", tableOutput("carTable")),
+    tabPanel("Statistical Summary", verbatimTextOutput("carSummary"))
+  )
+)
+
+server <- function(input, output, session) {
+  # Reactive expression shared across all three outputs
+  filtered_cars <- reactive({
+    mtcars %>%
+      filter(hp >= input$hp_range[1] & hp <= input$hp_range[2],
+             gear %in% as.numeric(input$gear_choice))
+  })
+  
+  output$carPlot <- renderPlot({
+    df <- filtered_cars()
+    ggplot(df, aes(x = wt, y = mpg, color = factor(gear))) +
+      geom_point(size = 4) +
+      labs(
+        title = "Fuel Economy vs. Vehicle Weight",
+        subtitle = "Filtered by user horsepower and gear selections",
+        x = "Vehicle Weight (1000 lbs)",
+        y = "Fuel Economy (Miles Per Gallon)",
+        color = "Gears",
+        caption = "Source: 1974 Motor Trend US magazine (mtcars dataset)"
+      ) +
+      theme_minimal()
+  })
+  
+  output$carTable <- renderTable({
+    filtered_cars() %>% tibble::rownames_to_column("Model") %>% select(Model, mpg, cyl, disp, hp, wt, gear)
+  })
+  
+  output$carSummary <- renderPrint({
+    summary(filtered_cars()[, c("mpg", "hp", "wt", "disp")])
+  })
+}
+
+shinyApp(ui, server)
+```
+
+```{=html}
+<iframe src="https://jvascanalytics.shinyapps.io/mtcars/"
+        width="100%" height="650" style="border: none;"
+        title="mtcars Shiny app" loading="lazy"></iframe>
+```
+___
+
+## USAarrests
+```{r, eval=FALSE}
+library(shiny)
+library(ggplot2)
+library(dplyr)
+
+ui <- fluidPage(
+  titlePanel("US Violent Crime Analyzer (USArrests)"),
+  
+  fluidRow(
+    # Left column for inputs
+    column(
+      width = 4,
+      wellPanel(
+        selectInput("crime_type", "Select Crime Category:",
+                    choices = c("Murder Rates" = "Murder",
+                                "Assault Rates" = "Assault",
+                                "Rape Rates" = "Rape")),
+        radioButtons("sort_order", "Bar Sorting Preference:",
+                     choices = c("Highest to Lowest" = "desc",
+                                 "Alphabetical by State" = "alpha"),
+                     selected = "desc")
+      )
+    ),
+    
+    # Right column for outputs
+    column(
+      width = 8,
+      plotOutput("arrestPlot", height = "450px"),
+      hr(),
+      tableOutput("arrestTable")
+    )
+  )
+)
+
+server <- function(input, output, session) {
+  # Reactive expression shared by plot and table
+  processed_arrests <- reactive({
+    df <- USArrests %>% tibble::rownames_to_column("State")
+    
+    if (input$sort_order == "desc") {
+      df %>% arrange(desc(.data[[input$crime_type]]))
+    } else {
+      df %>% arrange(State)
+    }
+  })
+  
+  output$arrestPlot <- renderPlot({
+    df <- processed_arrests()
+    
+    y_label_text <- switch(input$crime_type,
+                           "Murder" = "Murder Arrests (per 100,000 residents)",
+                           "Assault" = "Assault Arrests (per 100,000 residents)",
+                           "Rape" = "Rape Arrests (per 100,000 residents)")
+    
+    ggplot(df, aes(x = reorder(State, if(input$sort_order == "desc") .data[[input$crime_type]] else -as.integer(factor(State))), y = .data[[input$crime_type]])) +
+      geom_col(fill = "firebrick") +
+      coord_flip() +
+      labs(
+        title = paste("State-by-State Breakdown of", input$crime_type),
+        subtitle = "Sorted based on user preference",
+        x = "US State",
+        y = y_label_text,
+        caption = "Source: USArrests dataset (1973 statistics)"
+      ) +
+      theme_minimal()
+  })
+  
+  output$arrestTable <- renderTable({
+    processed_arrests()
+  })
+}
+
+shinyApp(ui, server)
+```
+
+```{=html}
+<iframe src="https://jvascanalytics.shinyapps.io/usaarrests/"
+        width="100%" height="650" style="border: none;"
+        title="usaarrests Shiny app" loading="lazy"></iframe>
+```
+___
+
+## uspop
+```{r, eval=FALSE}
+library(shiny)
+library(ggplot2)
+library(dplyr)
+
+# Explicit time series conversion for uspop
+uspop_df <- data.frame(
+  year = as.numeric(time(uspop)),
+  population = as.numeric(uspop)
+)
+
+ui <- fluidPage(
+  titlePanel("US Decennial Population Growth Explorer (uspop)"),
+  
+  sidebarLayout(
+    sidebarPanel(
+      sliderInput("year_window", "Select Decade Window:",
+                  min = min(uspop_df$year), max = max(uspop_df$year),
+                  value = c(1790, 1970), step = 10, sep = ""),
+      radioButtons("render_mode", "Visual Mode:",
+                   choices = c("Connected Line Plot" = "line",
+                               "Points Only" = "point",
+                               "Both Line & Points" = "both"))
+    ),
+    
+    mainPanel(
+      plotOutput("popPlot"),
+      verbatimTextOutput("popStats")
+    )
+  )
+)
+
+server <- function(input, output, session) {
+  # Reactive expression shared by the plot and the text summary
+  filtered_pop <- reactive({
+    uspop_df %>%
+      filter(year >= input$year_window[1] & year <= input$year_window[2])
+  })
+  
+  output$popPlot <- renderPlot({
+    df <- filtered_pop()
+    
+    p <- ggplot(df, aes(x = year, y = population)) +
+      labs(
+        title = "Historical Population Growth of the United States",
+        subtitle = paste("Decennial Census Data from", input$year_window[1], "to", input$year_window[2]),
+        x = "Year (CE)",
+        y = "Total Population (in Millions)",
+        caption = "Source: uspop time series dataset (US Bureau of the Census)"
+      ) +
+      theme_minimal()
+    
+    if (input$render_mode == "line") {
+      p + geom_line(color = "navyblue", linewidth = 1.2)
+    } else if (input$render_mode == "point") {
+      p + geom_point(color = "navyblue", size = 3)
+    } else {
+      p + geom_line(color = "navyblue", linewidth = 1.2) + geom_point(color = "navyblue", size = 3)
+    }
+  })
+  
+  output$popStats <- renderPrint({
+    df <- filtered_pop()
+    cat("--- Population Summary Statistics for Selected Window ---\n")
+    cat("Minimum Population:", min(df$population), "Million\n")
+    cat("Maximum Population:", max(df$population), "Million\n")
+    cat("Population Growth in Window:", round(max(df$population) - min(df$population), 2), "Million\n")
+  })
+}
+
+shinyApp(ui, server)
+```
+
+```{=html}
+<iframe src="https://jvascanalytics.shinyapps.io/uspop/"
+        width="100%" height="650" style="border: none;"
+        title="uspop Shiny app" loading="lazy"></iframe>
+```
+___
+
+# My own app
+
+```{r, eval=FALSE}
+library(shiny)
+library(bslib)
+library(ggplot2)
+
+# ---- Colours (same as the site's StatApps) ----------------------------------
+COL <- list(curve = "#1f2933", p = "#e6550d", p_fill = "#f0884a",
+            a = "#08519c", a_fill = "#4f84bd", grey = "#5f6b7a")
+
+# ---- Slider settings for each test ------------------------------------------
+# sv = sample statistic, h0 = null value, se = standard error (or n for variance)
+CONF <- list(
+  mean = list(sv = c(40, 60, 0.1, 52.2), h0 = c(40, 60, 0.5, 50), se = c(0.2, 4, 0.1, 1),
+              d = c(sv = 1, h0 = 1, se = 2)),
+  prop = list(sv = c(0, 1, 0.01, 0.56), h0 = c(0.05, 0.95, 0.01, 0.5), se = c(0.01, 0.1, 0.005, 0.025),
+              d = c(sv = 2, h0 = 2, se = 3)),
+  var  = list(sv = c(10, 250, 1, 140), h0 = c(40, 200, 5, 100), se = c(5, 60, 1, 25),
+              d = c(sv = 0, h0 = 0, se = 0))
+)
+LABELS <- list(
+  mean = c(sv = "Sample mean x\u0304", h0 = "Null value \u03BC\u2080", se = "Standard error SE"),
+  prop = c(sv = "Sample proportion p\u0302", h0 = "Null value p\u2080", se = "Standard error SE"),
+  var  = c(sv = "Sample variance s\u00B2", h0 = "Null value \u03C3\u2080\u00B2", se = "Sample size n")
+)
+
+# One slider per test and per role, shown only for the selected test
+slider_for <- function(stat, role) {
+  s <- CONF[[stat]][[role]]
+  conditionalPanel(sprintf("input.stat == '%s'", stat),
+    sliderInput(paste0(role, "_", stat), LABELS[[stat]][[role]],
+                min = s[1], max = s[2], step = s[3], value = s[4], width = "100%"))
+}
+
+# ---- Small helpers -----------------------------------------------------------
+fx <- function(x, d) formatC(x, format = "f", digits = d)
+fm <- function(x, d) sub("^-", "\u2212", fx(x, d))          # typographic minus for axis labels
+fp <- function(p) if (p < 1e-4) "< 0.0001" else if (p < 0.001) fx(p, 4) else fx(p, 3)
+fp_eq <- function(p) if (p < 1e-4) "< 0.0001" else paste("\\approx", fp(p))
+mj <- function(...) withMathJax(HTML(paste0("\\(", ..., "\\)")))   # inline formula
+
+
+# =============================================================================
+# UI
+# =============================================================================
+ui <- page_fluid(
+  theme = bs_theme(version = 5, primary = "#08519c",
+                   base_font = font_collection("system-ui", "-apple-system", "Segoe UI", "Roboto", "sans-serif"),
+                   font_scale = 0.9),
+  tags$head(tags$style(HTML("
+    body { background: #f5f6f8; }
+    .card { border: 1px solid #e2e6ea; border-radius: 10px; }
+    .card h5 { font-size: 14px; font-weight: 650; margin: 0; }
+    .sub { color: #5f6b7a; font-size: 12px; margin: 0 0 4px; }
+    .eq { background: #f5f7f9; border-radius: 6px; padding: 4px 8px; min-height: 46px;
+          display: flex; align-items: center; justify-content: center; }
+    .tag { font-size: 10.5px; font-weight: 650; text-transform: uppercase; border-radius: 999px;
+           padding: 1px 7px; margin-left: 6px; }
+    .tag.a { background: #e8f0f9; color: #08519c; } .tag.d { background: #fdeee4; color: #a63603; }
+    .hyp { background: #e8f0f9; border-radius: 8px; padding: 6px; text-align: center; }
+    .help { background: #f5f7f9; border-radius: 6px; padding: 5px 8px; font-size: 12px;
+            color: #5f6b7a; text-align: center; }
+    .control-label { font-size: 12px; font-weight: 600; color: #5f6b7a; }
+    .verdict { border-radius: 8px; padding: 10px 14px; height: 100%; }
+    .verdict.rej { background: #fdeee4; } .verdict.acc { background: #e8f0f9; }
+    .verdict .big { font-size: 20px; font-weight: 700; }
+    .rule { background: #f5f7f9; border-radius: 8px; padding: 8px; text-align: center; height: 100%; }
+    .rule .t { font-size: 11px; font-weight: 600; text-transform: uppercase; color: #5f6b7a; }
+    .rule .r { font-size: 12px; color: #5f6b7a; }
+  "))),
+
+  h3("Hypothesis Testing: Two Routes to the Same Decision", style = "margin-top: 12px;"),
+  p(class = "sub", style = "max-width: 1050px;",
+    "Set \u03B1, the null value and the direction of the test before collecting data; then enter what the sample gave. ",
+    "The top row is calculated from the sample; the bottom row is chosen before collecting data. ",
+    "Each card pairs with the one above it: P vs. \u03B1 (areas) and test statistic vs. critical value (scores)."),
+
+  layout_columns(
+    col_widths = c(4, 4, 4),
+
+    # ---- Column 1, top: significance level and hypotheses ----
+    card(card_body(
+      h5("Significance level", span(class = "tag a", "set in advance")),
+      p(class = "sub", "Decisions made before looking at the data."),
+      radioButtons("alpha", "Significance level \u03B1", inline = TRUE,
+                   choices = c("0.10", "0.05", "0.025", "0.01", "0.001"), selected = "0.05"),
+      radioButtons("tail", "Type of test", inline = TRUE,
+                   choices = c("Two-tailed" = "two", "Left-tailed" = "left", "Right-tailed" = "right")),
+      slider_for("mean", "h0"), slider_for("prop", "h0"), slider_for("var", "h0"),
+      div(class = "hyp", uiOutput("hyp"))
+    )),
+
+    # ---- Top row: test statistic ----
+    card(card_body(
+      h5("Test statistic"), p(class = "sub", textOutput("tstat_sub", inline = TRUE)),
+      div(class = "eq", uiOutput("tstat_eq")),
+      plotOutput("p_tstat", height = "200px")
+    )),
+
+    # ---- Top row: p-value ----
+    card(card_body(
+      h5("P-value"), p(class = "sub", textOutput("pval_sub", inline = TRUE)),
+      div(class = "eq", uiOutput("pval_eq")),
+      plotOutput("p_pval", height = "200px")
+    )),
+
+    # ---- Column 1, bottom: sample statistic ----
+    card(card_body(
+      h5("Sample statistic", span(class = "tag d", "from the data")),
+      p(class = "sub", "What the sample gave us."),
+      radioButtons("stat", "Parameter being tested", inline = TRUE,
+                   choices = c("Mean" = "mean", "Proportion" = "prop", "Variance" = "var")),
+      conditionalPanel("input.stat == 'mean'",
+        radioButtons("sigma", "Population \u03C3", inline = TRUE,
+                     choices = c("Known (z test)" = "known", "Unknown (t test)" = "unknown"))),
+      slider_for("mean", "sv"), slider_for("prop", "sv"), slider_for("var", "sv"),
+      slider_for("mean", "se"), slider_for("prop", "se"), slider_for("var", "se"),
+      conditionalPanel("input.stat == 'mean' && input.sigma == 'unknown'",
+        sliderInput("n_t", "Sample size n", min = 3, max = 100, value = 25, step = 1, width = "100%")),
+      div(class = "help", uiOutput("se_help"))
+    )),
+
+    # ---- Bottom row: critical value ----
+    card(card_body(
+      h5("Critical value"), p(class = "sub", textOutput("crit_sub", inline = TRUE)),
+      div(class = "eq", uiOutput("crit_eq")),
+      plotOutput("p_crit", height = "200px")
+    )),
+
+    # ---- Bottom row: alpha tail area ----
+    card(card_body(
+      h5("\u03B1 tail area"), p(class = "sub", textOutput("atail_sub", inline = TRUE)),
+      div(class = "eq", uiOutput("atail_eq")),
+      plotOutput("p_atail", height = "200px")
+    ))
+  ),
+
+  # ---- Full width: decision ----
+  card(card_body(uiOutput("decision")))
+)
+
+
+# =============================================================================
+# SERVER
+# =============================================================================
+server <- function(input, output, session) {
+
+  # ---- One reactive with every number the outputs need ----------------------
+  res <- reactive({
+    stat <- input$stat
+    a    <- as.numeric(input$alpha)
+    tail <- input$tail
+    sv   <- input[[paste0("sv_", stat)]]
+    h0   <- input[[paste0("h0_", stat)]]
+    se   <- input[[paste0("se_", stat)]]
+    req(sv, h0, se)
+
+    kind <- if (stat == "var") "chi" else if (stat == "mean" && input$sigma == "unknown") "t" else "z"
+    df   <- switch(kind, chi = se - 1, t = input$n_t - 1, z = NA)
+
+    # density, cumulative probability and quantile of the reference distribution
+    d <- switch(kind,
+      z   = list(pdf = dnorm, cdf = pnorm, q = qnorm, L = "z", RV = "Z"),
+      t   = list(pdf = \(x) dt(x, df), cdf = \(x) pt(x, df), q = \(p) qt(p, df),
+                 L = "t", RV = sprintf("T_{%d}", df)),
+      chi = list(pdf = \(x) dchisq(x, df), cdf = \(x) pchisq(x, df), q = \(p) qchisq(p, df),
+                 L = "\\chi^2", RV = sprintf("\\chi^2_{%d}", df)))
+
+    ts <- if (kind == "chi") df * sv / h0 else (sv - h0) / se      # test statistic
+
+    # critical values (cut-offs of the rejection region)
+    lo <- hi <- NA
+    if (tail == "two") { lo <- d$q(a / 2); hi <- d$q(1 - a / 2) }
+    if (tail == "left")  lo <- d$q(a)
+    if (tail == "right") hi <- d$q(1 - a)
+
+    # p-value and cut-offs of the P region
+    F <- d$cdf(ts); plo <- phi <- NA
+    if (tail == "two") { pt_ <- min(F, 1 - F); p <- min(1, 2 * pt_); plo <- d$q(pt_); phi <- d$q(1 - pt_) }
+    if (tail == "left")  { p <- F;     plo <- ts }
+    if (tail == "right") { p <- 1 - F; phi <- ts }
+
+    # x-axis range
+    if (kind == "chi") {
+      xr <- c(0, min(max(d$q(0.9995), ts * 1.08), d$q(0.999999)))
+    } else {
+      m  <- min(max(4, abs(ts) + 0.6, 1.15 * max(abs(c(lo, hi)), na.rm = TRUE)), 8)
+      xr <- c(-m, m)
+    }
+
+    list(stat = stat, a = a, tail = tail, sv = sv, h0 = h0, se = se, kind = kind, df = df,
+         d = d, ts = ts, lo = lo, hi = hi, F = F, p = p, plo = plo, phi = phi, xr = xr,
+         reject = p < a, dg = CONF[[stat]]$d,
+         center = if (kind == "chi") df else 0,
+         center_txt = if (kind == "chi") paste("df =", df) else "0")
+  })
+
+  # ---- Draws one distribution card ------------------------------------------
+  # regions: list of c(from, to) shaded with `fill`; ticks: values labelled under the axis;
+  # marks: values with a short vertical tick; corner: labels in the top corners
+  draw_dist <- function(R, regions = list(), fill = NA, ticks = NULL, tick_col = COL$grey,
+                        marks = NULL, mark_col = COL$grey, corner = list()) {
+    xs   <- seq(R$xr[1], R$xr[2], length.out = 500)
+    dat  <- data.frame(x = xs, y = R$d$pdf(xs))
+    ymax <- max(dat$y) * 1.32
+    g <- ggplot(dat, aes(x, y))
+    for (r in regions) {
+      sub <- dat[dat$x >= r[1] & dat$x <= r[2], ]
+      if (nrow(sub) > 1) g <- g + geom_area(data = sub, fill = fill)
+    }
+    g <- g + geom_line(colour = COL$curve, linewidth = 0.7) +
+      geom_hline(yintercept = 0, colour = "#c9d0d7")
+    for (v in marks[!is.na(marks)]) if (v >= R$xr[1] && v <= R$xr[2])
+      g <- g + annotate("segment", x = v, xend = v, y = 0, yend = ymax * 0.12, colour = mark_col, linewidth = 0.8)
+    # labels under the axis (an arrow shows a value outside the plotted range)
+    lab <- data.frame(v = c(R$center, ticks), txt = c(R$center_txt, fm(ticks, 2)),
+                      col = c(COL$grey, rep(tick_col, length(ticks))), face = c("plain", rep("bold", length(ticks))))
+    lab <- lab[!is.na(lab$v), ]
+    lab$txt[lab$v < R$xr[1]] <- paste("\u2190", lab$txt[lab$v < R$xr[1]])
+    lab$txt[lab$v > R$xr[2]] <- paste(lab$txt[lab$v > R$xr[2]], "\u2192")
+    lab$v <- pmin(pmax(lab$v, R$xr[1]), R$xr[2])
+    g <- g + annotate("text", x = lab$v, y = -ymax * 0.07, label = lab$txt, colour = lab$col,
+                      fontface = lab$face, size = 3.6)
+    for (cl in corner)
+      g <- g + annotate("text", x = if (cl$side == "left") R$xr[1] else R$xr[2], y = ymax * 0.97,
+                        label = cl$text, hjust = if (cl$side == "left") 0 else 1,
+                        colour = cl$col, fontface = "bold", size = 4)
+    g + coord_cartesian(xlim = R$xr, ylim = c(-ymax * 0.12, ymax), expand = FALSE, clip = "off") +
+      theme_void()
+  }
+
+  # P-region pieces (used by the test statistic and p-value cards)
+  p_parts <- reactive({
+    R <- res()
+    if (R$tail == "two")  list(reg = list(c(-Inf, R$plo), c(R$phi, Inf)), ticks = c(R$plo, R$phi),
+                               corner = list(list(side = "left", text = fp(R$p / 2), col = COL$p),
+                                             list(side = "right", text = fp(R$p / 2), col = COL$p)))
+    else if (R$tail == "left") list(reg = list(c(-Inf, R$plo)), ticks = R$plo,
+                               corner = list(list(side = "left", text = fp(R$p), col = COL$p)))
+    else list(reg = list(c(R$phi, Inf)), ticks = R$phi,
+              corner = list(list(side = "right", text = fp(R$p), col = COL$p)))
+  })
+  a_regions <- reactive({
+    R <- res()
+    Filter(Negate(is.null), list(if (!is.na(R$lo)) c(-Inf, R$lo), if (!is.na(R$hi)) c(R$hi, Inf)))
+  })
+
+  # ---- Hypotheses and help text ---------------------------------------------
+  par_tex <- reactive(switch(input$stat, mean = "\\mu", prop = "p", var = "\\sigma^2"))
+  output$hyp <- renderUI({
+    R <- res(); op <- switch(R$tail, two = "\\neq", left = "<", right = ">")
+    v <- fx(R$h0, R$dg[["h0"]])
+    mj("H_0:\\ ", par_tex(), " = ", v, "\\qquad H_1:\\ ", par_tex(), " ", op, " ", v)
+  })
+  output$se_help <- renderUI({
+    R <- res()
+    switch(R$kind,
+      z   = if (R$stat == "mean") mj("\\text{Standard error under } H_0:\\ SE = \\dfrac{\\sigma}{\\sqrt{n}} = ", fx(R$se, 2))
+            else mj("SE = \\sqrt{\\dfrac{p_0(1-p_0)}{n}} = ", fx(R$se, 3),
+                    "\\quad (\\text{implies } n \\approx ", round(R$h0 * (1 - R$h0) / R$se^2), ")"),
+      t   = mj("SE = \\dfrac{s}{\\sqrt{n}} = ", fx(R$se, 2), ",\\quad df = n - 1 = ", R$df),
+      chi = mj("\\text{The test uses } \\chi^2 \\text{ with } df = n - 1 = ", R$df))
+  })
+
+  # ---- Test statistic card --------------------------------------------------
+  output$tstat_sub <- renderText({
+    R <- res(); switch(R$kind, z = "standardized score", t = paste0("t score, df = ", R$df), chi = "chi-square score")
+  })
+  output$tstat_eq <- renderUI({
+    R <- res(); dg <- R$dg
+    if (R$kind == "chi")
+      mj("\\chi^2 = \\dfrac{(n-1)\\,s^2}{\\sigma_0^2} = \\dfrac{", R$df, " \\times ", fx(R$sv, 0), "}{", fx(R$h0, 0), "} = ", fx(R$ts, 2))
+    else {
+      s <- if (R$stat == "mean") c("\\bar{x}", "\\mu_0") else c("\\hat{p}", "p_0")
+      mj(R$d$L, " = \\dfrac{", s[1], " - ", s[2], "}{SE} = \\dfrac{", fx(R$sv, dg[["sv"]]), " - ",
+         fx(R$h0, dg[["h0"]]), "}{", fx(R$se, dg[["se"]]), "} = ", fx(R$ts, 2))
+    }
+  })
+  output$p_tstat <- renderPlot({
+    R <- res(); P <- p_parts()
+    draw_dist(R, ticks = P$ticks, tick_col = COL$p, marks = P$ticks, mark_col = COL$p)   # curve + marks only
+  })
+
+  # ---- P-value card ---------------------------------------------------------
+  output$pval_sub <- renderText({
+    R <- res()
+    if (R$tail == "two") { if (R$kind == "chi") "area in both tails, doubled from the nearer one"
+                           else paste0("area beyond \u00B1", fx(abs(R$ts), 2)) }
+    else paste("area", if (R$tail == "left") "below" else "above", fx(R$ts, 2))
+  })
+  output$pval_eq <- renderUI({
+    R <- res(); t2 <- fx(R$ts, 2)
+    if (R$tail == "two") {
+      side <- if (R$kind == "chi") paste(if (R$F < 0.5) "\\le" else "\\ge", t2) else paste("\\ge", fx(abs(R$ts), 2))
+      mj("P = 2 \\cdot P(", R$d$RV, " ", side, ") ", fp_eq(R$p))
+    } else mj("P = P(", R$d$RV, if (R$tail == "left") " \\le " else " \\ge ", t2, ") ", fp_eq(R$p))
+  })
+  output$p_pval <- renderPlot({
+    R <- res(); P <- p_parts()
+    draw_dist(R, regions = P$reg, fill = COL$p_fill, ticks = P$ticks, tick_col = COL$p,   # orange area only
+              corner = list(list(side = if (R$tail == "right") "right" else "left",
+                                 text = paste("P =", fp(R$p)), col = COL$p)))
+  })
+
+  # ---- Critical value card --------------------------------------------------
+  output$crit_sub <- renderText({
+    R <- res(); w <- switch(R$kind, z = "z", t = "t", chi = "\u03C7\u00B2")
+    dft <- if (R$kind == "t") paste0(" (df = ", R$df, ")") else ""
+    if (R$tail == "two") { if (R$kind == "chi") "values that cut off \u03B1/2 in each tail" else paste0(w, " that cuts off those tails", dft) }
+    else paste0(w, " that cuts off the ", R$tail, " tail", dft)
+  })
+  output$crit_eq <- renderUI({
+    R <- res()
+    if (R$tail == "two") {
+      if (R$kind == "chi") mj("\\chi^2_L = ", fx(R$lo, 2), ",\\quad \\chi^2_U = ", fx(R$hi, 2))
+      else mj(R$d$L, " = \\pm ", fx(R$hi, 2))
+    } else mj(R$d$L, " = ", fx(if (R$tail == "left") R$lo else R$hi, 2))
+  })
+  output$p_crit <- renderPlot({
+    R <- res(); cv <- c(R$lo, R$hi); cv <- cv[!is.na(cv)]
+    draw_dist(R, ticks = cv, tick_col = COL$a, marks = cv, mark_col = COL$a)   # curve + marks only
+  })
+
+  # ---- Alpha tail area card -------------------------------------------------
+  output$atail_sub <- renderText({
+    R <- res(); if (R$tail == "two") "area split over two tails" else paste("all of \u03B1 in the", R$tail, "tail")
+  })
+  output$atail_eq <- renderUI({
+    R <- res()
+    if (R$tail == "two") mj("\\alpha = ", R$a, ",\\qquad \\dfrac{\\alpha}{2} = ", signif(R$a / 2, 4), "\\text{ per tail}")
+    else mj("\\alpha = ", R$a, "\\text{ in the ", R$tail, " tail}")
+  })
+  output$p_atail <- renderPlot({
+    R <- res(); cv <- c(R$lo, R$hi); cv <- cv[!is.na(cv)]
+    draw_dist(R, regions = a_regions(), fill = COL$a_fill, ticks = cv, tick_col = COL$a)   # blue area only
+  })
+
+  # ---- Decision -------------------------------------------------------------
+  output$decision <- renderUI({
+    R <- res(); L <- R$d$L; t2 <- fx(R$ts, 2)
+    par_txt <- switch(R$stat, mean = "\u03BC", prop = "p", var = "\u03C3\u00B2")
+    op_txt  <- switch(R$tail, two = "\u2260", left = "<", right = ">")
+    v <- fx(R$h0, R$dg[["h0"]])
+
+    rule_p <- if (R$p < 1e-4) paste0("P < 0.0001 < \\alpha = ", R$a)
+              else paste0("P = ", fp(R$p), if (R$reject) " < " else " \\ge ", "\\alpha = ", R$a)
+    rule_z <- if (R$tail == "two" && R$kind != "chi") {
+      paste0("|", L, "| = ", fx(abs(R$ts), 2), if (R$reject) " > " else " \\le ", fx(R$hi, 2))
+    } else if (R$tail == "two") {
+      if (!R$reject) paste0(fx(R$lo, 2), " \\le \\chi^2 = ", t2, " \\le ", fx(R$hi, 2))
+      else if (R$ts > R$hi) paste0("\\chi^2 = ", t2, " > ", fx(R$hi, 2))
+      else paste0("\\chi^2 = ", t2, " < ", fx(R$lo, 2))
+    } else if (R$tail == "left") paste0(L, " = ", t2, if (R$reject) " < " else " \\ge ", fx(R$lo, 2))
+    else paste0(L, " = ", t2, if (R$reject) " > " else " \\le ", fx(R$hi, 2))
+
+    layout_columns(
+      col_widths = c(4, 4, 4),
+      div(class = paste("verdict", if (R$reject) "rej" else "acc"),
+          div(class = "big", style = paste0("color:", if (R$reject) "#a63603" else COL$a),
+              HTML(if (R$reject) "Reject H<sub>0</sub>" else "Fail to reject H<sub>0</sub>")),
+          div(style = "font-size: 13px; color: #5f6b7a;",
+              HTML(if (R$reject) sprintf("At \u03B1 = %s, the sample gives significant evidence that %s %s %s.", R$a, par_txt, op_txt, v)
+                   else sprintf("At \u03B1 = %s, the sample does not give enough evidence that %s %s %s. This does not prove H<sub>0</sub> is true.", R$a, par_txt, op_txt, v)))),
+      div(class = "rule", div(class = "t", "Compare areas"), mj(rule_p),
+          div(class = "r", if (R$reject) "the data's tail is smaller than \u03B1" else "the data's tail is at least as big as \u03B1")),
+      div(class = "rule", div(class = "t", "Compare scores"), mj(rule_z),
+          div(class = "r", if (R$reject) "the test statistic falls in the rejection region" else "the test statistic is outside the rejection region"))
+    )
+  })
+}
+
+shinyApp(ui, server)
+```
+
+```{=html}
+<iframe src="https://jvascanalytics.shinyapps.io/EPPS6356/"
+        width="100%" height="1300" style="border: none;"
+        title="EPPS6356 Shiny app" loading="lazy"></iframe>
+```
