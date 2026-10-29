@@ -73,6 +73,8 @@ website:
             text: Assignment 05 
           - href: pages_epps_6356/assign06_Data_Visualization.qmd
             text: Assignment 06
+          - href: pages_epps_6356/assign07_Hackathon2_Data_Visualization.qmd
+            text: Hackathon 2
       - text: EPPS 6302
         menu:
           - href: pages_epps_6302/assign02_Data_Collection.qmd

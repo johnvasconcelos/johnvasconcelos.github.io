@@ -265,6 +265,10 @@ window.Quarto = {
     <a class="dropdown-item" href="../pages_epps_6356/assign06_Data_Visualization.html">
  <span class="dropdown-text">Assignment 06</span></a>
   </li>  
+        <li>
+    <a class="dropdown-item" href="../pages_epps_6356/assign07_Hackathon2_Data_Visualization.html">
+ <span class="dropdown-text">Hackathon 2</span></a>
+  </li>  
     </ul>
   </li>
   <li class="nav-item dropdown ">
@@ -628,7 +632,7 @@ window.Quarto = {
 12    DCPD-2026DIGEST     Portico the President and Mrs Trump greeted President
 13    DCPD-2026DIGEST          Chris Woods Eldrick T Tiger Wright Christopher A
 14 DCPD-2026CHECKLIST       Hosts a Historic State Visit With China's President
-15     DCPD-202600638        Trump Remarks at a State Dinner Honoring President
+15     DCPD-202600653             House In his remarks he referred to President
       keyword                                                    post
 1  Xi Jinping           of China to discuss trade and military issues
 2  Xi Jinping                    of China in Beijing China on May and
@@ -644,14 +648,14 @@ window.Quarto = {
 12 Xi Jinping                   of China and his wife Peng Liyuan and
 13 Xi Jinping         Xie Feng Yared Pierre Yılmaz Cevdet Yingst Trey
 14 Xi Jinping Signs a Historic Arctic Security Agreement Secures Four
-15 Xi Jinping       of China September President Trump Thank you very</code></pre>
+15 Xi Jinping            of China A reporter referred to Dario Amodei</code></pre>
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Mentions per administration</span></span>
 <span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(<span class="at">admin =</span> <span class="fu">docvars</span>(cpd_toks, <span class="st">"admin"</span>)[<span class="fu">match</span>(xi_kwic<span class="sc">$</span>docname, <span class="fu">docnames</span>(cpd_toks))])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>admin
 Biden Trump 
-  465   266 </code></pre>
+  465   267 </code></pre>
 </div>
 </div>
 <p><strong>Step 3. Keyness.</strong> Keyness compares the relative frequency of every word in a target group with a reference group (chi-square test). Large positive values are typical of the target (Trump); large negative values are typical of the reference (Biden).</p>
@@ -669,7 +673,7 @@ Biden Trump
 </div>
 </div>
 <p><strong>Interpretation 2a(ii).</strong></p>
-<p>The query returned 351 documents, 183 from the Biden administration and 168 from the Trump administration, with 731 mentions of Xi Jinping in total. The words most typical of the Trump documents are q, trump, great, yes, know, going, want, think, people, good; the words most typical of the Biden documents are press, announced, national, briefing, intention, house, security, nominate, white, transcript.</p>
+<p>The query returned 351 documents, 183 from the Biden administration and 168 from the Trump administration, with 732 mentions of Xi Jinping in total. The words most typical of the Trump documents are q, trump, great, yes, know, going, want, think, people, good; the words most typical of the Biden documents are press, announced, national, briefing, intention, house, security, nominate, white, transcript.</p>
 <div class="callout callout-style-default callout-note callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
@@ -944,9 +948,7 @@ Biden Trump
 <p>Research it on the quanteda site (<code>textmodel_wordfish()</code>) and in tutorial ch.&nbsp;6; rec. Slapin &amp; Proksch (2008).</p>
 </blockquote>
 <p>Wordfish is an <strong>unsupervised scaling model</strong>: it places every document on <strong>one</strong> latent dimension using only word frequencies, without reference texts or pre-coded positions (unlike Wordscores, which is supervised). Slapin and Proksch (2008) developed it to estimate party positions from German party manifestos. The model is</p>
-<p><span class="math display">\[
-y_{ij} \sim \text{Poisson}(\lambda_{ij}), \qquad \log \lambda_{ij} = \alpha_i + \psi_j + \beta_j \, \theta_i
-\]</span></p>
+<p><span class="math display">\[y_{ij} \sim \text{Poisson}(\lambda_{ij}), \qquad \log \lambda_{ij} = \alpha_i + \psi_j + \beta_j \, \theta_i\]</span></p>
 <table class="caption-top table">
 <colgroup>
 <col style="width: 50%">

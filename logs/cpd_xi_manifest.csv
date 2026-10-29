@@ -1,6 +1,7 @@
 package_id,title,date,admin,n_chars,source
-DCPD-2026DIGEST,Digest of Other White House Announcements,2026-10-16,Trump,285049,https://www.govinfo.gov/app/details/DCPD-2026DIGEST
-DCPD-2026CHECKLIST,Checklist of White House Press Releases,2026-10-16,Trump,57181,https://www.govinfo.gov/app/details/DCPD-2026CHECKLIST
+DCPD-2026DIGEST,Digest of Other White House Announcements,2026-10-23,Trump,285049,https://www.govinfo.gov/app/details/DCPD-2026DIGEST
+DCPD-2026CHECKLIST,Checklist of White House Press Releases,2026-10-23,Trump,57181,https://www.govinfo.gov/app/details/DCPD-2026CHECKLIST
+DCPD-202600653,Remarks Following a Working Lunch on Artificial Intelligence and an Exchange With Reporters,2026-09-29,Trump,5182,https://www.govinfo.gov/app/details/DCPD-202600653
 DCPD-202600638,Remarks at a State Dinner Honoring President Xi Jinping of China,2026-09-24,Trump,10055,https://www.govinfo.gov/app/details/DCPD-202600638
 DCPD-202600636,Remarks at a Welcoming Ceremony for President Xi Jinping of China,2026-09-24,Trump,9159,https://www.govinfo.gov/app/details/DCPD-202600636
 DCPD-202600635,"Remarks in an Exchange With Reporters Upon Arrival From Joint Base Andrews, Maryland",2026-09-23,Trump,4676,https://www.govinfo.gov/app/details/DCPD-202600635
@@ -127,7 +128,6 @@ DCPD-202500663,Statement on the President's Telephone Conversation With Presiden
 DCPD-202500661,Remarks Prior to a Meeting With Chancellor Friedrich Merz of Germany and an Exchange With Reporters,2025-06-05,Trump,51064,https://www.govinfo.gov/app/details/DCPD-202500661
 DCPD-202500648,The President's News Conference With White House Senior Adviser Elon R. Musk,2025-05-30,Trump,60776,https://www.govinfo.gov/app/details/DCPD-202500648
 DCPD-202500590,Remarks on Signing an Executive Order on Delivering Most-Favored-Nation Prescription Drug Pricing to American Patients and an Exchange With Reporters,2025-05-12,Trump,62128,https://www.govinfo.gov/app/details/DCPD-202500590
-DCPD-202500576,Remarks at a Bill Signing Ceremony and an Exchange With Reporters,2025-05-09,Trump,17734,https://www.govinfo.gov/app/details/DCPD-202500576
 DCPD-202500573,Remarks With Prime Minister Keir Starmer of the United Kingdom Announcing a United States Trade Agreement With the United Kingdom and an Exchange With Reporters,2025-05-08,Trump,67986,https://www.govinfo.gov/app/details/DCPD-202500573
 DCPD-202500567,"Remarks During a Swearing-in Ceremony for David A. Perdue, Jr., as United States Ambassador to China and an Exchange With Reporters",2025-05-07,Trump,20482,https://www.govinfo.gov/app/details/DCPD-202500567
 DCPD-202500553,"Remarks and an Exchange With Reporters Aboard Air Force One En Route to Joint Base Andrews, Maryland",2025-05-04,Trump,16883,https://www.govinfo.gov/app/details/DCPD-202500553

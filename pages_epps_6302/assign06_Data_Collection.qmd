@@ -36,7 +36,7 @@ my_stop    <- c(stopwords("en"), "amp", "rt", "can", "will", "also", "just", "s"
 party_cols <- c(Democratic = "#08519c", Republican = "firebrick")
 ```
 
-___
+------------------------------------------------------------------------
 
 # 1. Read
 
@@ -45,13 +45,13 @@ ___
 The basic quanteda workflow used throughout this page:
 
 | Object | What it is | Function |
-|---|---|---|
+|----|----|----|
 | corpus | the texts plus their variables (date, party, ...) | `corpus()` |
 | tokens | each text split into words | `tokens()` |
 | dfm | document-feature matrix: one row per text, one column per word, cells = counts | `dfm()` |
 | fcm | feature co-occurrence matrix: how often two words appear in the same text | `fcm()` |
 
-___
+------------------------------------------------------------------------
 
 # 2. Analyze
 
@@ -84,7 +84,7 @@ ggplot(twt_freq, aes(frequency, reorder(feature, frequency))) +
   theme_bw()
 ```
 
-**(2) and (3) Networks.** 
+**(2) and (3) Networks.**
 
 ```{r tweets-networks}
 # Network of the 50 most used features that match a pattern ("#*" or "@*")
@@ -100,7 +100,7 @@ plot_net("#*", min_freq = 50, colour = "#08519c")    # (2) hashtags used in the 
 plot_net("@*", min_freq = 20, colour = "firebrick")  # (3) accounts mentioned in the same tweet
 ```
 
-**(4) Latent Semantic Analysis.** 
+**(4) Latent Semantic Analysis.**
 
 ```{r tweets-lsa}
 twt_lsa <- textmodel_lsa(twt_words, nd = 4)
@@ -109,7 +109,7 @@ top10 <- apply(abs(twt_lsa$features), 2, \(x) paste(names(sort(x, decreasing = T
 data.frame(dimension = 1:4, top_words = top10)
 ```
 
-**Interpreting 2a(i).** 
+**Interpreting 2a(i).**
 
 The `r format(nrow(summit), big.mark = ",")` tweets (`r round(100 * mean(summit$is_retweet))`% of them retweets) are dominated by the names of the two leaders and the format of the event: the most frequent words are `r paste(head(twt_freq$feature, 8), collapse = ", ")`. The hashtag network shows two clusters: one around the leaders and the bilateral agenda (`#china`, `#biden`, `#xijinping`, `#fentanyl`, `#coronavirus`, `#taiwan`) and one around human rights (`#uyghurgenocide`, `#tibetans`, `#humanrights`), which the official agenda barely names. The mention network links official and media accounts (`@potus`, `@joebiden`, `@politico`, journalists) and also a separate cluster formed by basketball player Enes Kanter and NBA accounts, a protest against China that happened in the same days. The first LSA dimension simply collects the general summit vocabulary; the others pick up narrower threads, such as Xi calling Biden an "old friend" and references to Russia and Ukraine. Because many tweets are retweets, frequent words partly reflect a few messages copied many times.
 
@@ -196,12 +196,13 @@ textplot_keyness(cpd_key, n = 20, color = c("firebrick", "#08519c")) +
   labs(title = "CPD documents mentioning Xi Jinping: Trump (red) vs. Biden (blue)")
 ```
 
-**Interpretation 2a(ii).** 
+**Interpretation 2a(ii).**
 
 The query returned `r kv(n_found)` documents, `r kv(sum(cpd$admin == "Biden"))` from the Biden administration and `r kv(sum(cpd$admin == "Trump"))` from the Trump administration, with `r kv(nrow(xi_kwic))` mentions of Xi Jinping in total. The words most typical of the Trump documents are `r kv(paste(head(cpd_key$feature, 10), collapse = ", "))`; the words most typical of the Biden documents are `r kv(paste(head(rev(cpd_key$feature), 10), collapse = ", "))`.
 
-::: {.callout-note}
+::: callout-note
 ## To complete after rendering with the key
+
 Read the kwic table and the keyness plot and add two or three sentences here: in what situations is Xi mentioned (calls, meetings, joint statements, remarks to the press), and what the keyness words say about how each administration framed China (for example security and alliances versus trade and deals). Remember that the two periods have different lengths, so compare relative frequencies, not counts.
 :::
 
@@ -216,8 +217,8 @@ tibble(rank       = 1:20,
 
 **Interpreting 2a(iii).**
 
-| | Tweets (Part 1) | Presidential documents (Part 2) |
-|---|---|---|
+|   | Tweets (Part 1) | Presidential documents (Part 2) |
+|----|----|----|
 | Who produced them | thousands of users: citizens, journalists, activists, media and official accounts | the White House; selected and published by the Office of the Federal Register |
 | For whom | followers and the online public | the public record, the press, foreign governments |
 | Selection | a keyword and a collection window of a few days | editors' choice of what enters the CPD, then our query |
@@ -328,7 +329,7 @@ latest_year <- max(docvars(data_corpus_inaugural, "Year"))
 packageVersion("quanteda")       # older versions of quanteda stop at 2021
 ```
 
-**Comments on 2b(ii).** 
+**Comments on 2b(ii).**
 
 In the installed version of quanteda (`r packageVersion("quanteda")`), the latest address is from **`r latest_year`** (`r tail(docvars(data_corpus_inaugural, "President"), 1)`). `r if (latest_year < 2025) "The 2025 address is missing." else "The 2025 address is already included."` To add it, the best source is the one used in Part 2: the inaugural address is itself a presidential document, so it is in the **GovInfo Compilation of Presidential Documents** (published 20 January 2025), with a stable identifier and an official text. Other sources are The American Presidency Project (presidency.ucsb.edu) and whitehouse.gov. The code below shows the steps; it runs only if the address is missing and the API key is available.
 
@@ -356,12 +357,10 @@ tail(docvars(c(data_corpus_inaugural, inaug_2025)), 2)
 
 Wordfish is an **unsupervised scaling model**: it places every document on **one** latent dimension using only word frequencies, without reference texts or pre-coded positions (unlike Wordscores, which is supervised). Slapin and Proksch (2008) developed it to estimate party positions from German party manifestos. The model is
 
-$$
-y_{ij} \sim \text{Poisson}(\lambda_{ij}), \qquad \log \lambda_{ij} = \alpha_i + \psi_j + \beta_j \, \theta_i
-$$
+$$y_{ij} \sim \text{Poisson}(\lambda_{ij}), \qquad \log \lambda_{ij} = \alpha_i + \psi_j + \beta_j \, \theta_i$$
 
 | Term | Meaning |
-|---|---|
+|----|----|
 | $y_{ij}$ | number of times word $j$ appears in document $i$ |
 | $\alpha_i$ | document fixed effect: longer, wordier documents use every word more |
 | $\psi_j$ | word fixed effect: some words are simply common |
@@ -410,7 +409,7 @@ textplot_scale1d(wf, margin = "features", highlighted = c(head(low_end, 6), head
 cor(wf$theta, textmodel_wordfish(wf_dfm, dir = rev(dir_docs))$theta)   # = -1
 ```
 
-**Interprtation 3b.** 
+**Interprtation 3b.**
 
 Wordfish assumes that each word count is drawn from a Poisson distribution whose rate depends on the length of the document ($\alpha$), the general frequency of the word ($\psi$), and a single latent position of the document ($\theta$) weighted by how strongly that word discriminates ($\beta$). It is a bag-of-words model: word order is ignored, words are independent of each other once the position is known, all systematic variation in word use is placed on **one** dimension, and the Poisson assumes that the variance equals the mean. On the inaugural addresses, the dimension it found is **not party**: the Democratic and Republican averages are both close to zero (`r round(party_m["Democratic"], 2)` and `r round(party_m["Republican"], 2)`). It is **time**: the position correlates `r round(r_year, 2)` with the year, running from Truman and Eisenhower at one end to Obama, Biden and Trump at the other. The words explain why: the low end is the abstract, institutional, Cold War vocabulary of `r paste(head(low_end, 8), collapse = ", ")`; the high end is a personal, domestic, narrative style with `r paste(head(high_end, 8), collapse = ", ")`. The dimension seems to measure a change in rhetorical style and agenda, from the world order to the citizen's story, rather than ideology. To show that it really measures that, I would need validation beyond word lists: correlate the positions with an independent measure (human coding of the addresses' style or topics, or expert ratings), check that the order is stable when the stop words, the trimming or the set of years change, and rule out simpler explanations such as length (here the correlation with log length is only `r round(r_length, 2)`). Finally, `dir` must be set because the model is identified only up to its sign: multiplying every $\theta$ and every $\beta$ by −1 gives exactly the same likelihood, so without `dir` the direction is arbitrary (the reversed run correlates −1 with the original). `dir = c(a, b)` fixes that document *a* lies to the left of document *b*; it makes the scale interpretable and the results reproducible, but it chooses only the direction, not the positions.
 
@@ -427,7 +426,6 @@ Wordfish assumes that each word count is drawn from a Poisson distribution whose
 **What Wordfish measures.** Wordfish finds the main dimension of variation in word use, whatever it is; it does not know that we might be interested in left–right ideology. When the texts come from a genre that evolves over time, that main dimension is the era. Calling it "ideology" would require validation against independent measures. Setting `dir` only fixes the direction of the scale.
 
 **Lessons.** Each source answers a different question. Tweets tell us what the public noticed; presidential documents tell us what the government chose to record; inaugural addresses tell us how a ritual evolved. The same text-analysis tools (frequencies, keyness, scaling) produce results whose meaning depends on how each corpus came to exist.
-
 
 # AI Scripts
 
