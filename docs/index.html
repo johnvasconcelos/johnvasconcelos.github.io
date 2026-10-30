@@ -6,6 +6,7 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
+<meta name="description" content="PhD student in Public and Nonprofit Management at UT Dallas">
 
 <title>John Vasconcelos</title>
 <style>
@@ -37,11 +38,12 @@ ul.task-list li input[type="checkbox"] {
 <script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
 <script src="site_libs/quarto-html/popper.min.js"></script>
 <script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
 <link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
 <link href="site_libs/quarto-html/quarto-syntax-highlighting-daee3dbc31499a3618572225bd8afd09.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap-cf1c33a087c0a85e603096bb70efc310.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-46bcec4a641586d09e0cade210ced972.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -253,54 +255,279 @@ ul.task-list li input[type="checkbox"] {
     </nav>
 </header>
 <!-- content -->
-<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<div id="quarto-content" class="quarto-container page-layout-custom page-navbar">
 <!-- sidebar -->
 <!-- margin-sidebar -->
-    
 <!-- main -->
-<div class="quarto-about-trestles">
-  <div class="about-entity">
-    <img src="images/headshot.jpg" class="about-image
-  round " style="height: 14em; width: 14em;">
-<header id="title-block-header" class="quarto-title-block default">
-<div class="quarto-title">
-<h1 class="title">John Vasconcelos</h1>
-</div>
-<div class="quarto-title-meta">
-  </div>
-</header>
-    <div class="about-links">
-  <a href="mailto:john.vasconcelos@utdallas.edu" class="about-link" rel="" target="">
-    <i class="bi bi-envelope"></i>
-     <span class="about-link-text">Email</span>
-  </a>
-  <a href="https://www.linkedin.com/in/johnvasconcelos" class="about-link" rel="" target="">
-    <i class="bi bi-linkedin"></i>
-     <span class="about-link-text">LinkedIn</span>
-  </a>
-  <a href="https://github.com/johnvasconcelos" class="about-link" rel="" target="">
-    <i class="bi bi-github"></i>
-     <span class="about-link-text">GitHub</span>
-  </a>
-  <a href="https://orcid.org/0009-0004-2983-0670" class="about-link" rel="" target="">
-    <i class="bi bi-person-vcard"></i>
-     <span class="about-link-text">ORCID</span>
-  </a>
-  <a href="https://scholar.google.com/citations?user=XXXX" class="about-link" rel="" target="">
-    <i class="bi bi-mortarboard"></i>
-     <span class="about-link-text">Google Scholar</span>
-  </a>
-</div>
-  </div>
-  <div class="about-contents"><main class="content" id="quarto-document-content">
-<p>I am a PhD student in Public and Nonprofit Management at the University of Texas at Dallas. My research interests cover topics associated with public financial and performance accountability oversight, such as public sector auditing and financial compliance, utilizing advanced statistics and artificial intelligence.</p>
 
 
-</main></div>
+
+
+<!-- Página inicial inspirada em bedimcode/portfolio-responsive-complete,
+     adaptada à paleta do site (azul #08519c, laranja #fd8d3c). -->
+<style>
+  .jv-home {
+    --azul: #08519c; --azul-medio: #2171b5; --azul-suave: #e8f0f9;
+    --laranja: #fd8d3c; --laranja-texto: #c4540d; --laranja-suave: #fff1e6;
+    --tinta: #1f2933; --cinza: #5f6b7a; --linha: #e2e6ea;
+    color: var(--tinta);
+  }
+  .jv-home a { text-decoration: none; }
+  .jv-wrap { max-width: 1080px; margin: 0 auto; padding: 0 1.5rem; }
+
+  /* ---------- HERO ---------- */
+  .jv-hero { position: relative; display: grid; grid-template-columns: 1.1fr .9fr; align-items: center;
+    gap: 2rem; min-height: calc(100vh - 62px); padding: 3rem 0 4rem; }
+  .jv-hero__eyebrow { font-size: .8rem; font-weight: 600; letter-spacing: .12em; text-transform: uppercase;
+    color: var(--laranja-texto); margin: 0 0 1rem; }
+  .jv-hero__title { font-size: clamp(2.3rem, 5.2vw, 3.8rem); line-height: 1.12; font-weight: 700;
+    color: var(--tinta); margin: 0 0 1.25rem; }
+  .jv-hero__title::after { display: none !important; }
+  .jv-hero__title span { color: var(--azul); }
+  .jv-hero__role { font-size: clamp(1.05rem, 1.6vw, 1.25rem); color: var(--cinza); max-width: 34rem; margin: 0 0 2.2rem; }
+  .jv-buttons { display: flex; gap: .8rem; flex-wrap: wrap; }
+  .jv-btn { display: inline-flex; align-items: center; gap: .5rem; padding: .75rem 1.6rem; border-radius: .5rem;
+    font-weight: 600; border: 2px solid var(--azul); transition: box-shadow .3s, background .2s, color .2s; }
+  .jv-btn--solid { background: var(--azul); color: #fff !important; }
+  .jv-btn--solid:hover { box-shadow: 0 10px 30px rgba(8, 81, 156, .25); }
+  .jv-btn--ghost { background: transparent; color: var(--azul) !important; }
+  .jv-btn--ghost:hover { background: var(--azul-suave); }
+  .jv-social { display: flex; gap: 1.4rem; margin-top: 3rem; }
+  .jv-social a { font-size: 1.45rem; color: var(--tinta); transition: color .2s, transform .2s; }
+  .jv-social a:hover { color: var(--azul); transform: translateY(-2px); }
+
+  .jv-hero__img { justify-self: center; width: min(440px, 100%); }
+  .jv-hero__img svg { width: 100%; height: auto; display: block; overflow: visible; }
+  .jv-blob-back { fill: var(--laranja); opacity: .9; }
+  .jv-blob-ring { fill: none; stroke: var(--azul); stroke-width: 3; opacity: .25; }
+
+  /* ---------- SECTIONS ---------- */
+  .jv-section { padding: 4.5rem 0 3.5rem; }
+  .jv-section--tint { background: #f5f6f8; }
+  .jv-section__title { text-align: center; font-size: clamp(1.5rem, 2.6vw, 2rem); font-weight: 700;
+    color: var(--azul); margin: 0 0 3rem; }
+  .jv-section__title::after { content: ""; display: block; width: 64px; height: 3px; background: var(--laranja);
+    margin: .7rem auto 0; }
+
+  /* About */
+  .jv-about { display: grid; grid-template-columns: .8fr 1.2fr; gap: 3rem; align-items: center; }
+  .jv-about__facts { display: grid; gap: .9rem; }
+  .jv-fact { display: flex; gap: .9rem; align-items: center; background: #fff; border: 1px solid var(--linha);
+    border-radius: 10px; padding: .9rem 1.1rem; }
+  .jv-fact i { font-size: 1.4rem; color: var(--azul); background: var(--azul-suave); border-radius: 50%;
+    width: 2.6rem; height: 2.6rem; display: grid; place-items: center; flex: none; }
+  .jv-fact b { display: block; color: var(--tinta); }
+  .jv-fact span { color: var(--cinza); font-size: .92rem; }
+  .jv-about__subtitle { font-size: 1.35rem; font-weight: 700; color: var(--tinta); margin: 0 0 1rem; }
+  .jv-about__subtitle::after { display: none !important; }
+  .jv-about p { color: #323f4b; line-height: 1.7; margin: 0 0 1.4rem; }
+  .jv-chips { display: flex; flex-wrap: wrap; gap: .5rem; }
+  .jv-chip { font-size: .85rem; font-weight: 600; padding: .35rem .85rem; border-radius: 999px;
+    background: var(--laranja-suave); color: var(--laranja-texto); }
+
+  /* Work cards */
+  .jv-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; }
+  .jv-card { display: flex; flex-direction: column; gap: .6rem; background: #fff; border: 1px solid var(--linha);
+    border-radius: 12px; padding: 1.5rem; color: var(--tinta) !important;
+    box-shadow: 0 4px 20px rgba(31, 41, 51, .06); transition: transform .25s, box-shadow .25s, border-color .25s; }
+  .jv-card:hover { transform: translateY(-4px); box-shadow: 0 12px 32px rgba(8, 81, 156, .14); border-color: #c6dbef; }
+  .jv-card i { font-size: 1.6rem; color: var(--azul); }
+  .jv-card h3 { font-size: 1.1rem; font-weight: 700; color: var(--tinta); margin: .2rem 0 0; }
+  .jv-card p { font-size: .93rem; color: var(--cinza); margin: 0; line-height: 1.55; flex: 1; }
+  .jv-card .jv-more { font-size: .88rem; font-weight: 600; color: var(--azul-medio); }
+  .jv-card:hover .jv-more { color: var(--laranja-texto); }
+
+  /* Contact */
+  .jv-contact { text-align: center; max-width: 40rem; margin: 0 auto; }
+  .jv-contact p { color: var(--cinza); margin: 0 0 1.8rem; line-height: 1.7; }
+  .jv-contact .jv-buttons { justify-content: center; }
+
+  /* Footer */
+  .jv-footer { background: var(--azul); color: #fff; text-align: center; padding: 2.2rem 1rem; }
+  .jv-footer__name { font-size: 1.3rem; font-weight: 700; margin: 0 0 1rem; }
+  .jv-footer__social { display: flex; justify-content: center; gap: 1.6rem; margin-bottom: 1rem; }
+  .jv-footer__social a { color: #fff; font-size: 1.3rem; opacity: .9; }
+  .jv-footer__social a:hover { color: #c6dbef; opacity: 1; }
+  .jv-footer__copy { font-size: .82rem; color: #c6dbef; margin: 0; }
+
+  /* Reveal on scroll (desligado para quem prefere menos movimento) */
+  .jv-reveal { opacity: 0; transform: translateY(24px); transition: opacity .7s ease, transform .7s ease; }
+  .jv-reveal.is-visible { opacity: 1; transform: none; }
+  @media (prefers-reduced-motion: reduce) {
+    .jv-reveal { opacity: 1; transform: none; transition: none; }
+    .jv-card, .jv-social a { transition: none; }
+  }
+
+  /* ---------- Responsive ---------- */
+  @media (max-width: 900px) {
+    .jv-cards { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (max-width: 767px) {
+    .jv-hero { grid-template-columns: 1fr; min-height: 0; padding: 2rem 0 3rem; text-align: left; }
+    .jv-hero__img { order: -1; width: min(300px, 80%); }
+    .jv-social { margin-top: 2rem; }
+    .jv-about { grid-template-columns: 1fr; gap: 2rem; }
+    .jv-cards { grid-template-columns: 1fr; }
+  }
+</style>
+
+<div class="jv-home">
+
+  <!-- ===== HOME ===== -->
+  <div class="jv-wrap">
+    <section class="jv-hero" id="home">
+      <div class="jv-hero__data jv-reveal">
+        <p class="jv-hero__eyebrow">PhD Student · UT Dallas</p>
+        <h1 class="jv-hero__title">John <span>Vasconcelos</span></h1>
+        <p class="jv-hero__role">Public financial and performance accountability, auditing and oversight, with advanced statistics and artificial intelligence.</p>
+        <div class="jv-buttons">
+          <a class="jv-btn jv-btn--solid" href="#contact"><i class="bi bi-envelope"></i> Contact</a>
+          <a class="jv-btn jv-btn--ghost" href="pages/research.html">Research</a>
+        </div>
+        <div class="jv-social">
+          <a href="https://www.linkedin.com/in/johnvasconcelos" aria-label="LinkedIn" title="LinkedIn"><i class="bi bi-linkedin"></i></a>
+          <a href="https://github.com/johnvasconcelos" aria-label="GitHub" title="GitHub"><i class="bi bi-github"></i></a>
+          <a href="https://orcid.org/0009-0004-2983-0670" aria-label="ORCID" title="ORCID"><i class="bi bi-person-vcard"></i></a>
+          <a href="mailto:john.vasconcelos@utdallas.edu" aria-label="Email" title="Email"><i class="bi bi-envelope-fill"></i></a>
+        </div>
+      </div>
+
+      <div class="jv-hero__img jv-reveal">
+        <svg viewbox="0 0 479 467" role="img" aria-label="Photo of John Vasconcelos">
+          <defs>
+            <clippath id="jv-blob">
+              <path d="M9.19024 145.964C34.0253 76.5814 114.865 54.7299 184.111 29.4823C245.804 6.98884 311.86 -14.9503 370.735 14.143C431.207 44.026 467.948 107.508 477.191 174.311C485.897 237.229 454.931 294.377 416.506 344.954C373.74 401.245 326.068 462.801 255.442 466.189C179.416 469.835 111.552 422.137 65.1576 361.805C17.4835 299.81 -17.1617 219.583 9.19024 145.964Z"></path>
+            </clippath>
+          </defs>
+          <path class="jv-blob-back" transform="translate(22 18) rotate(-6 240 233)" d="M9.19024 145.964C34.0253 76.5814 114.865 54.7299 184.111 29.4823C245.804 6.98884 311.86 -14.9503 370.735 14.143C431.207 44.026 467.948 107.508 477.191 174.311C485.897 237.229 454.931 294.377 416.506 344.954C373.74 401.245 326.068 462.801 255.442 466.189C179.416 469.835 111.552 422.137 65.1576 361.805C17.4835 299.81 -17.1617 219.583 9.19024 145.964Z"></path>
+          <image href="images/headshot.jpg" x="0" y="0" width="479" height="467" preserveaspectratio="xMidYMin slice" clip-path="url(#jv-blob)"></image>
+          <path class="jv-blob-ring" transform="translate(-14 -12) scale(1.04)" d="M9.19024 145.964C34.0253 76.5814 114.865 54.7299 184.111 29.4823C245.804 6.98884 311.86 -14.9503 370.735 14.143C431.207 44.026 467.948 107.508 477.191 174.311C485.897 237.229 454.931 294.377 416.506 344.954C373.74 401.245 326.068 462.801 255.442 466.189C179.416 469.835 111.552 422.137 65.1576 361.805C17.4835 299.81 -17.1617 219.583 9.19024 145.964Z"></path>
+        </svg>
+      </div>
+    </section>
+  </div>
+
+  <!-- ===== ABOUT ===== -->
+  <section class="jv-section jv-section--tint" id="about">
+    <div class="jv-wrap">
+      <h2 class="jv-section__title">About</h2>
+      <div class="jv-about">
+        <div class="jv-about__facts jv-reveal">
+          <div class="jv-fact"><i class="bi bi-mortarboard"></i><div><b>PhD Student</b><span>Public and Nonprofit Management, UT Dallas</span></div></div>
+          <div class="jv-fact"><i class="bi bi-easel"></i><div><b>Teaching Assistant</b><span>EPPS 2302 · Quantitative Analysis, Fall 2026</span></div></div>
+          <div class="jv-fact"><i class="bi bi-search"></i><div><b>Research focus</b><span>Public accountability and oversight</span></div></div>
+        </div>
+        <div class="jv-reveal">
+          <h3 class="jv-about__subtitle">I'm John</h3>
+          <p>I am a PhD student in Public and Nonprofit Management at the University of Texas at Dallas. My research interests cover topics associated with public financial and performance accountability oversight, such as public sector auditing and financial compliance, utilizing advanced statistics and artificial intelligence.</p>
+          <div class="jv-chips">
+            <span class="jv-chip">Public sector auditing</span>
+            <span class="jv-chip">Financial compliance</span>
+            <span class="jv-chip">Performance accountability</span>
+            <span class="jv-chip">Machine learning</span>
+            <span class="jv-chip">Statistics</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== WORK ===== -->
+  <section class="jv-section" id="work">
+    <div class="jv-wrap">
+      <h2 class="jv-section__title">Work</h2>
+      <div class="jv-cards">
+        <a class="jv-card jv-reveal" href="pages/research.html">
+          <i class="bi bi-journal-text"></i>
+          <h3>Research</h3>
+          <p>Machine learning applied to public sector auditing: anomaly detection in public health expenditure data from São Paulo, Brazil.</p>
+          <span class="jv-more">Working papers →</span>
+        </a>
+        <a class="jv-card jv-reveal" href="pages/teaching.html">
+          <i class="bi bi-easel"></i>
+          <h3>Teaching</h3>
+          <p>Teaching assistant for EPPS 2302, Quantitative Analysis in the Social and Policy Sciences.</p>
+          <span class="jv-more">Courses →</span>
+        </a>
+        <a class="jv-card jv-reveal" href="pages/w6_binomial_distribution.html">
+          <i class="bi bi-graph-up"></i>
+          <h3>StatApps</h3>
+          <p>Interactive apps for probability distributions, sampling, confidence intervals and hypothesis testing.</p>
+          <span class="jv-more">Open the apps →</span>
+        </a>
+        <a class="jv-card jv-reveal" href="pages/z_table.html">
+          <i class="bi bi-table"></i>
+          <h3>StatTables</h3>
+          <p>Interactive z, t and chi-square tables that find areas, critical values and alpha in one or both tails.</p>
+          <span class="jv-more">Open the tables →</span>
+        </a>
+        <a class="jv-card jv-reveal" href="pages/powerbi.html">
+          <i class="bi bi-bar-chart-line"></i>
+          <h3>Power BI</h3>
+          <p>Dashboards for financial statements, financial indicators, and HR and payroll analysis.</p>
+          <span class="jv-more">See dashboards →</span>
+        </a>
+        <a class="jv-card jv-reveal" href="pages/cv.html">
+          <i class="bi bi-file-earmark-person"></i>
+          <h3>CV</h3>
+          <p>Education, research, teaching and professional experience.</p>
+          <span class="jv-more">View CV →</span>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CONTACT ===== -->
+  <section class="jv-section jv-section--tint" id="contact">
+    <div class="jv-wrap">
+      <h2 class="jv-section__title">Contact</h2>
+      <div class="jv-contact jv-reveal">
+        <p>For research collaborations, teaching questions or anything else, email me or find me on the platforms below.</p>
+        <div class="jv-buttons">
+          <a class="jv-btn jv-btn--solid" href="mailto:john.vasconcelos@utdallas.edu"><i class="bi bi-envelope"></i> john.vasconcelos@utdallas.edu</a>
+          <a class="jv-btn jv-btn--ghost" href="https://www.linkedin.com/in/johnvasconcelos"><i class="bi bi-linkedin"></i> LinkedIn</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== FOOTER ===== -->
+  <footer class="jv-footer">
+    <p class="jv-footer__name">John Vasconcelos</p>
+    <div class="jv-footer__social">
+      <a href="https://www.linkedin.com/in/johnvasconcelos" aria-label="LinkedIn"><i class="bi bi-linkedin"></i></a>
+      <a href="https://github.com/johnvasconcelos" aria-label="GitHub"><i class="bi bi-github"></i></a>
+      <a href="https://orcid.org/0009-0004-2983-0670" aria-label="ORCID"><i class="bi bi-person-vcard"></i></a>
+      <a href="mailto:john.vasconcelos@utdallas.edu" aria-label="Email"><i class="bi bi-envelope-fill"></i></a>
+    </div>
+    <p class="jv-footer__copy">© 2026 John Vasconcelos</p>
+  </footer>
 </div>
- <!-- /main -->
+
+<script>
+// Revela as seções ao rolar a página (como o ScrollReveal do modelo, sem biblioteca externa)
+(function () {
+  var els = document.querySelectorAll(".jv-reveal");
+  if (!("IntersectionObserver" in window)) { els.forEach(function (e) { e.classList.add("is-visible"); }); return; }
+  var io = new IntersectionObserver(function (entries) {
+    entries.forEach(function (en) { if (en.isIntersecting) { en.target.classList.add("is-visible"); io.unobserve(en.target); } });
+  }, { threshold: 0.12 });
+  els.forEach(function (e, i) { e.style.transitionDelay = (i % 3) * 90 + "ms"; io.observe(e); });
+})();
+</script>
+
+
+
+
 <script id="quarto-html-after-body" type="application/javascript">
   window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
     const isCodeAnnotation = (el) => {
       for (const clz of el.classList) {
         if (clz.startsWith('code-annotation-')) {                     
