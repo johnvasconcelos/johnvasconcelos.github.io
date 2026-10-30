@@ -12,10 +12,10 @@ table.dataTable td,
   color: var(--bs-body-color) !important;
 }
 
-/* Cabeçalho verde com filete laranja, como as tabelas do tema */
+/* Cabeçalho azul com filete laranja, como as tabelas do tema */
 table.dataTable thead th {
-  color: #154734 !important;
-  border-bottom: 2px solid #ED7D31 !important;
+  color: #08519c !important;
+  border-bottom: 2px solid #fd8d3c !important;
 }
 
 /* Search box and "Show N entries" selector */
@@ -23,26 +23,27 @@ table.dataTable thead th {
 .dataTables_wrapper select {
   background-color: var(--bs-body-bg) !important;
   color: var(--bs-body-color) !important;
-  border: 1px solid var(--bs-border-color) !important;
+  border: 1px solid #c9d0d7 !important;
+  border-radius: 8px;
 }
 
-/* Rows: linhas alternadas em laranja-claro, hover em verde-claro */
+/* Rows: linhas alternadas em laranja-suave, hover em azul-suave */
 table.dataTable tbody tr {
   background-color: transparent !important;
 }
 table.dataTable.stripe > tbody > tr.odd > *,
 table.dataTable.display > tbody > tr.odd > * {
-  box-shadow: inset 0 0 0 9999px #FDF1E3 !important;
+  box-shadow: inset 0 0 0 9999px #fff1e6 !important;
 }
 table.dataTable.hover > tbody > tr:hover > *,
 table.dataTable.display > tbody > tr:hover > * {
-  box-shadow: inset 0 0 0 9999px #EEF5F0 !important;
+  box-shadow: inset 0 0 0 9999px #e8f0f9 !important;
 }
 
 /* Current page button */
 .dataTables_wrapper .dataTables_paginate .paginate_button.current,
 .dataTables_wrapper .dataTables_paginate .paginate_button.current:hover {
-  background: #154734 !important;
+  background: #08519c !important;
   color: #FFFFFF !important;
-  border-color: #154734 !important;
+  border-color: #08519c !important;
 }

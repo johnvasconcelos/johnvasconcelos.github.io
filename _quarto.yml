@@ -95,9 +95,9 @@ website:
 
 format:
   html:
-    theme: [default, custom.scss]   # tema dos slides (verde, laranja, Georgia)
+    theme: [default, custom.scss]   # tema dos StatApps (azul, laranja, fonte do sistema)
     css: styles.css
-    title-block-banner: true        # faixa verde com o título de cada página
+    title-block-banner: true        # faixa azul com o título de cada página
     toc: true
 
 execute:
