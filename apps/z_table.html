@@ -40,6 +40,10 @@
     cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 3px; flex: 1; min-width: 0; }
   .seg button + button { border-left: 1px solid #c9d0d7; }
   .seg button:hover { background: #f0f2f4; }
+  .seg button:disabled { opacity: .45; cursor: default; }
+  .seg button:disabled:hover { background: #fff; }
+  .seg button[aria-pressed="true"]:disabled:hover { background: var(--accent); }
+  .hint { color: var(--muted); font-size: 11px; margin-top: 4px; }
   .seg button[aria-pressed="true"] { background: var(--accent); color: #fff; }
   .seg svg { width: 38px; height: 16px; display: block; }
   .seg button .t { font-weight: 600; font-size: 12px; }
@@ -106,15 +110,24 @@
           <svg viewBox="0 0 38 16"><path class="area" d="M1 15 C8 15 12 2 19 2 L19 15 Z" fill="#fdbb84"/><path class="curve" d="M1 15 C8 15 12 2 19 2 C26 2 30 15 37 15" fill="none" stroke="#08519c" stroke-width="1.4"/></svg>
           <span class="t">Left</span>
         </button>
-        <button data-v="central" aria-pressed="false" title="Area between −z and z: P(−z ≤ Z ≤ z)">
+        <button data-v="central" aria-pressed="false" title="Two-tailed: central area between −z and z, or α = area in both tails">
           <svg viewBox="0 0 38 16"><path class="area" d="M12 15 C14 8 16 2 19 2 C22 2 24 8 26 15 Z" fill="#fdbb84"/><path class="curve" d="M1 15 C8 15 12 2 19 2 C26 2 30 15 37 15" fill="none" stroke="#08519c" stroke-width="1.4"/></svg>
-          <span class="t">Central</span>
+          <span class="t">Two-tailed</span>
         </button>
         <button data-v="right" aria-pressed="false" title="Area to the right of z: P(Z ≥ z)">
           <svg viewBox="0 0 38 16"><path class="area" d="M19 2 C26 2 30 15 37 15 L19 15 Z" fill="#fdbb84"/><path class="curve" d="M1 15 C8 15 12 2 19 2 C26 2 30 15 37 15" fill="none" stroke="#08519c" stroke-width="1.4"/></svg>
           <span class="t">Right</span>
         </button>
       </div>
+    </div>
+
+    <div>
+      <span class="lab">Two-tailed area shows</span>
+      <div class="seg" id="seg_meas" role="group" aria-label="Two-tailed area shows">
+        <button data-v="prob" aria-pressed="true" title="Probability = the central area between −z and z (confidence level)"><span class="t">Probability</span></button>
+        <button data-v="alpha" aria-pressed="false" title="Alpha = the area in both tails combined (significance level of a two-tailed test)"><span class="t">Alpha (α)</span></button>
+      </div>
+      <div class="hint" id="meas_hint"></div>
     </div>
 
     <div>
@@ -231,11 +244,13 @@ function zFor(tail, p) {
 
 <script>
 const $ = id => document.getElementById(id);
-const state = { tail: "left", dir: "z2p", z: 1.96, p: pnorm(1.96), rowStart: null };
+const state = { tail: "left", dir: "z2p", measure: "prob", z: 1.96, p: pnorm(1.96), rowStart: null };
+// note: for Two-tailed, state.p always holds the CENTRAL area internally; α = 1 − state.p
 const CHIPS = {
   z2p: ["0", "1", "1.28", "1.645", "1.96", "2.326", "2.576", "3"],
   p2z: ["0.80", "0.90", "0.95", "0.975", "0.99", "0.995"]
 };
+const ALPHA_CHIPS = ["0.20", "0.10", "0.05", "0.02", "0.01"];
 const SHADE = "#fd8d3c", CURVE = "#08519c";
 
 function fmtP(p) {
@@ -252,13 +267,27 @@ function setSeg(id, v) {
 }
 document.querySelectorAll("#seg_tail button").forEach(b => b.addEventListener("click", () => {
   state.tail = b.dataset.v; setSeg("seg_tail", state.tail);
-  recompute(); render();
+  setupMeasure(); setupInput(); recompute(); render();
+}));
+// ---------------- probability / alpha (two-tailed only) ----------------
+const isAlpha = () => state.tail === "central" && state.measure === "alpha";
+function setupMeasure() {
+  const two = state.tail === "central";
+  document.querySelectorAll("#seg_meas button").forEach(b => { b.disabled = !two; });
+  $("meas_hint").textContent = two
+    ? (state.measure === "alpha" ? "α = area in both tails combined (hypothesis tests)." : "Probability = central area (confidence level).")
+    : "Used only with Two-tailed. For one tail, the area shown is the tail itself.";
+}
+document.querySelectorAll("#seg_meas button").forEach(b => b.addEventListener("click", () => {
+  if (state.measure === b.dataset.v || b.disabled) return;
+  state.measure = b.dataset.v; setSeg("seg_meas", state.measure);
+  setupMeasure(); setupInput(); recompute(); render();
 }));
 document.querySelectorAll("#seg_dir button").forEach(b => b.addEventListener("click", () => {
   if (state.dir === b.dataset.v) return;
   state.dir = b.dataset.v; setSeg("seg_dir", state.dir);
   // carry the current answer into the input, so switching direction keeps the same point
-  const v = state.dir === "z2p" ? state.z : state.p;
+  const v = state.dir === "z2p" ? state.z : isAlpha() ? 1 - state.p : state.p;
   if (Number.isFinite(v)) $("val").value = state.dir === "z2p" ? +v.toFixed(4) : +v.toFixed(4);
   setupInput();
   recompute(); render();
@@ -267,11 +296,12 @@ $("val").addEventListener("input", () => { recompute(); state.rowStart = null; r
 
 function setupInput() {
   const z2p = state.dir === "z2p";
-  $("val_label").textContent = z2p ? "z value" : "Probability p (between 0 and 1)";
+  $("val_label").textContent = z2p ? "z value" : isAlpha() ? "Alpha α (between 0 and 1)" : "Probability p (between 0 and 1)";
   $("val").step = z2p ? "0.01" : "0.001";
   if (z2p) { $("val").removeAttribute("min"); $("val").removeAttribute("max"); }
   else { $("val").min = "0"; $("val").max = "1"; }
-  $("chips").innerHTML = CHIPS[state.dir].map(v => `<button type="button" data-v="${v}">${v}</button>`).join("");
+  const chipList = !z2p && isAlpha() ? ALPHA_CHIPS : CHIPS[state.dir];
+  $("chips").innerHTML = chipList.map(v => `<button type="button" data-v="${v}">${v}</button>`).join("");
   $("chips").querySelectorAll("button").forEach(b => b.addEventListener("click", () => {
     $("val").value = b.dataset.v; recompute(); state.rowStart = null; render();
   }));
@@ -287,7 +317,7 @@ function recompute() {
     state.z = v; state.p = area(state.tail, v);
   } else {
     if (!(v > 0 && v < 1)) state.error = "The probability must be strictly between 0 and 1.";
-    else { state.p = v; state.z = zFor(state.tail, v); }
+    else { state.p = isAlpha() ? 1 - v : v; state.z = zFor(state.tail, state.p); }
   }
   $("val").classList.toggle("bad", !!state.error);
   $("msg").textContent = state.error || "";
@@ -303,15 +333,21 @@ function renderResult() {
   if (dir === "z2p") {
     if (tail === "left")  main = `P(Z ≤ ${zs}) = <b>${fmtP(p)}</b>`;
     if (tail === "right") main = `P(Z ≥ ${zs}) = <b>${fmtP(p)}</b>`;
-    if (tail === "central") main = `P(−${za} ≤ Z ≤ ${za}) = <b>${fmtP(p)}</b>`;
+    if (tail === "central") main = isAlpha()
+      ? `α = P(|Z| ≥ ${za}) = <b>${fmtP(1 - p)}</b>`
+      : `P(−${za} ≤ Z ≤ ${za}) = <b>${fmtP(p)}</b>`;
   } else {
     if (tail === "left")  main = `<b>z = ${zs}</b> &nbsp;so that P(Z ≤ z) = ${fmtP(p)}`;
     if (tail === "right") main = `<b>z = ${zs}</b> &nbsp;so that P(Z ≥ z) = ${fmtP(p)}`;
-    if (tail === "central") main = `<b>z = ±${za}</b> &nbsp;so that P(−z ≤ Z ≤ z) = ${fmtP(p)}`;
+    if (tail === "central") main = isAlpha()
+      ? `<b>z* = ±${za}</b> &nbsp;so that α = P(|Z| ≥ z*) = ${fmtP(1 - p)}`
+      : `<b>z = ±${za}</b> &nbsp;so that P(−z ≤ Z ≤ z) = ${fmtP(p)}`;
   }
   if (tail === "central") {
     const t = pnormUpper(Math.abs(z));
-    extra = `Each tail = ${fmtP(t)} &nbsp;·&nbsp; both tails = ${fmtP(2 * t)}`;
+    extra = isAlpha()
+      ? `Each tail = ${fmtP(t)} &nbsp;·&nbsp; central area = ${fmtP(1 - 2 * t)}`
+      : `Each tail = ${fmtP(t)} &nbsp;·&nbsp; both tails (α) = ${fmtP(2 * t)}`;
     if (dir === "z2p" && z < 0) extra += " &nbsp;·&nbsp; central area uses |z|";
   } else {
     extra = `Complement: ${tail === "left" ? "P(Z ≥ z)" : "P(Z ≤ z)"} = ${fmtP(1 - p)}`;
@@ -337,6 +373,7 @@ function renderPlot() {
     let parts;
     if (state.tail === "left") parts = [[-lim, Math.max(-lim, Math.min(lim, z))]];
     else if (state.tail === "right") parts = [[Math.max(-lim, Math.min(lim, z)), lim]];
+    else if (isAlpha()) parts = [[-lim, -Math.min(az, lim)], [Math.min(az, lim), lim]];
     else parts = [[-Math.min(az, lim), Math.min(az, lim)]];
     parts.forEach(([a, b], i) => {
       if (b > a) {
@@ -356,9 +393,10 @@ function renderPlot() {
     let lx;
     if (state.tail === "left") lx = Math.max(-lim + 0.6, Math.min(z - 0.7, 0));
     else if (state.tail === "right") lx = Math.min(lim - 0.6, Math.max(z + 0.7, 0));
+    else if (isAlpha()) lx = Math.min(lim - 0.9, az + 0.9);
     else lx = 0;
-    const ly = state.tail === "central" ? Math.min(dnorm(0) * 0.45, dnorm(Math.min(az, 1)) * 0.6) : Math.max(0.05, dnorm(lx) * 0.45);
-    ann.push({ x: lx, y: Math.max(0.04, ly), text: `<b>area = ${fmtP(state.p)}</b>`, showarrow: false,
+    const ly = state.tail === "central" && !isAlpha() ? Math.min(dnorm(0) * 0.45, dnorm(Math.min(az, 1)) * 0.6) : Math.max(0.05, dnorm(lx) * 0.45);
+    ann.push({ x: lx, y: Math.max(0.04, ly), text: isAlpha() ? `<b>α = ${fmtP(1 - state.p)}</b> (both tails)` : `<b>area = ${fmtP(state.p)}</b>`, showarrow: false,
       font: { size: 14, color: "#1f2933" }, bgcolor: "rgba(255,255,255,0.85)", borderpad: 3 });
   }
   traces.push({ type: "scatter", mode: "lines", x: xs, y: xs.map(dnorm), line: { color: CURVE, width: 2.5 },
@@ -373,7 +411,7 @@ function renderPlot() {
   };
   Plotly.react($("plot"), traces, layout, { displayModeBar: false, responsive: true });
   const titles = { left: "Area to the left of z", right: "Area to the right of z", central: "Area between −z and z" };
-  $("plot_title").textContent = titles[state.tail] + " (shaded)";
+  $("plot_title").textContent = (isAlpha() ? "Area in both tails, α" : titles[state.tail]) + " (shaded)";
 }
 
 // ---------------- z-table ----------------
@@ -420,7 +458,7 @@ function renderTable() {
     for (let j = 0; j < 10; j++) {
       const z = cellZ(r, j);
       const cls = i === hr && j === hc ? "hl-cell" : (i === hr ? "hl-row" : (j === hc && hr >= 0 ? "hl-col" : ""));
-      html += `<td class="${cls}" data-z="${z.toFixed(2)}">${area(state.tail, z).toFixed(4)}</td>`;
+      html += `<td class="${cls}" data-z="${z.toFixed(2)}">${(isAlpha() ? 1 - area(state.tail, z) : area(state.tail, z)).toFixed(4)}</td>`;
     }
     html += "</tr>";
   }
@@ -433,10 +471,10 @@ function renderTable() {
   }));
 
   const titles = { left: "Left-tail table: P(Z ≤ z)", right: "Right-tail table: P(Z ≥ z)", central: "Central table: P(−z ≤ Z ≤ z)" };
-  $("table_title").textContent = titles[state.tail];
+  $("table_title").textContent = isAlpha() ? "Two-tailed α table: P(|Z| ≥ z)" : titles[state.tail];
   let note = "Row = z to one decimal; column = second decimal. Click any cell to use that z.";
   if (!state.error && hr < 0) note = `z = ${fmtZ(state.z, 2)} is outside the table range (|z| ≤ 3.49); the result above is still exact.`;
-  else if (state.dir === "p2z" && !state.error) note = `Closest table entry to p = ${fmtP(state.p)} is highlighted (z rounded to 2 decimals). Click any cell to use that z.`;
+  else if (state.dir === "p2z" && !state.error) note = `Closest table entry to ${isAlpha() ? "α" : "p"} = ${fmtP(isAlpha() ? 1 - state.p : state.p)} is highlighted (z rounded to 2 decimals). Click any cell to use that z.`;
   $("table_note").textContent = note;
   $("table_sub").textContent = "";
 }
@@ -460,6 +498,7 @@ if (window.self !== window.top) {
   window.addEventListener("load", () => { reportHeight(); setTimeout(reportHeight, 500); setTimeout(reportHeight, 1500); });
 }
 
+setupMeasure();
 setupInput();
 recompute();
 window.addEventListener("load", () => render());
