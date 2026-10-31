@@ -69,12 +69,14 @@ website:
             text: Assignment 03    
           - href: pages_epps_6356/assign04_2_Data_Visualization.qmd
             text: Note on Grammar of Graphics     
+          - href: pages_epps_6356/assign04_Hackathon1_Data_Visualization.qmd
+            text: Assignment 04 (Hackathon 1)
           - href: pages_epps_6356/assign05_Data_Visualization.qmd
             text: Assignment 05 
           - href: pages_epps_6356/assign06_Data_Visualization.qmd
             text: Assignment 06
           - href: pages_epps_6356/assign07_Hackathon2_Data_Visualization.qmd
-            text: Hackathon 2
+            text: Assignment 07 (Hackathon 2)
       - text: EPPS 6302
         menu:
           - href: pages_epps_6302/assign02_Data_Collection.qmd

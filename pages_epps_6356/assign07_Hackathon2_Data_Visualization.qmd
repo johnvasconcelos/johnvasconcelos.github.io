@@ -1,6 +1,6 @@
 ---
-title: "Hackathon 2.0 - Data Visualization EPPS 6356"
-subtitle: "Assignment 7. Team Project: Happy Planet Index Shiny App"
+title: "Assignment 07 (Hackathon 2) - Data Visualization EPPS 6356"
+subtitle: "Team Project: Happy Planet Index Shiny App"
 author:
   - "Solbee Kim (Coordinator)"
   - "Evandro M. S. Gomes"
