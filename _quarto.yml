@@ -77,6 +77,10 @@ website:
             text: Assignment 06
           - href: pages_epps_6356/assign07_Hackathon2_Data_Visualization.qmd
             text: Assignment 07 (Hackathon 2)
+          - href: pages_epps_6356/assign08_Dashboard_Data_Visualization.qmd
+            text: Assignment 08 (Dashboard)
+          - href: pages_epps_6356/va_dashboard.qmd
+            text: "VA Budget Dashboard"
       - text: EPPS 6302
         menu:
           - href: pages_epps_6302/assign02_Data_Collection.qmd

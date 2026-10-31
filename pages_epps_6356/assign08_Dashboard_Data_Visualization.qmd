@@ -1,0 +1,44 @@
+---
+title: "Assignment 08 (Dashboard) - Data Visualization EPPS 6356"
+subtitle: "Team Project: VA Budget, FY2008–FY2026"
+author:
+  - "Evandro M. S. Gomes"
+  - "Solbee Kim"
+  - "John Vasconcelos"
+date: "2026-11-06"
+---
+
+::: callout-tip
+## Open the dashboard
+[**VA Budget Dashboard →**](va_dashboard.qmd){.btn .btn-primary}
+
+The RQ1 and RQ2 pages run R in your browser (Shinylive), so the first load takes 10–30 seconds.
+:::
+
+# Links
+
+| Item | Link |
+|---|---|
+| **Published dashboard** | [VA Budget Dashboard](va_dashboard.qmd) |
+| **Code repository** | [github.com/SolB-Kim/epps6356-hackathon › VA Project](https://github.com/SolB-Kim/epps6356-hackathon/tree/main/VA%20Project) |
+| **Use of generative AI** | [IA prompts.md](https://github.com/SolB-Kim/epps6356-hackathon/blob/main/VA%20Project/IA%20prompts.md) |
+
+# About the project
+
+The dashboard asks how the **executive** and **legislative** branches differ in funding the U.S. Department of Veterans Affairs:
+
+- **RQ1 · Requested vs. enacted.** How far do VA's budget requests fall from what Congress enacts? Does the gap change by year, and is it larger for some accounts (medical care, IT, construction)?
+- **RQ2 · Discretionary vs. mandatory.** When did mandatory funding overtake discretionary funding, which programs drove it, and is the discretionary share shrinking mostly because mandatory funding grows faster?
+
+**Data:** U.S. Department of Veterans Affairs, *Congressional Budget Submission*, Volumes I–V, FY2008–FY2027 editions. Budget authority, nominal dollars, FY2008–FY2026.
+
+# How it meets the assignment
+
+| Requirement | Implementation |
+|---|---|
+| Route | Quarto dashboard (`format: dashboard`) with bslib Shiny apps running serverless through **Shinylive** |
+| Layout | Title, navigation bar, four pages (Overview, RQ1, RQ2, Data), rows of value boxes and tabbed chart cards |
+| Value boxes | Three per analysis page (e.g., largest gap, year mandatory passed discretionary, discretionary share), recalculated by the filters |
+| Charts | Ten charts, each in its own card with a message title, labelled axes with units and a source note; several show change over time |
+| Interaction | Fiscal-year range slider, funding type, account groups, comparison measure, units and program filters; the sidebar shows only the controls for the open tab |
+| Design | `bs_theme()` with a U.S. veterans palette (flag navy, red, gold) and Oswald / Source Sans 3 fonts |
