@@ -14,6 +14,7 @@ project:
     - apps/w10_hypothesis_testing.html
     - apps/t_table.html
     - apps/chi_square_table.html
+    - apps/f_table.html
 
 website:
   title: "John Vasconcelos"
@@ -51,6 +52,8 @@ website:
             text: "T-Table"
           - href: pages/chi_square_table.qmd
             text: "Chi-Square Table"
+          - href: pages/f_table.qmd
+            text: "F-Table"
       - href: pages/cv.qmd
         text: CV
       - text: Portfolio

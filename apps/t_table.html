@@ -47,6 +47,7 @@
   .seg button[aria-pressed="true"] { background: var(--accent); color: #fff; }
   .seg svg { width: 38px; height: 16px; display: block; }
   .seg button .t { font-weight: 600; font-size: 12px; }
+  .seg button .s { font-size: 10.5px; opacity: .8; font-variant-numeric: tabular-nums; }
   .seg button[aria-pressed="true"] svg .curve { stroke: #fff; }
   .seg button[aria-pressed="true"] svg .area { fill: #ffd1ad; }
 
@@ -143,8 +144,8 @@
     <div>
       <span class="lab">Direction</span>
       <div class="seg" id="seg_dir" role="group" aria-label="Direction">
-        <button data-v="t2p" aria-pressed="false" title="Enter t, get the probability"><span class="t">t → p</span></button>
-        <button data-v="p2t" aria-pressed="true" title="Enter the probability, get t*"><span class="t">p → t</span></button>
+        <button data-v="t2p" aria-pressed="false" title="Enter t, get the probability"><span class="t">Area / p-value</span><span class="s">t → p</span></button>
+        <button data-v="p2t" aria-pressed="true" title="Enter the probability, get t*"><span class="t">Critical value</span><span class="s">p → t</span></button>
       </div>
     </div>
 
