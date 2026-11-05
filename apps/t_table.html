@@ -43,6 +43,7 @@
   .seg button:disabled { opacity: .45; cursor: default; }
   .seg button:disabled:hover { background: #fff; }
   .seg button[aria-pressed="true"]:disabled:hover { background: var(--accent); }
+  .nocase { text-transform: none; }
   .hint { color: var(--muted); font-size: 11px; margin-top: 4px; }
   .seg button[aria-pressed="true"] { background: var(--accent); color: #fff; }
   .seg svg { width: 38px; height: 16px; display: block; }
@@ -133,19 +134,19 @@
     </div>
 
     <div>
-      <span class="lab">Two-tailed area shows</span>
-      <div class="seg" id="seg_meas" role="group" aria-label="Two-tailed area shows">
-        <button data-v="prob" aria-pressed="true" title="Probability = the central area between the critical values (confidence level)"><span class="t">Probability</span></button>
-        <button data-v="alpha" aria-pressed="false" title="Alpha = the area in both tails combined (significance level of a two-tailed test)"><span class="t">Alpha (α)</span></button>
+      <span class="lab">Two-tailed area as</span>
+      <div class="seg" id="seg_meas" role="group" aria-label="Two-tailed area as">
+        <button data-v="prob" aria-pressed="true" title="Confidence level = 1 − α = the central area between the two critical values (used for confidence intervals)"><span class="t">Confidence level</span><span class="s">central area, 1 − α</span></button>
+        <button data-v="alpha" aria-pressed="false" title="Significance level α = the area in both tails combined (used for two-tailed hypothesis tests)"><span class="t">Significance level</span><span class="s">both tails, α</span></button>
       </div>
       <div class="hint" id="meas_hint"></div>
     </div>
 
     <div>
-      <span class="lab">Direction</span>
-      <div class="seg" id="seg_dir" role="group" aria-label="Direction">
-        <button data-v="t2p" aria-pressed="false" title="Enter t, get the probability"><span class="t">Area / p-value</span><span class="s">t → p</span></button>
-        <button data-v="p2t" aria-pressed="true" title="Enter the probability, get t*"><span class="t">Critical value</span><span class="s">p → t</span></button>
+      <span class="lab">Solve for</span>
+      <div class="seg" id="seg_dir" role="group" aria-label="Solve for">
+        <button data-v="t2p" aria-pressed="false" title="Cumulative probability (CDF): the area under the curve for a given t. Use it to get p-values."><span class="t">Area (probability)</span><span class="s">given t → area</span></button>
+        <button data-v="p2t" aria-pressed="true" title="Inverse (quantile function): the t with a given area. Use it to get critical values and percentiles."><span class="t">t value (quantile)</span><span class="s">given area → t</span></button>
       </div>
     </div>
 
@@ -156,7 +157,7 @@
     </div>
 
     <div>
-      <label class="lab" for="val" id="val_label">Probability p</label>
+      <label class="lab" for="val" id="val_label">Area p</label>
       <input type="number" class="num" id="val" value="0.025" step="0.001" inputmode="decimal">
       <div class="chips" id="chips"></div>
       <div class="msg" id="msg"></div>
@@ -336,8 +337,8 @@ function setupMeasure() {
   const two = state.tail === "central";
   document.querySelectorAll("#seg_meas button").forEach(b => { b.disabled = !two; });
   $("meas_hint").textContent = two
-    ? (state.measure === "alpha" ? "α = area in both tails combined (hypothesis tests)." : "Probability = central area (confidence level).")
-    : "Used only with Two-tailed. For one tail, the area shown is the tail itself.";
+    ? (state.measure === "alpha" ? "α = combined area of both tails (two-tailed hypothesis tests)." : "1 − α = central area (confidence intervals).")
+    : "Used only with Two-tailed. With one tail, the area is the tail itself.";
 }
 document.querySelectorAll("#seg_meas button").forEach(b => b.addEventListener("click", () => {
   if (state.measure === b.dataset.v || b.disabled) return;
@@ -352,7 +353,7 @@ $("df_chips").querySelectorAll("button").forEach(b => b.addEventListener("click"
 
 function setupInput() {
   const t2p = state.dir === "t2p";
-  $("val_label").textContent = t2p ? "t value" : isAlpha() ? "Alpha α (between 0 and 1)" : "Probability p (between 0 and 1)";
+  $("val_label").innerHTML = t2p ? "t value" : isAlpha() ? "Significance level <span class='nocase'>α</span> (e.g. 0.05)" : state.tail === "central" ? "Confidence level 1 − <span class='nocase'>α</span> (e.g. 0.95)" : "Area p (between 0 and 1)";
   $("val").step = t2p ? "0.01" : "0.001";
   if (t2p) { $("val").removeAttribute("min"); $("val").removeAttribute("max"); }
   else { $("val").min = "0"; $("val").max = "1"; }
