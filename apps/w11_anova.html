@@ -1,0 +1,504 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>One-Way ANOVA</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/plotly.js-dist-min@2.35.2/plotly.min.js"></script>
+<style>
+  :root {
+    --bg: #f5f6f8; --card: #ffffff; --ink: #1f2933; --muted: #5f6b7a;
+    --line: #e2e6ea; --accent: #08519c; --accent-soft: #e8f0f9;
+    --pcol: #e6550d; --p-soft: #fdeee4; --p-dark: #a63603;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: var(--bg); color: var(--ink);
+    font: 13px/1.4 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  header { padding: 10px 16px 6px; }
+  header h1 { margin: 0; font-size: 18px; font-weight: 650; }
+  header p { margin: 2px 0 0; color: var(--muted); font-size: 12px; max-width: 1050px; }
+
+  .app { display: grid; grid-template-columns: 330px minmax(0, 1fr) minmax(0, 1fr); gap: 12px; padding: 6px 16px 16px;
+    grid-template-areas: "ctl pop pop" "ctl samp est" "tab fdist fdist" "dec dec dec"; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 8px 10px; min-width: 0; }
+  .card h3 { margin: 0 0 1px; font-size: 13px; font-weight: 650; }
+  .card .sub { color: var(--muted); font-size: 11.5px; margin: 0; }
+  .card .eq { background: #f5f7f9; border-radius: 6px; padding: 4px 8px; margin: 6px 0 0; min-height: 40px;
+    display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 4px 18px; }
+  .card .eq .katex { font-size: 1.02em; }
+  .plot { height: 210px; }
+  .plot.tall { height: 230px; }
+  .tag { display: inline-block; font-size: 10.5px; font-weight: 650; text-transform: uppercase; letter-spacing: .05em;
+    border-radius: 999px; padding: 1px 7px; margin-left: 6px; vertical-align: 1px; }
+  .tag.d { background: var(--p-soft); color: var(--p-dark); }
+  .tag.a { background: var(--accent-soft); color: var(--accent); }
+
+  #c_ctl { grid-area: ctl; } #c_pop { grid-area: pop; } #c_samp { grid-area: samp; }
+  #c_est { grid-area: est; } #c_tab { grid-area: tab; } #c_fdist { grid-area: fdist; }
+
+  /* ---------- controls ---------- */
+  .ctl { display: grid; grid-template-columns: 1fr; gap: 10px; margin-top: 8px; }
+  .lab { display: block; font-weight: 600; margin-bottom: 4px; font-size: 11px;
+    text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
+  .lab .sym { text-transform: none; font-size: 12.5px; letter-spacing: 0; }
+  .lab output { float: right; font-weight: 650; color: var(--accent); font-variant-numeric: tabular-nums; font-size: 14px;
+    text-transform: none; letter-spacing: 0; }
+  .key .lab output { color: var(--pcol); }
+  .key { background: var(--p-soft); border-radius: 8px; padding: 7px 9px; }
+  .key input[type=range] { accent-color: var(--pcol); }
+  input[type=range] { width: 100%; margin: 0; accent-color: var(--accent); }
+  .range-ends { display: flex; justify-content: space-between; font-size: 10.5px; color: var(--muted); font-variant-numeric: tabular-nums; }
+  .seg { display: flex; width: 100%; border: 1px solid #c9d0d7; border-radius: 8px; overflow: hidden; }
+  .seg button { flex: 1; min-width: 0; font: inherit; font-size: 12px; font-weight: 600; border: 0; background: #fff; color: var(--ink);
+    padding: 6px 4px; cursor: pointer; font-variant-numeric: tabular-nums; }
+  .seg button + button { border-left: 1px solid #c9d0d7; }
+  .seg button:hover { background: #f0f2f4; }
+  .seg button[aria-pressed="true"] { background: var(--accent); color: #fff; }
+  .btn { font: inherit; font-size: 12px; font-weight: 600; border: 1px solid #c9d0d7; background: #fff; color: var(--ink);
+    border-radius: 8px; padding: 6px 8px; cursor: pointer; width: 100%; }
+  .btn:hover { background: #f0f2f4; }
+  .hyp { background: var(--accent-soft); border-radius: 8px; padding: 6px 10px; display: flex; flex-direction: column; gap: 4px; align-items: center; }
+  .hyp .katex { font-size: 1.05em; }
+  .help { color: var(--muted); font-size: 11.5px; margin: 0; background: #f5f7f9; border-radius: 6px; padding: 6px 8px; }
+
+  /* ---------- two estimates ---------- */
+  .est-row { display: grid; grid-template-columns: 1fr; gap: 4px; margin-top: 6px; }
+  .est-row .eq { margin: 0; justify-content: flex-start; padding: 4px 8px; min-height: 36px; }
+  .est-row .eq.b { border-left: 3px solid var(--pcol); }
+  .est-row .eq.w { border-left: 3px solid var(--accent); }
+  .expect { font-size: 11.5px; color: var(--muted); text-align: center; margin: 4px 0 0; }
+  .expect .katex { font-size: 1.0em; }
+
+  /* ---------- ANOVA table ---------- */
+  table.aov { width: 100%; border-collapse: collapse; margin-top: 8px; font-variant-numeric: tabular-nums; font-size: 12.5px; }
+  table.aov th, table.aov td { padding: 5px 6px; text-align: right; border-bottom: 1px solid var(--line); }
+  table.aov th:first-child, table.aov td:first-child { text-align: left; }
+  table.aov thead th { font-size: 11px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); font-weight: 600; }
+  table.aov tr.b td:first-child { color: var(--p-dark); font-weight: 600; }
+  table.aov tr.w td:first-child { color: var(--accent); font-weight: 600; }
+  table.aov tr.t td { color: var(--muted); border-bottom: 0; }
+  table.aov td.f { font-weight: 700; }
+  .tabnote { color: var(--muted); font-size: 11.5px; margin: 8px 0 0; background: #f5f7f9; border-radius: 6px; padding: 6px 8px; }
+  .tabnote .katex { font-size: 1.0em; }
+
+  /* ---------- decision ---------- */
+  #c_dec { grid-area: dec; display: grid; grid-template-columns: 1.1fr 1fr 1fr; gap: 10px; align-items: stretch; padding: 10px 12px;
+    border: 2px solid var(--accent); }
+  #c_dec.reject { border-color: var(--pcol); }
+  .verdict { display: flex; flex-direction: column; justify-content: center; border-radius: 8px; padding: 8px 12px; background: var(--accent-soft); }
+  #c_dec.reject .verdict { background: var(--p-soft); }
+  .verdict .big { font-size: 18px; font-weight: 700; color: var(--accent); }
+  #c_dec.reject .verdict .big { color: var(--p-dark); }
+  .verdict .why { font-size: 12px; color: var(--muted); margin-top: 2px; }
+  .rule { background: #f5f7f9; border-radius: 8px; padding: 7px 10px; text-align: center; }
+  .rule .t { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; }
+  .rule .m { margin-top: 4px; font-size: 14px; }
+  .rule .r { font-size: 11.5px; margin-top: 3px; color: var(--muted); }
+  .legend { display: flex; gap: 16px; justify-content: center; font-size: 12px; color: var(--muted); grid-column: 1 / -1; flex-wrap: wrap; }
+  .legend span { display: inline-flex; align-items: center; gap: 6px; }
+  .legend i { width: 14px; height: 12px; border-radius: 2px; display: inline-block; }
+
+  html.embedded body { background: transparent; }
+  @media (max-width: 1100px) {
+    .app { grid-template-columns: 300px minmax(0, 1fr) minmax(0, 1fr); }
+  }
+  @media (max-width: 860px) {
+    .app { grid-template-columns: 1fr; grid-template-areas: "ctl" "pop" "samp" "est" "fdist" "tab" "dec"; }
+    #c_dec { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>One-Way ANOVA: Testing Means with Two Estimates of σ²</h1>
+  <p>Three populations, one sample from each. Drag the <b>distance between the population means</b>. At zero the populations are identical and H<sub>0</sub> is true. As they pull apart, the group means spread out more than chance alone would explain: the <b>between-groups</b> estimate of σ² inflates, while the <b>within-groups</b> estimate stays put (it only looks inside each group, so it is the ruler). Their ratio is F.</p>
+</header>
+
+<div class="app">
+  <!-- ================= CONTROLS ================= -->
+  <aside class="card" id="c_ctl">
+    <h3>Populations and samples <span class="tag a">you set</span></h3>
+    <p class="sub">The samples stay the same as you move the sliders; only the populations shift.</p>
+    <div class="ctl">
+      <div class="key">
+        <label class="lab" for="dd">Distance between means <span class="sym">Δ</span> <output id="dd_out"></output></label>
+        <input type="range" id="dd" min="0" max="20" step="0.1" value="0">
+        <div class="range-ends"><span>0 (H₀ true)</span><span>20</span></div>
+      </div>
+      <div>
+        <label class="lab" for="sg">Population SD <span class="sym">σ</span> <output id="sg_out"></output></label>
+        <input type="range" id="sg" min="2" max="20" step="0.5" value="10">
+        <div class="range-ends"><span>2</span><span>20</span></div>
+      </div>
+      <div>
+        <label class="lab" for="nn">Sample size per group <span class="sym">n</span> <output id="nn_out"></output></label>
+        <input type="range" id="nn" min="3" max="50" step="1" value="10">
+        <div class="range-ends"><span>3</span><span>50</span></div>
+      </div>
+      <div>
+        <span class="lab">Significance level <span class="sym">α</span></span>
+        <div class="seg" id="seg_alpha">
+          <button data-v="0.10">0.10</button>
+          <button data-v="0.05" aria-pressed="true">0.05</button>
+          <button data-v="0.01">0.01</button>
+          <button data-v="0.001">0.001</button>
+        </div>
+      </div>
+      <button class="btn" id="btn_new">↻ Draw new samples</button>
+      <div class="hyp"><span id="tex_mu"></span><span id="tex_h0"></span><span id="tex_h1"></span></div>
+      <p class="help">Assumptions: independent samples, normal populations, equal variances σ². Under H<sub>0</sub> the three populations are therefore identical.</p>
+    </div>
+  </aside>
+
+  <!-- ================= POPULATIONS ================= -->
+  <section class="card" id="c_pop">
+    <h3>The three populations <span class="tag a">unknown in practice</span></h3>
+    <p class="sub" id="pop_sub"></p>
+    <div class="plot" id="p_pop"></div>
+  </section>
+
+  <!-- ================= SAMPLES ================= -->
+  <section class="card" id="c_samp">
+    <h3>The samples <span class="tag d">from the data</span></h3>
+    <p class="sub">Coloured bars: group means x̄ᵢ. Dashed line: grand mean. <b style="color:#08519c">Within</b> = spread of points around their own bar; <b style="color:#a63603">between</b> = spread of the bars around the dashed line.</p>
+    <div class="plot tall" id="p_samp"></div>
+  </section>
+
+  <!-- ================= TWO ESTIMATES ================= -->
+  <section class="card" id="c_est">
+    <h3>Two estimates of σ²</h3>
+    <p class="sub">Both target the same σ² when H<sub>0</sub> is true. Dashed line: the true σ².</p>
+    <div class="est-row">
+      <div class="eq b" id="tex_msb"></div>
+      <div class="eq w" id="tex_msw"></div>
+    </div>
+    <div class="plot" id="p_est" style="height:120px"></div>
+    <p class="expect" id="tex_exp"></p>
+  </section>
+
+  <!-- ================= ANOVA TABLE ================= -->
+  <section class="card" id="c_tab">
+    <h3>ANOVA table</h3>
+    <p class="sub" id="tab_sub"></p>
+    <table class="aov">
+      <thead><tr><th>Source</th><th>SS</th><th>df</th><th>MS</th><th>F</th></tr></thead>
+      <tbody>
+        <tr class="b"><td>Between</td><td id="t_ssb"></td><td id="t_dfb"></td><td id="t_msb"></td><td class="f" id="t_f" rowspan="2"></td></tr>
+        <tr class="w"><td>Within</td><td id="t_ssw"></td><td id="t_dfw"></td><td id="t_msw"></td></tr>
+        <tr class="t"><td>Total</td><td id="t_sst"></td><td id="t_dft"></td><td></td><td></td></tr>
+      </tbody>
+    </table>
+    <p class="tabnote" id="tex_note"></p>
+  </section>
+
+  <!-- ================= F DISTRIBUTION ================= -->
+  <section class="card" id="c_fdist">
+    <h3>The F distribution under H<sub>0</sub></h3>
+    <p class="sub" id="fdist_sub"></p>
+    <div class="eq" id="tex_f"></div>
+    <div class="plot" id="p_fdist"></div>
+  </section>
+
+  <!-- ================= DECISION ================= -->
+  <section class="card" id="c_dec">
+    <div class="verdict">
+      <div class="big" id="dec_big"></div>
+      <div class="why" id="dec_why"></div>
+    </div>
+    <div class="rule">
+      <div class="t">Compare areas</div>
+      <div class="m" id="tex_rule_p"></div>
+      <div class="r" id="rule_p_txt"></div>
+    </div>
+    <div class="rule">
+      <div class="t">Compare scores</div>
+      <div class="m" id="tex_rule_f"></div>
+      <div class="r" id="rule_f_txt"></div>
+    </div>
+    <div class="legend">
+      <span><i style="background:#e6550d"></i> Area from the data (P)</span>
+      <span><i style="background:#08519c"></i> Area set in advance (α)</span>
+    </div>
+  </section>
+</div>
+
+<script id="stats-lib">
+// ---------- gamma / beta ----------
+const LG = [0.99999999999980993, 676.5203681218851, -1259.1392167224028, 771.32342877765313, -176.61502916214059, 12.507343278686905, -0.13857109526572012, 9.9843695780195716e-6, 1.5056327351493116e-7];
+function lgamma(x) {
+  if (x < 0.5) return Math.log(Math.PI / Math.abs(Math.sin(Math.PI * x))) - lgamma(1 - x);
+  x -= 1; let a = LG[0]; const t = x + 7.5;
+  for (let i = 1; i < 9; i++) a += LG[i] / (x + i);
+  return 0.5 * Math.log(2 * Math.PI) + (x + 0.5) * Math.log(t) - t + Math.log(a);
+}
+function betacf(a, b, x) {
+  const FPMIN = 1e-300; let qab = a + b, qap = a + 1, qam = a - 1, c = 1, d = 1 - qab * x / qap;
+  if (Math.abs(d) < FPMIN) d = FPMIN; d = 1 / d; let h = d;
+  for (let m = 1; m <= 300; m++) {
+    const m2 = 2 * m; let aa = m * (b - m) * x / ((qam + m2) * (a + m2));
+    d = 1 + aa * d; if (Math.abs(d) < FPMIN) d = FPMIN; c = 1 + aa / c; if (Math.abs(c) < FPMIN) c = FPMIN; d = 1 / d; h *= d * c;
+    aa = -(a + m) * (qab + m) * x / ((a + m2) * (qap + m2));
+    d = 1 + aa * d; if (Math.abs(d) < FPMIN) d = FPMIN; c = 1 + aa / c; if (Math.abs(c) < FPMIN) c = FPMIN; d = 1 / d;
+    const del = d * c; h *= del; if (Math.abs(del - 1) < 1e-15) break;
+  }
+  return h;
+}
+function ibeta(a, b, x) {
+  if (x <= 0) return 0; if (x >= 1) return 1;
+  const bt = Math.exp(lgamma(a + b) - lgamma(a) - lgamma(b) + a * Math.log(x) + b * Math.log(1 - x));
+  return x < (a + 1) / (a + b + 2) ? bt * betacf(a, b, x) / a : 1 - bt * betacf(b, a, 1 - x) / b;
+}
+// ---------- F distribution ----------
+function pf(x, d1, d2) { return x <= 0 ? 0 : ibeta(d1 / 2, d2 / 2, d1 * x / (d1 * x + d2)); }
+// upper tail computed directly, so tiny p-values keep their precision
+function pfUpper(x, d1, d2) { return x <= 0 ? 1 : ibeta(d2 / 2, d1 / 2, d2 / (d2 + d1 * x)); }
+function qf(p, d1, d2) {
+  let lo = 0, hi = 1;
+  while (pf(hi, d1, d2) < p) hi *= 2;
+  for (let i = 0; i < 200; i++) { const m = (lo + hi) / 2; if (pf(m, d1, d2) < p) lo = m; else hi = m; }
+  return (lo + hi) / 2;
+}
+function dfdist(x, d1, d2) {
+  if (x <= 0) return d1 === 2 ? 1 : 0;
+  const lb = lgamma(d1 / 2) + lgamma(d2 / 2) - lgamma((d1 + d2) / 2);
+  return Math.exp((d1 / 2) * Math.log(d1 / d2) + (d1 / 2 - 1) * Math.log(x) - ((d1 + d2) / 2) * Math.log(1 + d1 * x / d2) - lb);
+}
+const dnorm = (x, m, s) => Math.exp(-0.5 * ((x - m) / s) ** 2) / (s * Math.sqrt(2 * Math.PI));
+// ---------- seeded random numbers ----------
+function mulberry32(a) { return function () { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+</script>
+
+<script>
+const $ = id => document.getElementById(id);
+const K = 3, NMAX = 50, CENTER = 50, DMAX = 20;
+const GCOL = ["#08519c", "#e6550d", "#6a51a3"];          // group colours
+const GFILL = ["rgba(8,81,156,.16)", "rgba(230,85,13,.16)", "rgba(106,81,163,.16)"];
+const COL = { curve: "#1f2933", p: "#e6550d", pFill: "#f0884a", a: "#08519c", aFill: "#4f84bd", grey: "#5f6b7a" };
+const FONT = { family: "system-ui, -apple-system, Segoe UI, Roboto, sans-serif", size: 11, color: "#1f2933" };
+const CFG = { displayModeBar: false, responsive: true };
+
+const S = { delta: 0, sigma: 10, n: 10, alpha: 0.05, seed: 7 };
+let Z = [], J = [];   // standard-normal draws and x-jitter, fixed until "new samples"
+
+function drawBase() {
+  const r = mulberry32(S.seed * 7919 + 13);
+  const norm = () => { let u = 0, v = 0; while (u === 0) u = r(); v = r(); return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v); };
+  Z = []; J = [];
+  for (let g = 0; g < K; g++) { const z = [], j = []; for (let i = 0; i < NMAX; i++) { z.push(norm()); j.push((r() - 0.5) * 0.36); } Z.push(z); J.push(j); }
+}
+
+// ---------------- helpers ----------------
+const tex = (el, s) => katex.render(s, $(el), { throwOnError: false, displayMode: false });
+const fx = (x, d) => Number(x).toFixed(d);
+function f2(x) { // compact number formatting for SS/MS
+  const a = Math.abs(x);
+  if (a >= 10000) return x.toFixed(0);
+  if (a >= 100) return x.toFixed(1);
+  return x.toFixed(2);
+}
+function fp(p) { if (p < 0.0001) return "< 0.0001"; if (p < 0.001) return p.toFixed(4); return p.toFixed(3); }
+function fpEq(p) { return p < 0.0001 ? "< 0.0001" : "\\approx " + fp(p); }
+
+// ---------------- controls ----------------
+function setSeg(id, v) { document.querySelectorAll(`#${id} button`).forEach(b => b.setAttribute("aria-pressed", String(b.dataset.v === v))); }
+document.querySelectorAll("#seg_alpha button").forEach(b => b.addEventListener("click", () => { setSeg("seg_alpha", b.dataset.v); S.alpha = +b.dataset.v; render(); }));
+$("dd").addEventListener("input", () => { S.delta = +$("dd").value; render(); });
+$("sg").addEventListener("input", () => { S.sigma = +$("sg").value; render(); });
+$("nn").addEventListener("input", () => { S.n = +$("nn").value; render(); });
+$("btn_new").addEventListener("click", () => { S.seed += 1; drawBase(); render(); });
+
+// ---------------- core computation ----------------
+function compute() {
+  const { delta, sigma, n, alpha } = S;
+  const mu = [CENTER - delta, CENTER, CENTER + delta];
+  const x = mu.map((m, g) => Z[g].slice(0, n).map(z => m + sigma * z));
+  const means = x.map(a => a.reduce((s, v) => s + v, 0) / n);
+  const vars = x.map((a, g) => a.reduce((s, v) => s + (v - means[g]) ** 2, 0) / (n - 1));
+  const grand = means.reduce((s, v) => s + v, 0) / K;            // equal n, so grand mean = mean of means
+  const varMeans = means.reduce((s, v) => s + (v - grand) ** 2, 0) / (K - 1);
+  const msb = n * varMeans;
+  const msw = vars.reduce((s, v) => s + v, 0) / K;
+  const N = K * n, dfb = K - 1, dfw = N - K;
+  const ssb = msb * dfb, ssw = msw * dfw;
+  const F = msb / msw;
+  const p = pfUpper(F, dfb, dfw);
+  const fcrit = qf(1 - alpha, dfb, dfw);
+  const muBar = CENTER;
+  const effect = n * mu.reduce((s, m) => s + (m - muBar) ** 2, 0) / (K - 1);   // n Σ(μi − μ̄)² / (k − 1)
+  return { mu, x, means, vars, grand, varMeans, msb, msw, N, dfb, dfw, ssb, ssw, F, p, fcrit, effect, reject: p < alpha };
+}
+
+// fixed vertical/horizontal range so the motion is visible as Δ changes
+const valueRange = () => [CENTER - DMAX - 3.3 * S.sigma, CENTER + DMAX + 3.3 * S.sigma];
+
+// ---------------- plots ----------------
+function drawPop(R) {
+  const xr = valueRange(), N = 400, xs = [];
+  for (let i = 0; i <= N; i++) xs.push(xr[0] + (xr[1] - xr[0]) * i / N);
+  const tr = [], ymax = dnorm(0, 0, S.sigma) * 1.3, shapes = [], ann = [];
+  R.mu.forEach((m, g) => {
+    tr.push({ type: "scatter", mode: "lines", x: xs, y: xs.map(v => dnorm(v, m, S.sigma)), fill: "tozeroy", fillcolor: GFILL[g],
+      line: { color: GCOL[g], width: 1.8 }, name: `Population ${g + 1}`, hovertemplate: `Pop. ${g + 1}<extra></extra>` });
+    shapes.push({ type: "line", x0: m, x1: m, y0: 0, y1: dnorm(0, 0, S.sigma), line: { color: GCOL[g], width: 1, dash: "dot" } });
+  });
+  // one label line (individual labels would collide when the curves overlap)
+  const muTxt = S.delta < 0.05
+    ? `<b>μ₁ = μ₂ = μ₃ = ${fx(CENTER, 1)}</b>  <span style="color:${COL.grey}">(one population)</span>`
+    : R.mu.map((m, g) => `<b style="color:${GCOL[g]}">μ${"₁₂₃"[g]} = ${fx(m, 1)}</b>`).join("   ");
+  ann.push({ xref: "paper", yref: "paper", x: 0, y: 1, xanchor: "left", yanchor: "top", text: muTxt, showarrow: false, font: { size: 12, color: COL.curve } });
+  Plotly.react($("p_pop"), tr, {
+    margin: { l: 6, r: 6, t: 4, b: 26 }, font: FONT, paper_bgcolor: "#fff", plot_bgcolor: "#fff",
+    showlegend: true, legend: { orientation: "h", x: 1, xanchor: "right", y: 1, yanchor: "top", font: { size: 11 }, bgcolor: "rgba(255,255,255,.7)" },
+    xaxis: { range: xr, showgrid: false, zeroline: false, showline: true, linecolor: "#c9d0d7", fixedrange: true, ticks: "outside", tickcolor: "#c9d0d7" },
+    yaxis: { range: [0, ymax * 1.08], visible: false, fixedrange: true },
+    shapes, annotations: ann
+  }, CFG);
+}
+
+function drawSamples(R) {
+  const yr = valueRange(), tr = [], shapes = [];
+  R.x.forEach((vals, g) => {
+    tr.push({ type: "scatter", mode: "markers", x: vals.map((_, i) => g + 1 + J[g][i]), y: vals,
+      marker: { size: 6, color: GFILL[g].replace(".16", ".55"), line: { color: GCOL[g], width: 1 } }, hovertemplate: "%{y:.1f}<extra></extra>" });
+    // group mean bar
+    shapes.push({ type: "line", x0: g + 1 - 0.3, x1: g + 1 + 0.3, y0: R.means[g], y1: R.means[g], line: { color: GCOL[g], width: 3.5 } });
+    // between-groups deviation: from grand mean to group mean
+    shapes.push({ type: "line", x0: g + 1.36, x1: g + 1.36, y0: R.grand, y1: R.means[g], line: { color: "#a63603", width: 2 } });
+  });
+  shapes.push({ type: "line", x0: 0.5, x1: 3.6, y0: R.grand, y1: R.grand, line: { color: COL.grey, width: 1.3, dash: "dash" } });
+  const ann = R.means.map((m, g) => ({ x: g + 1, y: yr[1], yanchor: "top", text: `<b>x̄${"₁₂₃"[g]} = ${fx(m, 1)}</b>`, showarrow: false, font: { size: 11.5, color: GCOL[g] } }));
+  ann.push({ x: 3.6, y: R.grand, xanchor: "left", text: `x̄ = ${fx(R.grand, 1)}`, showarrow: false, font: { size: 11, color: COL.grey } });
+  Plotly.react($("p_samp"), tr, {
+    margin: { l: 34, r: 6, t: 4, b: 22 }, font: FONT, paper_bgcolor: "#fff", plot_bgcolor: "#fff", showlegend: false, hovermode: "closest",
+    xaxis: { range: [0.5, 4.05], tickvals: [1, 2, 3], ticktext: ["Group 1", "Group 2", "Group 3"], showgrid: false, zeroline: false, fixedrange: true },
+    yaxis: { range: yr, showgrid: true, gridcolor: "#eef1f4", zeroline: false, fixedrange: true },
+    shapes, annotations: ann
+  }, CFG);
+}
+
+function drawEst(R) {
+  const s2 = S.sigma ** 2;
+  const top = Math.max(R.msb, R.msw, s2) * 1.18;
+  const tr = [{ type: "bar", orientation: "h", y: ["Within", "Between"], x: [R.msw, R.msb], marker: { color: [COL.aFill, COL.pFill] },
+    text: [f2(R.msw), f2(R.msb)], textposition: "outside", cliponaxis: false, hovertemplate: "%{x:.2f}<extra></extra>", width: 0.6 }];
+  Plotly.react($("p_est"), tr, {
+    margin: { l: 62, r: 36, t: 14, b: 22 }, font: FONT, paper_bgcolor: "#fff", plot_bgcolor: "#fff", showlegend: false,
+    xaxis: { range: [0, top], showgrid: true, gridcolor: "#eef1f4", zeroline: false, fixedrange: true },
+    yaxis: { fixedrange: true, tickfont: { size: 12 } },
+    shapes: [{ type: "line", x0: s2, x1: s2, y0: -0.5, y1: 1.5, line: { color: COL.curve, width: 1.4, dash: "dash" } }],
+    annotations: [{ x: s2, y: 1.5, yanchor: "bottom", xanchor: "left", xshift: 3, text: `σ² = ${f2(s2)}`, showarrow: false, font: { size: 11, color: COL.curve } }]
+  }, CFG);
+}
+
+function drawF(R) {
+  const { dfb, dfw, F, fcrit } = R;
+  const xmax = Math.max(qf(0.995, dfb, dfw), fcrit * 1.6, 5);
+  const N = 500, xs = [];
+  for (let i = 0; i <= N; i++) xs.push(1e-6 + xmax * i / N);
+  const pdf = x => dfdist(x, dfb, dfw);
+  const ys = xs.map(pdf), ymax = Math.max(...ys) * 1.25;
+  const tr = [];
+  const region = (a, b, fill) => {
+    a = Math.max(a, 0); b = Math.min(b, xmax); if (b <= a) return;
+    const px = [a, ...xs.filter(x => x > a && x < b), b];
+    tr.push({ type: "scatter", mode: "lines", x: [a, ...px, b], y: [0, ...px.map(pdf), 0], fill: "toself", fillcolor: fill, line: { width: 0 }, hoverinfo: "skip" });
+  };
+  // each piece of the axis gets ONE colour: the smaller of the two areas is drawn on top
+  if (R.p < S.alpha) { region(fcrit, F, COL.aFill); region(F, 1e9, COL.pFill); }
+  else { region(F, fcrit, COL.pFill); region(fcrit, 1e9, COL.aFill); }
+  tr.push({ type: "scatter", mode: "lines", x: xs, y: ys, line: { color: COL.curve, width: 1.6 }, hovertemplate: "F = %{x:.2f}<extra></extra>" });
+
+  const shapes = [], ann = [];
+  const tick = (v, text, color, yshift) => {
+    let x = v, t = text, xa = "center";
+    if (x > xmax) { x = xmax; t = t + " →"; xa = "right"; }
+    ann.push({ x, y: 0, yanchor: "top", xanchor: xa, yshift, text: `<b>${t}</b>`, showarrow: false, font: { size: 11.5, color } });
+    if (v <= xmax) shapes.push({ type: "line", x0: v, x1: v, y0: 0, y1: ymax * 0.55, line: { color, width: 1.6 } });
+  };
+  tick(fcrit, `F crit = ${fx(fcrit, 2)}`, COL.a, -3);
+  tick(F, `F = ${fx(F, 2)}`, COL.p, -17);
+  ann.push({ x: 1, xanchor: "center", y: 0, yanchor: "top", yshift: -3, text: "1", showarrow: false, font: { size: 11, color: COL.grey } });
+  ann.push({ xref: "paper", yref: "paper", x: 1, y: 1, xanchor: "right", yanchor: "top", text: `<b>P ${R.p < 0.0001 ? "< 0.0001" : "= " + fp(R.p)}</b>   <span style="color:${COL.a}">α = ${S.alpha}</span>`, showarrow: false, font: { size: 12, color: COL.p } });
+
+  Plotly.react($("p_fdist"), tr, {
+    margin: { l: 6, r: 6, t: 4, b: 36 }, font: FONT, paper_bgcolor: "#fff", plot_bgcolor: "#fff", showlegend: false, hovermode: "closest",
+    xaxis: { range: [0, xmax], showgrid: false, zeroline: false, showticklabels: false, showline: true, linecolor: "#c9d0d7", fixedrange: true },
+    yaxis: { range: [0, ymax], visible: false, fixedrange: true },
+    shapes, annotations: ann
+  }, CFG);
+}
+
+// ---------------- render ----------------
+function render() {
+  const R = compute();
+  const { n } = S, s2 = S.sigma ** 2;
+
+  $("dd_out").textContent = fx(S.delta, 1);
+  $("sg_out").textContent = fx(S.sigma, 1);
+  $("nn_out").textContent = n;
+
+  tex("tex_mu", `\\mu_1 = ${fx(R.mu[0], 1)},\\ \\mu_2 = ${fx(R.mu[1], 1)},\\ \\mu_3 = ${fx(R.mu[2], 1)}`);
+  tex("tex_h0", `H_0:\\ \\mu_1 = \\mu_2 = \\mu_3`);
+  tex("tex_h1", `H_1:\\ \\text{at least one } \\mu_i \\text{ differs}`);
+
+  $("pop_sub").innerHTML = S.delta < 0.05
+    ? "Δ = 0: the three curves sit on top of each other. H<sub>0</sub> is <b>true</b>, so any difference between the sample means is pure chance."
+    : `Means 50 − Δ, 50 and 50 + Δ, all with σ = ${fx(S.sigma, 1)}. H<sub>0</sub> is <b>false</b>; the more the curves overlap, the harder that is to detect.`;
+
+  // ----- two estimates -----
+  tex("tex_msb", `MS_{\\text{between}} = n \\cdot s^2_{\\bar{x}} = ${n} \\times ${f2(R.varMeans)} = ${f2(R.msb)}`);
+  tex("tex_msw", `MS_{\\text{within}} = \\dfrac{s_1^2 + s_2^2 + s_3^2}{3} = \\dfrac{${f2(R.vars[0])} + ${f2(R.vars[1])} + ${f2(R.vars[2])}}{3} = ${f2(R.msw)}`);
+  tex("tex_exp", `\\text{Expected: } E[MS_{\\text{b}}] = \\sigma^2 + \\tfrac{n\\sum(\\mu_i-\\bar{\\mu})^2}{k-1} = ${f2(s2)} + ${f2(R.effect)},\\quad E[MS_{\\text{w}}] = \\sigma^2 = ${f2(s2)}`);
+
+  // ----- table -----
+  $("tab_sub").textContent = `k = ${K} groups, n = ${n} per group, N = ${R.N}`;
+  $("t_ssb").textContent = f2(R.ssb); $("t_ssw").textContent = f2(R.ssw); $("t_sst").textContent = f2(R.ssb + R.ssw);
+  $("t_dfb").textContent = R.dfb; $("t_dfw").textContent = R.dfw; $("t_dft").textContent = R.N - 1;
+  $("t_msb").textContent = f2(R.msb); $("t_msw").textContent = f2(R.msw);
+  $("t_f").textContent = fx(R.F, 2);
+  tex("tex_note", `\\begin{aligned} SS_{\\text{total}} &= SS_{\\text{between}} + SS_{\\text{within}} \\\\ MS &= SS / df \\\\ df_{\\text{between}} &= k-1 = ${R.dfb} \\\\ df_{\\text{within}} &= N-k = ${R.dfw} \\end{aligned}`);
+
+  // ----- F card -----
+  $("fdist_sub").textContent = `F(${R.dfb}, ${R.dfw}): what F looks like when H₀ is true. Values near 1 are typical; only the right tail counts as evidence.`;
+  tex("tex_f", `F = \\dfrac{MS_{\\text{between}}}{MS_{\\text{within}}} = \\dfrac{${f2(R.msb)}}{${f2(R.msw)}} = ${fx(R.F, 2)} \\qquad P = P(F_{${R.dfb},${R.dfw}} \\ge ${fx(R.F, 2)}) ${fpEq(R.p)}`);
+
+  // ----- decision -----
+  $("c_dec").classList.toggle("reject", R.reject);
+  $("dec_big").innerHTML = R.reject ? "Reject H<sub>0</sub>" : "Fail to reject H<sub>0</sub>";
+  const truth = S.delta < 0.05 ? "true" : "false";
+  let why = R.reject
+    ? `At α = ${S.alpha}, the group means vary more than chance alone would explain: at least one population mean differs.`
+    : `At α = ${S.alpha}, the group means do not vary more than chance would explain. This does not prove H<sub>0</sub> is true.`;
+  if (R.reject && truth === "true") why += " <b>Here H<sub>0</sub> is actually true, so this is a Type I error.</b>";
+  if (!R.reject && truth === "false") why += " <b>Here H<sub>0</sub> is actually false, so this is a Type II error.</b>";
+  $("dec_why").innerHTML = why;
+
+  if (R.p < 0.0001) tex("tex_rule_p", `P < 0.0001 < \\alpha = ${S.alpha}`);
+  else tex("tex_rule_p", `P = ${fp(R.p)} ${R.reject ? "<" : "\\ge"} \\alpha = ${S.alpha}`);
+  $("rule_p_txt").textContent = R.reject ? "the data's tail is smaller than α" : "the data's tail is at least as big as α";
+  tex("tex_rule_f", `F = ${fx(R.F, 2)} ${R.reject ? ">" : "\\le"} F_{\\text{crit}} = ${fx(R.fcrit, 2)}`);
+  $("rule_f_txt").textContent = R.reject ? "F falls in the rejection region (right tail)" : "F is outside the rejection region";
+
+  drawPop(R); drawSamples(R); drawEst(R); drawF(R);
+}
+
+// ---------------- embedding ----------------
+if (window.self !== window.top) {
+  document.documentElement.classList.add("embedded");
+  let lastH = 0;
+  const reportHeight = () => {
+    const h = Math.ceil(document.body.getBoundingClientRect().height);
+    if (h > 0 && h !== lastH) { lastH = h; window.parent.postMessage({ type: "app-height", height: h }, "*"); }
+  };
+  new ResizeObserver(reportHeight).observe(document.body);
+  window.addEventListener("load", () => { reportHeight(); setTimeout(reportHeight, 500); setTimeout(reportHeight, 1500); });
+}
+
+drawBase();
+window.addEventListener("load", render);
+</script>
+</body>
+</html>

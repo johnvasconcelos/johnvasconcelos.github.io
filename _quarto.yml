@@ -12,6 +12,7 @@ project:
     - apps/w9_confidence_intervals.html
     - apps/w9_t_distribution.html
     - apps/w10_hypothesis_testing.html
+    - apps/w11_anova.html
     - apps/t_table.html
     - apps/chi_square_table.html
     - apps/f_table.html
@@ -44,6 +45,8 @@ website:
             text: "Normal vs. t Distribution"
           - href: pages/w10_hypothesis_testing.qmd
             text: "Hypothesis Testing"
+          - href: pages/w11_anova.qmd
+            text: "One-Way ANOVA"
       - text: StatTables
         menu:
           - href: pages/z_table.qmd
