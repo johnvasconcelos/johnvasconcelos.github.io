@@ -1,0 +1,542 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Type I and Type II Errors</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/plotly.js-dist-min@2.35.2/plotly.min.js"></script>
+<style>
+  :root {
+    --bg: #f5f6f8; --card: #ffffff; --ink: #1f2933; --muted: #5f6b7a;
+    --line: #e2e6ea; --accent: #08519c; --accent-soft: #e8f0f9;
+    --pcol: #e6550d; --p-soft: #fdeee4; --p-dark: #a63603;
+    --ok: #2b7a3d; --ok-soft: #e6f4ea; --bad: #b42318; --bad-soft: #fdecea;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: var(--bg); color: var(--ink);
+    font: 13px/1.4 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  header { padding: 10px 16px 6px; }
+  header h1 { margin: 0; font-size: 18px; font-weight: 650; }
+  header p { margin: 2px 0 0; color: var(--muted); font-size: 12px; max-width: 1100px; }
+
+  .app { display: grid; grid-template-columns: 330px minmax(0, 1fr); gap: 12px; padding: 6px 16px 16px;
+    grid-template-areas: "ctl plot" "ctl stats" "draw tally"; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 8px 10px; min-width: 0; }
+  .card h3 { margin: 0 0 1px; font-size: 13px; font-weight: 650; }
+  .card .sub { color: var(--muted); font-size: 11.5px; margin: 0; }
+  .tag { display: inline-block; font-size: 10.5px; font-weight: 650; text-transform: uppercase; letter-spacing: .05em;
+    border-radius: 999px; padding: 1px 7px; margin-left: 6px; vertical-align: 1px; }
+  .tag.a { background: var(--accent-soft); color: var(--accent); }
+  .tag.d { background: var(--p-soft); color: var(--p-dark); }
+
+  #c_ctl { grid-area: ctl; } #c_plot { grid-area: plot; } #c_stats { grid-area: stats; }
+  #c_draw { grid-area: draw; } #c_tally { grid-area: tally; }
+
+  /* ---------- controls ---------- */
+  .ctl { display: grid; grid-template-columns: 1fr 1fr; gap: 9px 14px; margin-top: 8px; }
+  .ctl .full { grid-column: 1 / -1; }
+  .lab { display: block; font-weight: 600; margin-bottom: 4px; font-size: 11px;
+    text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
+  .lab .sym { text-transform: none; font-size: 12.5px; letter-spacing: 0; }
+  .lab output { float: right; font-weight: 650; color: var(--accent); font-variant-numeric: tabular-nums; font-size: 14px;
+    text-transform: none; letter-spacing: 0; }
+  .lab.h1c output { color: var(--accent); } .lab.h0c output { color: var(--p-dark); }
+  input[type=range] { width: 100%; margin: 0; accent-color: var(--accent); }
+  input.h0r { accent-color: var(--pcol); }
+  .range-ends { display: flex; justify-content: space-between; font-size: 10.5px; color: var(--muted); font-variant-numeric: tabular-nums; }
+  .seg { display: flex; width: 100%; border: 1px solid #c9d0d7; border-radius: 8px; overflow: hidden; }
+  .seg button { flex: 1; min-width: 0; font: inherit; font-size: 12px; font-weight: 600; border: 0; background: #fff; color: var(--ink);
+    padding: 6px 4px; cursor: pointer; font-variant-numeric: tabular-nums; }
+  .seg button + button { border-left: 1px solid #c9d0d7; }
+  .seg button:hover { background: #f0f2f4; }
+  .seg button[aria-pressed="true"] { background: var(--accent); color: #fff; }
+  .hyp { background: var(--accent-soft); border-radius: 8px; padding: 6px 10px; display: flex; gap: 22px; justify-content: center; flex-wrap: wrap; }
+  .hyp .katex { font-size: 1.1em; }
+  .help { color: var(--muted); font-size: 11.5px; margin: 0; text-align: center; background: #f5f7f9; border-radius: 6px; padding: 5px 8px; }
+  .btns { display: flex; gap: 8px; }
+  .btn { flex: 1; font: inherit; font-size: 13px; font-weight: 650; border-radius: 8px; padding: 9px 8px; cursor: pointer;
+    border: 1px solid var(--accent); background: var(--accent); color: #fff; }
+  .btn:hover { filter: brightness(1.1); }
+  .btn.ghost { background: #fff; color: var(--accent); }
+  .btn.small { flex: 0 0 auto; font-size: 12px; padding: 9px 10px; }
+
+  /* ---------- plot ---------- */
+  #p_main { height: 430px; }
+  .legend { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; font-size: 11.5px; color: var(--muted); margin-top: 2px; }
+  .legend span { display: inline-flex; align-items: center; gap: 5px; }
+  .legend i { width: 14px; height: 11px; border-radius: 2px; display: inline-block; }
+  .legend i.ln { height: 0; border-top: 2px solid; border-radius: 0; }
+  .legend i.dash { height: 0; border-top: 2px dashed; border-radius: 0; }
+
+  /* ---------- stats row ---------- */
+  #c_stats { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 8px; padding: 8px; }
+  .stat { border-radius: 8px; padding: 6px 8px; background: #f5f7f9; text-align: center; min-width: 0; }
+  .stat .t { font-size: 10.5px; font-weight: 650; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; }
+  .stat .v { font-size: 19px; font-weight: 700; font-variant-numeric: tabular-nums; margin-top: 1px; }
+  .stat .r { font-size: 11px; color: var(--muted); }
+  .stat.al { background: var(--p-soft); } .stat.al .v { color: var(--p-dark); }
+  .stat.be { background: var(--accent-soft); } .stat.be .v { color: var(--accent); }
+  .stat.tn { background: #fef6f0; } .stat.tn .v { color: #c4702f; }
+  .stat.pw { background: #f0f6fc; } .stat.pw .v { color: #4f84bd; }
+
+  /* ---------- this draw ---------- */
+  #c_draw .ctl { gap: 6px; }
+  .verdict { border-radius: 8px; padding: 7px 10px; background: var(--accent-soft); margin-top: 6px; }
+  .verdict.reject { background: var(--p-soft); }
+  .verdict .big { font-size: 16px; font-weight: 700; color: var(--accent); }
+  .verdict.reject .big { color: var(--p-dark); }
+  .verdict .why { font-size: 12px; color: var(--muted); margin-top: 1px; }
+  .line { display: flex; justify-content: space-between; gap: 8px; padding: 3px 2px; border-bottom: 1px dashed var(--line); font-variant-numeric: tabular-nums; }
+  .line:last-child { border-bottom: 0; }
+  .line .k { color: var(--muted); }
+  .chk { font-weight: 650; }
+  .chk.y { color: var(--ok); } .chk.n { color: var(--bad); }
+  table.q { width: 100%; border-collapse: separate; border-spacing: 4px; margin-top: 6px; font-size: 11.5px; }
+  table.q th { font-size: 10.5px; color: var(--muted); font-weight: 650; text-transform: uppercase; letter-spacing: .04em; }
+  table.q td { background: #f5f7f9; border-radius: 6px; padding: 5px 6px; text-align: center; border: 2px solid transparent; }
+  table.q td.on { border-color: var(--ink); background: #fff; font-weight: 650; }
+  table.q td.err { color: var(--bad); }
+  table.q td.cor { color: var(--ok); }
+
+  /* ---------- tally ---------- */
+  table.tl { width: 100%; border-collapse: collapse; margin-top: 6px; font-variant-numeric: tabular-nums; }
+  table.tl th, table.tl td { padding: 6px 8px; text-align: right; border-bottom: 1px solid var(--line); }
+  table.tl th { font-size: 10.5px; color: var(--muted); font-weight: 650; text-transform: uppercase; letter-spacing: .04em; }
+  table.tl td:first-child, table.tl th:first-child { text-align: left; }
+  table.tl tr.hl td { background: var(--accent-soft); }
+  table.tl .pct { color: var(--muted); font-size: 11.5px; margin-left: 4px; }
+  .note { margin: 8px 0 0; font-size: 12px; color: var(--ink); background: #f5f7f9; border-radius: 8px; padding: 7px 10px; }
+  .note b { color: var(--accent); }
+
+  html.embedded body { background: transparent; }
+  @media (max-width: 1100px) {
+    .app { grid-template-columns: 300px minmax(0, 1fr); }
+    #c_stats { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  }
+  @media (max-width: 860px) {
+    .app { grid-template-columns: 1fr; grid-template-areas: "ctl" "plot" "stats" "draw" "tally"; }
+    #c_stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Type I and Type II Errors: α, β, Power and the Confidence Interval</h1>
+  <p>Each curve is the <b>sampling distribution of x̄</b> if that hypothesis is true. The dashed critical value splits the axis into
+    “fail to reject H₀” and “reject H₀”. Press <b>Draw a sample</b> to generate a new x̄ from the true population, see where it lands,
+    and compare the decision with its confidence interval.</p>
+</header>
+
+<div class="app">
+  <!-- ================= CONTROLS ================= -->
+  <aside class="card" id="c_ctl">
+    <h3>Hypotheses and design <span class="tag a">set in advance</span></h3>
+    <p class="sub">Move the sliders; the curves, α and β update at once.</p>
+    <div class="ctl">
+      <div class="full">
+        <label class="lab h0c" for="mu0">H₀ mean <span class="sym">μ₀</span> <output id="mu0_out"></output></label>
+        <input type="range" id="mu0" class="h0r" min="80" max="120" step="0.5" value="100">
+        <div class="range-ends"><span>80</span><span>120</span></div>
+      </div>
+      <div class="full">
+        <label class="lab h1c" for="mu1">H₁ mean (one alternative) <span class="sym">μ₁</span> <output id="mu1_out"></output></label>
+        <input type="range" id="mu1" min="80" max="120" step="0.5" value="106">
+        <div class="range-ends"><span>80</span><span>120</span></div>
+      </div>
+      <div class="full">
+        <span class="lab">Type of test</span>
+        <div class="seg" id="seg_tail">
+          <button data-v="left">Left-tailed</button>
+          <button data-v="two">Two-tailed</button>
+          <button data-v="right" aria-pressed="true">Right-tailed</button>
+        </div>
+      </div>
+      <div class="full hyp"><span id="tex_h0"></span><span id="tex_h1"></span></div>
+      <div class="full">
+        <span class="lab">Significance level <span class="sym">α</span></span>
+        <div class="seg" id="seg_alpha">
+          <button data-v="0.10">0.10</button>
+          <button data-v="0.05" aria-pressed="true">0.05</button>
+          <button data-v="0.01">0.01</button>
+          <button data-v="0.001">0.001</button>
+        </div>
+      </div>
+      <div>
+        <label class="lab" for="sig">Pop. <span class="sym">σ</span> <output id="sig_out"></output></label>
+        <input type="range" id="sig" min="5" max="30" step="1" value="15">
+        <div class="range-ends"><span>5</span><span>30</span></div>
+      </div>
+      <div>
+        <label class="lab" for="nn">Size <span class="sym">n</span> <output id="nn_out"></output></label>
+        <input type="range" id="nn" min="4" max="200" step="1" value="25">
+        <div class="range-ends"><span>4</span><span>200</span></div>
+      </div>
+      <div class="full"><p class="help" id="se_help"></p></div>
+      <div class="full">
+        <span class="lab">Samples come from (the truth)</span>
+        <div class="seg" id="seg_truth">
+          <button data-v="h0">H₀ true (μ = μ₀)</button>
+          <button data-v="h1" aria-pressed="true">H₁ true (μ = μ₁)</button>
+        </div>
+      </div>
+      <div class="full">
+        <span class="lab">Confidence interval</span>
+        <div class="seg" id="seg_ci">
+          <button data-v="match" aria-pressed="true">Matches the test</button>
+          <button data-v="two">Always two-sided</button>
+        </div>
+      </div>
+      <div class="full btns">
+        <button class="btn" id="b_draw">Draw a sample</button>
+        <button class="btn ghost small" id="b_100">+100</button>
+        <button class="btn ghost small" id="b_reset">Reset</button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ================= PLOT ================= -->
+  <section class="card" id="c_plot">
+    <h3>Sampling distributions under H₀ and H₁</h3>
+    <p class="sub" id="plot_sub"></p>
+    <div id="p_main"></div>
+    <div class="legend">
+      <span><i style="background:#e6550d"></i> Type I error α</span>
+      <span><i style="background:#08519c"></i> Type II error β</span>
+      <span><i style="background:#f6c8a6"></i> True negative 1 − α</span>
+      <span><i style="background:#b9cfe6"></i> True positive (power) 1 − β</span>
+      <span><i class="dash" style="border-color:#1f2933"></i> Critical value</span>
+      <span><i class="ln" style="border-color:#2b7a3d"></i> Sample mean x̄ and its CI</span>
+    </div>
+  </section>
+
+  <!-- ================= STATS ================= -->
+  <section class="card" id="c_stats">
+    <div class="stat al"><div class="t">Type I · α</div><div class="v" id="s_a"></div><div class="r">reject | H₀ true</div></div>
+    <div class="stat tn"><div class="t">True neg. · 1 − α</div><div class="v" id="s_tn"></div><div class="r">fail to reject | H₀ true</div></div>
+    <div class="stat be"><div class="t">Type II · β</div><div class="v" id="s_b"></div><div class="r">fail to reject | H₁ true</div></div>
+    <div class="stat pw"><div class="t">Power · 1 − β</div><div class="v" id="s_pw"></div><div class="r">reject | H₁ true</div></div>
+    <div class="stat"><div class="t">Critical value</div><div class="v" id="s_cv"></div><div class="r" id="s_cvz"></div></div>
+    <div class="stat"><div class="t">Effect size d</div><div class="v" id="s_d"></div><div class="r">(μ₁ − μ₀) / σ</div></div>
+  </section>
+
+  <!-- ================= THIS DRAW ================= -->
+  <section class="card" id="c_draw">
+    <h3>This sample <span class="tag d">from the data</span></h3>
+    <p class="sub" id="draw_sub"></p>
+    <div class="verdict" id="verdict"><div class="big" id="v_big"></div><div class="why" id="v_why"></div></div>
+    <div style="margin-top:6px">
+      <div class="line"><span class="k">Sample mean x̄</span><span id="d_xbar"></span></div>
+      <div class="line"><span class="k">Test statistic z</span><span id="d_z"></span></div>
+      <div class="line"><span class="k" id="d_ci_lab">Confidence interval</span><span id="d_ci"></span></div>
+      <div class="line"><span class="k">CI contains μ₀?</span><span id="d_c0" class="chk"></span></div>
+      <div class="line"><span class="k">CI contains μ₁?</span><span id="d_c1" class="chk"></span></div>
+    </div>
+    <table class="q">
+      <tr><th></th><th>H₀ true</th><th>H₁ true</th></tr>
+      <tr><th>Fail to reject</th><td id="q00" class="cor">True negative<br>1 − α</td><td id="q01" class="err">Type II error<br>β</td></tr>
+      <tr><th>Reject</th><td id="q10" class="err">Type I error<br>α</td><td id="q11" class="cor">True positive<br>1 − β</td></tr>
+    </table>
+  </section>
+
+  <!-- ================= TALLY ================= -->
+  <section class="card" id="c_tally">
+    <h3>All samples drawn so far</h3>
+    <p class="sub">Resets whenever you change a slider or a setting, because every number depends on them.</p>
+    <table class="tl">
+      <thead><tr><th>Where x̄ landed</th><th>Samples</th><th>CI contains μ₀</th><th>CI contains μ₁</th></tr></thead>
+      <tbody>
+        <tr id="tr_f"><td>Fail-to-reject region</td><td id="t_fn"></td><td id="t_f0"></td><td id="t_f1"></td></tr>
+        <tr id="tr_r"><td>Rejection region</td><td id="t_rn"></td><td id="t_r0"></td><td id="t_r1"></td></tr>
+        <tr><td><b>Total</b></td><td id="t_n"></td><td id="t_a0"></td><td id="t_a1"></td></tr>
+      </tbody>
+    </table>
+    <p class="note" id="note"></p>
+  </section>
+</div>
+
+<script id="stats-lib">
+function pnorm(z) {
+  const x = Math.abs(z); let c;
+  if (x > 37) c = 0;
+  else {
+    const e = Math.exp(-x * x / 2);
+    if (x < 7.07106781186547) {
+      let b = 3.52624965998911e-02 * x + 0.700383064443688;
+      b = b * x + 6.37396220353165; b = b * x + 33.912866078383; b = b * x + 112.079291497871;
+      b = b * x + 221.213596169931; b = b * x + 220.206867912376; c = e * b;
+      b = 8.83883476483184e-02 * x + 1.75566716318264; b = b * x + 16.064177579207; b = b * x + 86.7807322029461;
+      b = b * x + 296.564248779674; b = b * x + 637.333633378831; b = b * x + 793.826512519948; b = b * x + 440.413735824752;
+      c = c / b;
+    } else { let b = x + 0.65; b = x + 4 / b; b = x + 3 / b; b = x + 2 / b; b = x + 1 / b; c = e / b / 2.506628274631; }
+  }
+  return z > 0 ? 1 - c : c;
+}
+function qnorm(p) {
+  const a = [-3.969683028665376e+01, 2.209460984245205e+02, -2.759285104469687e+02, 1.383577518672690e+02, -3.066479806614716e+01, 2.506628277459239e+00];
+  const b = [-5.447609879822406e+01, 1.615858368580409e+02, -1.556989798598866e+02, 6.680131188771972e+01, -1.328068155288572e+01];
+  const c = [-7.784894002430293e-03, -3.223964580411365e-01, -2.400758277161838e+00, -2.549732539343734e+00, 4.374664141464968e+00, 2.938163982698783e+00];
+  const d = [7.784695709041462e-03, 3.224671290700398e-01, 2.445134137142996e+00, 3.754408661907416e+00];
+  const pl = 0.02425; let q, r, x;
+  if (p < pl) { q = Math.sqrt(-2 * Math.log(p)); x = (((((c[0] * q + c[1]) * q + c[2]) * q + c[3]) * q + c[4]) * q + c[5]) / ((((d[0] * q + d[1]) * q + d[2]) * q + d[3]) * q + 1); }
+  else if (p <= 1 - pl) { q = p - 0.5; r = q * q; x = (((((a[0] * r + a[1]) * r + a[2]) * r + a[3]) * r + a[4]) * r + a[5]) * q / (((((b[0] * r + b[1]) * r + b[2]) * r + b[3]) * r + b[4]) * r + 1); }
+  else { q = Math.sqrt(-2 * Math.log(1 - p)); x = -(((((c[0] * q + c[1]) * q + c[2]) * q + c[3]) * q + c[4]) * q + c[5]) / ((((d[0] * q + d[1]) * q + d[2]) * q + d[3]) * q + 1); }
+  const e = pnorm(x) - p, u = e * Math.sqrt(2 * Math.PI) * Math.exp(x * x / 2);
+  return x - u / (1 + x * u / 2);
+}
+const dnorm = x => Math.exp(-0.5 * x * x) / Math.sqrt(2 * Math.PI);
+</script>
+
+<script>
+const $ = id => document.getElementById(id);
+const COL = { ink: "#1f2933", h0: "#a63603", h1: "#08519c", a: "#e6550d", b: "#08519c",
+  tn: "rgba(240,136,74,0.30)", pw: "rgba(79,132,189,0.32)", ci: "#2b7a3d", grey: "#5f6b7a" };
+const FONT = { family: "system-ui, -apple-system, Segoe UI, Roboto, sans-serif", size: 11, color: "#1f2933" };
+const CFG = { displayModeBar: false, responsive: true };
+
+const S = { mu0: 100, mu1: 106, sig: 15, n: 25, alpha: 0.05, tail: "right", truth: "h1", ci: "match",
+  u: null, draws: [] };   // u = standard-normal noise of the current sample; draws = {x, rej, c0, c1}
+
+const tex = (el, s) => katex.render(s, $(el), { throwOnError: false });
+const f1 = x => Number(x).toFixed(1).replace(/^-/, "−");
+const f2 = x => Number(x).toFixed(2).replace(/^-/, "−");
+const f3 = x => Number(x).toFixed(3);
+const pct = (k, n) => n ? `<span class="pct">${(100 * k / n).toFixed(1)}%</span>` : "";
+function randn() { let u = 0, v = 0; while (u === 0) u = Math.random(); while (v === 0) v = Math.random();
+  return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v); }
+
+// ---------------- controls ----------------
+function setSeg(id, v) { document.querySelectorAll(`#${id} button`).forEach(b => b.setAttribute("aria-pressed", String(b.dataset.v === v))); }
+function bindSeg(id, fn) { document.querySelectorAll(`#${id} button`).forEach(b => b.addEventListener("click", () => {
+  setSeg(id, b.dataset.v); fn(b.dataset.v); S.draws = []; render(); })); }
+bindSeg("seg_tail", v => S.tail = v);
+bindSeg("seg_alpha", v => S.alpha = +v);
+bindSeg("seg_truth", v => S.truth = v);
+bindSeg("seg_ci", v => S.ci = v);
+[["mu0", "mu0"], ["mu1", "mu1"], ["sig", "sig"], ["nn", "n"]].forEach(([id, k]) =>
+  $(id).addEventListener("input", () => { S[k] = +$(id).value; S.draws = []; render(); }));
+
+// ---------------- core computation ----------------
+function model() {
+  const se = S.sig / Math.sqrt(S.n), a = S.alpha, t = S.tail;
+  // rejection region in x̄ units: x̄ < lo  and/or  x̄ > hi
+  let zc, lo = -Infinity, hi = Infinity;
+  if (t === "two") { zc = qnorm(1 - a / 2); lo = S.mu0 - zc * se; hi = S.mu0 + zc * se; }
+  else if (t === "right") { zc = qnorm(1 - a); hi = S.mu0 + zc * se; }
+  else { zc = qnorm(1 - a); lo = S.mu0 - zc * se; }
+  const P = (m, x) => pnorm((x - m) / se);           // P(x̄ < x | μ = m)
+  const accept = m => P(m, hi) - P(m, lo);           // P(fail to reject | μ = m)
+  const beta = accept(S.mu1);
+  // confidence interval multiplier and sides
+  let zci, ciSide;
+  if (S.ci === "two" || t === "two") { zci = qnorm(1 - a / 2); ciSide = "two"; }
+  else { zci = qnorm(1 - a); ciSide = t; }           // right-tailed test ↔ lower bound; left-tailed ↔ upper bound
+  return { se, zc, lo, hi, beta, power: 1 - beta, zci, ciSide };
+}
+function evalSample(x, M) {
+  const rej = x < M.lo || x > M.hi;
+  const ciL = M.ciSide === "left" ? -Infinity : x - M.zci * M.se;
+  const ciU = M.ciSide === "right" ? Infinity : x + M.zci * M.se;
+  const has = m => m >= ciL && m <= ciU;
+  return { x, rej, ciL, ciU, c0: has(S.mu0), c1: has(S.mu1) };
+}
+const trueMean = () => S.truth === "h1" ? S.mu1 : S.mu0;
+function drawOne(M) { S.u = randn(); const s = evalSample(trueMean() + S.u * M.se, M); S.draws.push(s); return s; }
+
+$("b_draw").addEventListener("click", () => { drawOne(model()); render(); });
+$("b_100").addEventListener("click", () => { const M = model(); for (let i = 0; i < 100; i++) drawOne(M); render(); });
+$("b_reset").addEventListener("click", () => { S.draws = []; S.u = null; render(); });
+
+// ---------------- plot ----------------
+function region(m, se, a, b, xmin, xmax) {          // pdf of N(m, se) on [a, b] ∩ [xmin, xmax]
+  const A = Math.max(a, xmin), B = Math.min(b, xmax); if (!(B > A)) return null;
+  const xs = [], ys = [], N = 160;
+  for (let i = 0; i <= N; i++) { const x = A + (B - A) * i / N; xs.push(x); ys.push(dnorm((x - m) / se) / se); }
+  return { x: [A, ...xs, B], y: [0, ...ys, 0] };
+}
+function fillTrace(r, color, name) {
+  return r ? { x: r.x, y: r.y, type: "scatter", mode: "lines", fill: "toself", fillcolor: color,
+    line: { width: 0 }, hoverinfo: "skip", name, showlegend: false } : null;
+}
+function curve(m, se, xmin, xmax, color, dash) {
+  const xs = [], ys = [], N = 300;
+  for (let i = 0; i <= N; i++) { const x = xmin + (xmax - xmin) * i / N; xs.push(x); ys.push(dnorm((x - m) / se) / se); }
+  return { x: xs, y: ys, type: "scatter", mode: "lines", line: { color, width: 2.2, dash }, hoverinfo: "skip", showlegend: false };
+}
+function centroid(r) { if (!r) return null; let sw = 0, sx = 0;
+  for (let i = 0; i < r.x.length; i++) { sw += r.y[i]; sx += r.x[i] * r.y[i]; } return sw ? sx / sw : null; }
+function areaMass(m, se, a, b) { return pnorm((b - m) / se) - pnorm((a - m) / se); }
+
+function drawPlot(M, cur) {
+  const se = M.se;
+  const pad = Math.max(4.5 * se, S.sig);   // fixed by σ unless n is tiny, so a larger n visibly narrows the curves
+  const xmin = Math.min(S.mu0, S.mu1) - pad, xmax = Math.max(S.mu0, S.mu1) + pad;
+  const ymax = 1.18 * dnorm(0) / se;
+  const tr = [];
+  // fail-to-reject = [lo, hi]; reject = (-inf, lo) ∪ (hi, inf)
+  const rej = [];
+  if (isFinite(M.lo)) rej.push([-Infinity, M.lo]);
+  if (isFinite(M.hi)) rej.push([M.hi, Infinity]);
+  const accR = [M.lo, M.hi];
+  // light fills first: true negative (H0, accept) and power (H1, reject)
+  tr.push(fillTrace(region(S.mu0, se, accR[0], accR[1], xmin, xmax), COL.tn));
+  const pwR = [], aR = [];
+  rej.forEach(([a, b]) => { pwR.push(region(S.mu1, se, a, b, xmin, xmax)); aR.push(region(S.mu0, se, a, b, xmin, xmax)); });
+  pwR.forEach(r => tr.push(fillTrace(r, COL.pw)));
+  // strong fills: β (H1, accept) and α (H0, reject)
+  const bR = region(S.mu1, se, accR[0], accR[1], xmin, xmax);
+  tr.push(fillTrace(bR, "rgba(8,81,156,0.75)"));
+  aR.forEach(r => tr.push(fillTrace(r, "rgba(230,85,13,0.85)")));
+  tr.push(curve(S.mu0, se, xmin, xmax, COL.h0));
+  tr.push(curve(S.mu1, se, xmin, xmax, COL.h1));
+
+  // past draws as a rug just under the axis
+  if (S.draws.length) {
+    const ds = S.draws.slice(-300);
+    tr.push({ x: ds.map(d => d.x), y: ds.map(() => -0.045 * ymax), type: "scatter", mode: "markers", hoverinfo: "skip",
+      marker: { size: 6, symbol: "line-ns-open", color: ds.map(d => d.rej ? COL.a : COL.b), line: { width: 1.4 } }, showlegend: false });
+  }
+
+  const shapes = [], ann = [];
+  const vline = (x, color, dash, width, y0 = 0, y1 = 1, yref = "paper") =>
+    shapes.push({ type: "line", xref: "x", yref, x0: x, x1: x, y0, y1, line: { color, dash, width } });
+  // μ0 and μ1 markers through both panels
+  vline(S.mu0, COL.h0, "dot", 1.4); vline(S.mu1, COL.h1, "dot", 1.4);
+  ann.push({ x: S.mu0, y: 0.165, yref: "paper", text: "μ₀ = " + f1(S.mu0), showarrow: false, yanchor: "middle",
+    font: { color: COL.h0, size: 11.5 }, bgcolor: "rgba(255,255,255,0.9)", xanchor: S.mu0 <= S.mu1 ? "right" : "left", xshift: S.mu0 <= S.mu1 ? -3 : 3 });
+  ann.push({ x: S.mu1, y: 0.165, yref: "paper", text: "μ₁ = " + f1(S.mu1), showarrow: false, yanchor: "middle",
+    font: { color: COL.h1, size: 11.5 }, bgcolor: "rgba(255,255,255,0.9)", xanchor: S.mu0 <= S.mu1 ? "left" : "right", xshift: S.mu0 <= S.mu1 ? 3 : -3 });
+  // critical values
+  [M.lo, M.hi].forEach(c => { if (isFinite(c) && c > xmin && c < xmax) {
+    vline(c, COL.ink, "dash", 1.8, 0, ymax * 1.02, "y");
+    const zTxt = "<b>x̄* = " + f1(c) + "</b>";
+    ann.push({ x: c, y: ymax * 1.02, yref: "y", text: zTxt, showarrow: false, yanchor: "bottom", font: { size: 11, color: COL.ink } });
+    const leftIsReject = c === M.lo, yT = ymax * 1.02;
+    ann.push({ x: c, y: yT, yref: "y", yanchor: "bottom", text: leftIsReject ? "← Reject H₀" : "Reject H₀ →", showarrow: false,
+      xanchor: leftIsReject ? "right" : "left", xshift: leftIsReject ? -38 : 38, font: { size: 11, color: COL.a } });
+    if (S.tail !== "two") ann.push({ x: c, y: yT, yref: "y", yanchor: "bottom", text: leftIsReject ? "Fail to reject H₀ →" : "← Fail to reject H₀", showarrow: false,
+      xanchor: leftIsReject ? "left" : "right", xshift: leftIsReject ? 38 : -38, font: { size: 11, color: COL.b } });
+  } });
+  if (S.tail === "two") ann.push({ x: S.mu0, y: ymax * 1.02, yref: "y", yanchor: "bottom", text: "← Fail to reject H₀ →", showarrow: false, font: { size: 11, color: COL.b } });
+  // α / β labels at the centroid of each strong area (only if visible)
+  const lab = (r, m, text, color) => { const cx = centroid(r); if (cx == null) return;
+    const y = dnorm((cx - m) / se) / se; ann.push({ x: cx, y: Math.max(y * 0.45, ymax * 0.04), text, showarrow: false,
+      font: { size: 12.5, color: "#fff", family: FONT.family }, bgcolor: color, borderpad: 2 }); };
+  if (M.beta > 0.004) lab(bR, S.mu1, "β", COL.b);
+  aR.forEach(r => { if (r && areaMass(S.mu0, se, r.x[0], r.x[r.x.length - 1]) > 0.0008) lab(r, S.mu0, S.tail === "two" ? "α/2" : "α", COL.a); });
+
+  // current sample: x̄ line + CI bar in the lower panel
+  if (cur) {
+    const col = COL.ci;
+    vline(cur.x, col, "solid", 2.6);
+    ann.push({ x: cur.x, y: ymax * 0.70, yref: "y", text: `<b>x̄ = ${f1(cur.x)}</b><br>z = ${f2((cur.x - S.mu0) / se)}`,
+      showarrow: false, bgcolor: "rgba(255,255,255,0.88)", bordercolor: col, borderwidth: 1, borderpad: 3, font: { size: 11.5, color: col } });
+    const L = Math.max(cur.ciL, xmin), U = Math.min(cur.ciU, xmax);
+    tr.push({ x: [L, U], y: [0.5, 0.5], xaxis: "x", yaxis: "y2", type: "scatter", mode: "lines+markers", hoverinfo: "skip", showlegend: false,
+      line: { color: col, width: 5 },
+      marker: { size: 12, color: col, symbol: [isFinite(cur.ciL) ? "line-ns-open" : "triangle-left", isFinite(cur.ciU) ? "line-ns-open" : "triangle-right"], line: { width: 3, color: col } } });
+    tr.push({ x: [cur.x], y: [0.5], xaxis: "x", yaxis: "y2", type: "scatter", mode: "markers", hoverinfo: "skip", showlegend: false,
+      marker: { size: 10, color: "#fff", line: { color: col, width: 2.5 } } });
+    const ciTxt = (isFinite(cur.ciL) ? f1(cur.ciL) : "−∞") + "  to  " + (isFinite(cur.ciU) ? f1(cur.ciU) : "+∞");
+    ann.push({ x: (L + U) / 2, y: 0.5, xref: "x", yref: "y2", text: `${+(100 * (1 - S.alpha)).toFixed(1)}% CI: ${ciTxt}`,
+      showarrow: false, yshift: 15, font: { size: 11, color: col } });
+  } else {
+    ann.push({ x: (xmin + xmax) / 2, y: 0.5, xref: "x", yref: "y2", text: "Press “Draw a sample” to see x̄ and its confidence interval",
+      showarrow: false, font: { size: 11.5, color: COL.grey } });
+  }
+
+  Plotly.react($("p_main"), tr.filter(Boolean), {
+    margin: { l: 10, r: 10, t: 22, b: 30 }, font: FONT, paper_bgcolor: "rgba(0,0,0,0)", plot_bgcolor: "rgba(0,0,0,0)",
+    xaxis: { range: [xmin, xmax], zeroline: false, showgrid: false, ticks: "outside", ticklen: 4, title: { text: "x̄", standoff: 4 }, anchor: "y2" },
+    yaxis: { domain: [0.2, 1], range: [-0.08 * ymax, ymax * 1.12], visible: false, fixedrange: true },
+    yaxis2: { domain: [0, 0.14], range: [0, 1.25], visible: false, fixedrange: true },
+    shapes, annotations: ann, showlegend: false, dragmode: false
+  }, CFG);
+}
+
+// ---------------- render ----------------
+function render() {
+  const M = model(), se = M.se, t = S.tail;
+  $("mu0_out").textContent = f1(S.mu0); $("mu1_out").textContent = f1(S.mu1);
+  $("sig_out").textContent = S.sig; $("nn_out").textContent = S.n;
+  $("se_help").innerHTML = `Standard error SE = σ / √n = ${S.sig} / √${S.n} = <b>${f2(se)}</b>. A larger n narrows both curves.`;
+  const op = { two: "\\neq", left: "<", right: ">" }[t];
+  tex("tex_h0", `H_0: \\mu = ${f1(S.mu0)}`); tex("tex_h1", `H_1: \\mu ${op} ${f1(S.mu0)}`);
+
+  const wrongSide = (t === "right" && S.mu1 < S.mu0) || (t === "left" && S.mu1 > S.mu0);
+  $("plot_sub").textContent = wrongSide
+    ? "Careful: μ₁ is on the side the test does not look at, so power is below α."
+    : "μ₁ is one illustrative alternative. H₁ covers many values, so β depends on the true μ.";
+
+  $("s_a").textContent = S.alpha; $("s_tn").textContent = f3(1 - S.alpha);
+  $("s_b").textContent = f3(M.beta); $("s_pw").textContent = f3(M.power);
+  $("s_cv").textContent = t === "two" ? `${f1(M.lo)} | ${f1(M.hi)}` : f1(t === "right" ? M.hi : M.lo);
+  $("s_cvz").textContent = (t === "two" ? "z* = ±" : "z* = " + (t === "left" ? "−" : "")) + f2(M.zc);
+  $("s_d").textContent = f2((S.mu1 - S.mu0) / S.sig);
+
+  // current sample follows the sliders (same random noise u, new parameters)
+  let cur = null;
+  if (S.u != null) cur = evalSample(trueMean() + S.u * se, M);
+  drawPlot(M, cur);
+
+  // ---------- this draw ----------
+  const truthTxt = S.truth === "h1" ? `H₁ is true (μ = ${f1(S.mu1)})` : `H₀ is true (μ = ${f1(S.mu0)})`;
+  $("draw_sub").textContent = `Samples are generated with ${truthTxt}.`;
+  const v = $("verdict");
+  ["q00", "q01", "q10", "q11"].forEach(id => $(id).classList.remove("on"));
+  const ciName = M.ciSide === "two" ? `${+(100 * (1 - S.alpha)).toFixed(1)}% CI` :
+    `${+(100 * (1 - S.alpha)).toFixed(1)}% ${M.ciSide === "right" ? "lower" : "upper"} bound`;
+  $("d_ci_lab").textContent = ciName;
+  if (!cur) {
+    v.classList.remove("reject"); $("v_big").textContent = "No sample yet"; $("v_why").textContent = "Press “Draw a sample”.";
+    ["d_xbar", "d_z", "d_ci", "d_c0", "d_c1"].forEach(id => { $(id).textContent = "–"; $(id).className = id.startsWith("d_c") && id !== "d_ci" ? "chk" : ""; });
+  } else {
+    const z = (cur.x - S.mu0) / se;
+    v.classList.toggle("reject", cur.rej);
+    $("v_big").innerHTML = cur.rej ? "Reject H<sub>0</sub>" : "Fail to reject H<sub>0</sub>";
+    const h1 = S.truth === "h1";
+    const kind = cur.rej ? (h1 ? "a true positive" : "a Type I error") : (h1 ? "a Type II error (x̄ fell in the β area)" : "a true negative");
+    $("v_why").textContent = `x̄ fell in the ${cur.rej ? "rejection" : "fail-to-reject"} region. Since ${truthTxt}, this is ${kind}.`;
+    $("d_xbar").textContent = f2(cur.x); $("d_z").textContent = f2(z);
+    $("d_ci").textContent = `[${isFinite(cur.ciL) ? f2(cur.ciL) : "−∞"}, ${isFinite(cur.ciU) ? f2(cur.ciU) : "+∞"}]`;
+    $("d_c0").textContent = cur.c0 ? "Yes ✓" : "No ✗"; $("d_c0").className = "chk " + (cur.c0 ? "y" : "n");
+    $("d_c1").textContent = cur.c1 ? "Yes ✓" : "No ✗"; $("d_c1").className = "chk " + (cur.c1 ? "y" : "n");
+    $(`q${cur.rej ? 1 : 0}${h1 ? 1 : 0}`).classList.add("on");
+  }
+
+  // ---------- tally (recomputed for the current parameters) ----------
+  const D = S.draws, N = D.length;
+  const F = D.filter(d => !d.rej), R = D.filter(d => d.rej);
+  const cnt = (arr, k) => arr.filter(d => d[k]).length;
+  $("t_fn").innerHTML = F.length + pct(F.length, N); $("t_rn").innerHTML = R.length + pct(R.length, N); $("t_n").textContent = N;
+  $("t_f0").innerHTML = cnt(F, "c0") + pct(cnt(F, "c0"), F.length); $("t_f1").innerHTML = cnt(F, "c1") + pct(cnt(F, "c1"), F.length);
+  $("t_r0").innerHTML = cnt(R, "c0") + pct(cnt(R, "c0"), R.length); $("t_r1").innerHTML = cnt(R, "c1") + pct(cnt(R, "c1"), R.length);
+  $("t_a0").innerHTML = cnt(D, "c0") + pct(cnt(D, "c0"), N); $("t_a1").innerHTML = cnt(D, "c1") + pct(cnt(D, "c1"), N);
+  $("tr_f").classList.toggle("hl", S.truth === "h1");
+
+  const expect = S.truth === "h1" ? `β = ${f3(M.beta)}` : `1 − α = ${f3(1 - S.alpha)}`;
+  let note = `Expected share in the fail-to-reject region: <b>${expect}</b>. `;
+  note += M.ciSide === "two" && t !== "two"
+    ? `With a two-sided CI and a one-tailed test, the link to μ₀ can break: the CI may miss μ₀ even when you fail to reject. Switch back to “Matches the test”.`
+    : `When the CI matches the test, “fail to reject” and “CI contains μ₀” always go together (100%). Whether the CI also reaches μ₁ is a separate question: watch the last column of the first row.`;
+  $("note").innerHTML = note;
+}
+
+// ---------------- embedding ----------------
+if (window.self !== window.top) {
+  document.documentElement.classList.add("embedded");
+  let lastH = 0;
+  const reportHeight = () => {
+    const h = Math.ceil(document.body.getBoundingClientRect().height);
+    if (h > 0 && h !== lastH) { lastH = h; window.parent.postMessage({ type: "app-height", height: h }, "*"); }
+  };
+  new ResizeObserver(reportHeight).observe(document.body);
+  window.addEventListener("load", () => { reportHeight(); setTimeout(reportHeight, 500); setTimeout(reportHeight, 1500); });
+}
+
+window.addEventListener("load", render);
+</script>
+</body>
+</html>
