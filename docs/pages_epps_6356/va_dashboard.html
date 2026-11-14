@@ -3187,7 +3187,7 @@ server &lt;- function(input, output, session) {
   # ---- map: base map once, polygons redrawn with leafletProxy()
   output$map &lt;- renderLeaflet(
     leaflet(options = leafletOptions(minZoom = 2, zoomSnap = 0.25)) |&gt;
-      addProviderTiles("CartoDB.Positron") |&gt;
+      addProviderTiles("Esri.WorldGrayCanvas") |&gt;   # no API key needed
       setView(-104, 41, zoom = 3.25))
 
   observe({

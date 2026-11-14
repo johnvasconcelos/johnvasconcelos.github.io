@@ -367,8 +367,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#a.-spatial-plan" id="toc-a.-spatial-plan" class="nav-link active" data-scroll-target="#a.-spatial-plan">A. Spatial plan</a></li>
-  <li><a href="#b.-static-maps" id="toc-b.-static-maps" class="nav-link" data-scroll-target="#b.-static-maps">B. Static maps</a>
+  <li><a href="#static-maps" id="toc-static-maps" class="nav-link active" data-scroll-target="#static-maps">Static maps</a>
   <ul class="collapse">
   <li><a href="#join-and-check" id="toc-join-and-check" class="nav-link" data-scroll-target="#join-and-check">1. Join and check</a></li>
   <li><a href="#projection-comparison" id="toc-projection-comparison" class="nav-link" data-scroll-target="#projection-comparison">2. Projection comparison</a></li>
@@ -376,7 +375,6 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#classification-comparison" id="toc-classification-comparison" class="nav-link" data-scroll-target="#classification-comparison">4. Classification comparison</a></li>
   <li><a href="#proportional-symbols" id="toc-proportional-symbols" class="nav-link" data-scroll-target="#proportional-symbols">5. Proportional symbols</a></li>
   </ul></li>
-  <li><a href="#c.-reactive-map" id="toc-c.-reactive-map" class="nav-link" data-scroll-target="#c.-reactive-map">C. Reactive map</a></li>
   <li><a href="#data-note" id="toc-data-note" class="nav-link" data-scroll-target="#data-note">Data note</a></li>
   </ul>
 </nav>
@@ -394,26 +392,16 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
-<span class="screen-reader-only">Tip</span>Open the reactive map
+<span class="screen-reader-only">Tip</span>Interactive version
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p>The interactive version is the <strong>Map</strong> page of the team dashboard: <a href="../pages_epps_6356/va_dashboard.html" class="btn btn-primary">VA Budget Dashboard → Map tab</a></p>
+<p>The reactive map is on the <strong>Map</strong> tab of the team dashboard: <a href="../pages_epps_6356/va_dashboard.html" class="btn btn-primary">VA Budget Dashboard → Map tab</a></p>
 </div>
 </div>
 <p>Our dashboard follows the VA budget at the national level: what the executive branch requests, what Congress enacts, and how mandatory funding has overtaken discretionary funding (RQ2). The budget volumes have no geography, so this assignment adds the <strong>Geographic Distribution of VA Expenditures (GDX)</strong>, the VA’s own annual breakdown of its spending by state. It lets us ask where RQ2 happens: <strong>in which states mandatory benefits, mostly disability compensation, have become the larger part of what VA spends.</strong></p>
-<section id="a.-spatial-plan" class="level1">
-<h1>A. Spatial plan</h1>
-<p>This section is also added to the team’s <code>PLAN.md</code> under “Assignment 9”.</p>
-<ol type="1">
-<li><strong>Units and boundaries.</strong> One row of the map is a <strong>state</strong>: the 50 states, the District of Columbia, Puerto Rico and Guam, which are the 53 units in GDX. Boundaries come from the U.S. Census Bureau cartographic boundary file of states (1:10m), as distributed in the <code>us-atlas</code> package. The join key is the <strong>state name</strong>; GDX has no FIPS code, so names are cleaned with <code>str_squish()</code> (the GDX file pads them with spaces) before joining.</li>
-<li><strong>Variables.</strong> (a) <strong>Compensation &amp; pension share</strong>: compensation and pension as a % of the state’s VA spending, a <strong>share</strong> shown as a choropleth. (b) <strong>Construction share</strong>, % of the state’s VA spending, and (c) <strong>medical care per unique patient</strong>, in dollars, a share and a rate shown as choropleths on the dashboard. (d) <strong>Total VA spending</strong>, in billions of dollars, a <strong>total</strong> shown with proportional symbols. GDX advises against dividing compensation, pension or total spending by the veteran population, because beneficiaries are a different population, so we use shares and per-patient rates instead of “per veteran” figures. Loan Guaranty is left out of state totals, because GDX books all of it in Travis County, Texas. The District of Columbia is shown as “not comparable”, because its totals include VA Central Office spending.</li>
-<li><strong>Coordinate reference systems.</strong> Data are stored in <strong>EPSG:4326</strong> (longitude/latitude), the format of the boundary file and the one Leaflet expects. Static maps use <strong>EPSG:5070</strong> (Albers equal-area for the contiguous U.S.), so that state areas are comparable, with Alaska, Hawaii and Puerto Rico moved and resized next to the lower 48 (a small function on this page does what <code>tigris::shift_geometry()</code> does, without downloading a reference file at render time). The interactive map draws in <strong>EPSG:3857</strong> (Web Mercator), which Leaflet uses for its tiles and reprojects to on its own.</li>
-<li><strong>Interaction.</strong> The dashboard map changes with the <strong>variable</strong>, the <strong>fiscal year</strong> (FY2015–FY2023) and the <strong>colour scale</strong> (quantile classes or continuous). With the map update two value boxes (states shown, median of the selected measure), a third box with the national value, and a companion chart of the ten states highest on the selected measure.</li>
-</ol>
-</section>
-<section id="b.-static-maps" class="level1">
-<h1>B. Static maps</h1>
+<section id="static-maps" class="level1">
+<h1>Static maps</h1>
 <div class="cell">
 <details open="" class="code-fold">
 <summary>Code</summary>
@@ -641,17 +629,6 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <p>Total spending is a count, so it is drawn with symbols sized by value rather than with colour: a choropleth of totals would mostly show where veterans live, and large, empty states would look important because of their area.</p>
 </section>
-</section>
-<section id="c.-reactive-map" class="level1">
-<h1>C. Reactive map</h1>
-<p>The reactive map is the <strong>Map</strong> page of the team dashboard, built the same way as the RQ1 and RQ2 pages (a bslib Shiny app that runs in the browser through Shinylive, so it needs no server). It reads <code>va_states.csv</code> and <code>us_states.geojson</code>, which <code>va_map_data.R</code> builds from the same GDX workbooks and boundary file used above (boundaries simplified to about 80 KB so the page loads quickly).</p>
-<ul>
-<li><strong>Map:</strong> a Leaflet choropleth built from an <code>sf</code> object in EPSG:4326, with a label for each state (name and value) and a legend titled with the variable and its units.</li>
-<li><strong>Inputs:</strong> the measure (compensation &amp; pension share, construction share, medical care per patient), the fiscal year (FY2015–FY2023) and the colour scale (quantile or continuous).</li>
-<li><strong>One shared <code>reactive()</code></strong> with the filtered <code>sf</code> data feeds the map, three value boxes and a top-10 chart.</li>
-<li>The data are read and joined once, at the top of <code>app.R</code>; the base map is drawn once and the polygons are redrawn with <code>leafletProxy()</code>.</li>
-</ul>
-<p><a href="../pages_epps_6356/va_dashboard.html">Open the dashboard and choose the <strong>Map</strong> tab →</a></p>
 </section>
 <section id="data-note" class="level1">
 <h1>Data note</h1>

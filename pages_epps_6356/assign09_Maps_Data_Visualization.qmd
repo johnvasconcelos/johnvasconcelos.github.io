@@ -17,22 +17,13 @@ execute:
 ---
 
 ::: callout-tip
-## Open the reactive map
-The interactive version is the **Map** page of the team dashboard: [VA Budget Dashboard → Map tab](va_dashboard.qmd){.btn .btn-primary}
+## Interactive version
+The reactive map is on the **Map** tab of the team dashboard: [VA Budget Dashboard → Map tab](va_dashboard.qmd){.btn .btn-primary}
 :::
 
 Our dashboard follows the VA budget at the national level: what the executive branch requests, what Congress enacts, and how mandatory funding has overtaken discretionary funding (RQ2). The budget volumes have no geography, so this assignment adds the **Geographic Distribution of VA Expenditures (GDX)**, the VA's own annual breakdown of its spending by state. It lets us ask where RQ2 happens: **in which states mandatory benefits, mostly disability compensation, have become the larger part of what VA spends.**
 
-# A. Spatial plan
-
-This section is also added to the team's `PLAN.md` under "Assignment 9".
-
-1. **Units and boundaries.** One row of the map is a **state**: the 50 states, the District of Columbia, Puerto Rico and Guam, which are the 53 units in GDX. Boundaries come from the U.S. Census Bureau cartographic boundary file of states (1:10m), as distributed in the `us-atlas` package. The join key is the **state name**; GDX has no FIPS code, so names are cleaned with `str_squish()` (the GDX file pads them with spaces) before joining.
-2. **Variables.** (a) **Compensation & pension share**: compensation and pension as a % of the state's VA spending, a **share** shown as a choropleth. (b) **Construction share**, % of the state's VA spending, and (c) **medical care per unique patient**, in dollars, a share and a rate shown as choropleths on the dashboard. (d) **Total VA spending**, in billions of dollars, a **total** shown with proportional symbols. GDX advises against dividing compensation, pension or total spending by the veteran population, because beneficiaries are a different population, so we use shares and per-patient rates instead of "per veteran" figures. Loan Guaranty is left out of state totals, because GDX books all of it in Travis County, Texas. The District of Columbia is shown as "not comparable", because its totals include VA Central Office spending.
-3. **Coordinate reference systems.** Data are stored in **EPSG:4326** (longitude/latitude), the format of the boundary file and the one Leaflet expects. Static maps use **EPSG:5070** (Albers equal-area for the contiguous U.S.), so that state areas are comparable, with Alaska, Hawaii and Puerto Rico moved and resized next to the lower 48 (a small function on this page does what `tigris::shift_geometry()` does, without downloading a reference file at render time). The interactive map draws in **EPSG:3857** (Web Mercator), which Leaflet uses for its tiles and reprojects to on its own.
-4. **Interaction.** The dashboard map changes with the **variable**, the **fiscal year** (FY2015–FY2023) and the **colour scale** (quantile classes or continuous). With the map update two value boxes (states shown, median of the selected measure), a third box with the national value, and a companion chart of the ten states highest on the selected measure.
-
-# B. Static maps
+# Static maps
 
 ```{r}
 #| label: setup
@@ -206,17 +197,6 @@ ggplot() +
 ```
 
 Total spending is a count, so it is drawn with symbols sized by value rather than with colour: a choropleth of totals would mostly show where veterans live, and large, empty states would look important because of their area.
-
-# C. Reactive map
-
-The reactive map is the **Map** page of the team dashboard, built the same way as the RQ1 and RQ2 pages (a bslib Shiny app that runs in the browser through Shinylive, so it needs no server). It reads `va_states.csv` and `us_states.geojson`, which `va_map_data.R` builds from the same GDX workbooks and boundary file used above (boundaries simplified to about 80 KB so the page loads quickly).
-
-- **Map:** a Leaflet choropleth built from an `sf` object in EPSG:4326, with a label for each state (name and value) and a legend titled with the variable and its units.
-- **Inputs:** the measure (compensation & pension share, construction share, medical care per patient), the fiscal year (FY2015–FY2023) and the colour scale (quantile or continuous).
-- **One shared `reactive()`** with the filtered `sf` data feeds the map, three value boxes and a top-10 chart.
-- The data are read and joined once, at the top of `app.R`; the base map is drawn once and the polygons are redrawn with `leafletProxy()`.
-
-[Open the dashboard and choose the **Map** tab →](va_dashboard.qmd)
 
 # Data note
 

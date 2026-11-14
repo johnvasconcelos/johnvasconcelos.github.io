@@ -578,7 +578,7 @@
     "href": "pages_epps_6356/assign09_Maps_Data_Visualization.html",
     "title": "Assignment 09 (Maps) - Data Visualization EPPS 6356",
     "section": "",
-    "text": "TipOpen the reactive map\n\n\n\nThe interactive version is the Map page of the team dashboard: VA Budget Dashboard → Map tab\nOur dashboard follows the VA budget at the national level: what the executive branch requests, what Congress enacts, and how mandatory funding has overtaken discretionary funding (RQ2). The budget volumes have no geography, so this assignment adds the Geographic Distribution of VA Expenditures (GDX), the VA’s own annual breakdown of its spending by state. It lets us ask where RQ2 happens: in which states mandatory benefits, mostly disability compensation, have become the larger part of what VA spends."
+    "text": "TipInteractive version\n\n\n\nThe reactive map is on the Map tab of the team dashboard: VA Budget Dashboard → Map tab\nOur dashboard follows the VA budget at the national level: what the executive branch requests, what Congress enacts, and how mandatory funding has overtaken discretionary funding (RQ2). The budget volumes have no geography, so this assignment adds the Geographic Distribution of VA Expenditures (GDX), the VA’s own annual breakdown of its spending by state. It lets us ask where RQ2 happens: in which states mandatory benefits, mostly disability compensation, have become the larger part of what VA spends."
   },
   {
     "objectID": "pages_epps_6356/assign09_Maps_Data_Visualization.html#join-and-check",
