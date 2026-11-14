@@ -1,80 +1,46 @@
 ---
 title: "Power BI"
 page-layout: full
+toc: false
 ---
 
-**Financial Statments and Index Analysis Multiple Companies**
+Interactive Power BI dashboards. Each one opens on its own page.
 
 ```{=html}
-<div style="width: 56%; margin: 0 auto;">
-  <div style="position: relative; height: 0; padding-bottom: calc(56.25% + 60px);">
-    <iframe title="Meu dashboard"
-            src="https://app.powerbi.com/view?r=eyJrIjoiNGViMGRlZTEtMGE2ZC00ODE4LWE4N2YtYTk1NTU4ZWZjOGQwIiwidCI6ImUyOTFjOTBmLThhZTAtNGE0NS1iNTdiLWFiZTQyOWNjNWEyNCJ9"
-            style="position: absolute; inset: 0; width: 100%; height: 100%; border: 0;"
-            allowfullscreen="true"></iframe>
-  </div>
-</div>
-```
-
-___
-
-**Financial Indicators Dashboard**
-
-```{=html}
-<div style="width: 56%; margin: 0 auto;">
-  <div style="position: relative; height: 0; padding-bottom: calc(56.25% + 60px);">
-    <iframe title="Meu dashboard"
-            src="https://app.powerbi.com/view?r=eyJrIjoiZWVhNTEzMmYtY2Y4Yy00NTAyLWJmOWYtNjBiYzVhNGQxNDFhIiwidCI6ImUyOTFjOTBmLThhZTAtNGE0NS1iNTdiLWFiZTQyOWNjNWEyNCJ9"
-            style="position: absolute; inset: 0; width: 100%; height: 100%; border: 0;"
-            allowfullscreen="true"></iframe>
-  </div>
-</div>
-```
-
-___
-
-**HR & Payroll Analysis**
-
-```{=html}
-<div style="width: 56%; margin: 0 auto;">
-  <div style="position: relative; height: 0; padding-bottom: calc(56.25% + 60px);">
-    <iframe title="Meu dashboard"
-            src="https://app.powerbi.com/view?r=eyJrIjoiNjY5M2UwMjMtZGU2Yi00Yzc4LTllZTEtNTA4NjEwMzEyZTg2IiwidCI6ImUyOTFjOTBmLThhZTAtNGE0NS1iNTdiLWFiZTQyOWNjNWEyNCJ9"
-            style="position: absolute; inset: 0; width: 100%; height: 100%; border: 0;"
-            allowfullscreen="true"></iframe>
-  </div>
-</div>
-```
-
-
-___
-
-**US Elections**
-\
-*Final data for 2024 to be updated*
-
-```{=html}
-<div style="width: 56%; margin: 0 auto;">
-  <div style="position: relative; height: 0; padding-bottom: calc(56.25% + 60px);">
-    <iframe title="Meu dashboard"
-            src="https://app.powerbi.com/view?r=eyJrIjoiYzJmMWUyODgtMDE1OS00OWJkLWI3ZWQtOWMyNjY4M2ZjYTkyIiwidCI6ImUyOTFjOTBmLThhZTAtNGE0NS1iNTdiLWFiZTQyOWNjNWEyNCJ9"
-            style="position: absolute; inset: 0; width: 100%; height: 100%; border: 0;"
-            allowfullscreen="true"></iframe>
-  </div>
-</div>
-```
-
-___
-
-**Summarized Financial Reports**
-
-```{=html}
-<div style="width: 56%; margin: 0 auto;">
-  <div style="position: relative; height: 0; padding-bottom: calc(56.25% + 60px);">
-    <iframe title="Meu dashboard"
-            src="https://app.powerbi.com/view?r=eyJrIjoiZDJlMGZmODItZWZiOC00YWNkLTllYzAtMGJmMjcwMmEyYjJmIiwidCI6ImUyOTFjOTBmLThhZTAtNGE0NS1iNTdiLWFiZTQyOWNjNWEyNCJ9"
-            style="position: absolute; inset: 0; width: 100%; height: 100%; border: 0;"
-            allowfullscreen="true"></iframe>
-  </div>
+<style>
+  .pbi-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 16px; margin-top: 12px; }
+  .pbi-card { display: flex; flex-direction: column; gap: 6px; padding: 18px; border: 1px solid #e2e6ea; border-radius: 10px;
+    background: #fff; color: inherit; text-decoration: none; transition: box-shadow .15s, transform .15s; }
+  .pbi-card:hover { box-shadow: 0 6px 18px rgba(8,81,156,.12); transform: translateY(-2px); }
+  .pbi-card i { font-size: 24px; color: #08519c; }
+  .pbi-card h3 { margin: 0; font-size: 16px; font-weight: 650; }
+  .pbi-card span { margin-top: auto; color: #08519c; font-size: 13px; font-weight: 600; }
+</style>
+<div class="pbi-grid">
+  <a class="pbi-card" href="powerbi/financial_statements.html">
+    <i class="bi bi-bar-chart-line"></i>
+    <h3>Financial Statements and Index Analysis: Multiple Companies</h3>
+    <span>Open dashboard →</span>
+  </a>
+  <a class="pbi-card" href="powerbi/financial_indicators.html">
+    <i class="bi bi-bar-chart-line"></i>
+    <h3>Financial Indicators Dashboard</h3>
+    <span>Open dashboard →</span>
+  </a>
+  <a class="pbi-card" href="powerbi/hr_payroll.html">
+    <i class="bi bi-bar-chart-line"></i>
+    <h3>HR & Payroll Analysis</h3>
+    <span>Open dashboard →</span>
+  </a>
+  <a class="pbi-card" href="powerbi/us_elections.html">
+    <i class="bi bi-bar-chart-line"></i>
+    <h3>US Elections</h3>
+    <span>Open dashboard →</span>
+  </a>
+  <a class="pbi-card" href="powerbi/financial_reports.html">
+    <i class="bi bi-bar-chart-line"></i>
+    <h3>Summarized Financial Reports</h3>
+    <span>Open dashboard →</span>
+  </a>
 </div>
 ```

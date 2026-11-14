@@ -1,0 +1,20 @@
+---
+title: "HR & Payroll Analysis"
+page-layout: full
+toc: false
+---
+
+
+
+```{=html}
+<div style="width: 100%; max-width: 1200px; margin: 0 auto;">
+  <div style="position: relative; height: 0; padding-bottom: calc(56.25% + 36px);">
+    <iframe title="HR & Payroll Analysis"
+            src="https://app.powerbi.com/view?r=eyJrIjoiNjY5M2UwMjMtZGU2Yi00Yzc4LTllZTEtNTA4NjEwMzEyZTg2IiwidCI6ImUyOTFjOTBmLThhZTAtNGE0NS1iNTdiLWFiZTQyOWNjNWEyNCJ9"
+            style="position: absolute; inset: 0; width: 100%; height: 100%; border: 0;"
+            allowfullscreen="true"></iframe>
+  </div>
+</div>
+```
+
+[← All Power BI dashboards](../powerbi.qmd)

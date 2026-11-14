@@ -17,6 +17,7 @@ project:
     - apps/t_table.html
     - apps/chi_square_table.html
     - apps/f_table.html
+    - apps/tukey_table.html
 
 website:
   title: "John Vasconcelos"
@@ -60,14 +61,24 @@ website:
             text: "Chi-Square Table"
           - href: pages/f_table.qmd
             text: "F-Table"
+          - href: pages/tukey_table.qmd
+            text: "Tukey q-Table"
       - href: pages/cv.qmd
         text: CV
-      - text: Portfolio
+      - text: Power BI
         menu:
-          - href: pages/apps.qmd
-            text: Apps  
           - href: pages/powerbi.qmd
-            text: Power BI      
+            text: "All dashboards"
+          - href: pages/powerbi/financial_statements.qmd
+            text: "Financial Statements (Multiple Companies)"
+          - href: pages/powerbi/financial_indicators.qmd
+            text: "Financial Indicators Dashboard"
+          - href: pages/powerbi/hr_payroll.qmd
+            text: "HR & Payroll Analysis"
+          - href: pages/powerbi/us_elections.qmd
+            text: "US Elections"
+          - href: pages/powerbi/financial_reports.qmd
+            text: "Summarized Financial Reports"
       - text: EPPS 6356
         menu:
           - href: pages_epps_6356/assign01_Data_Visualization.qmd
