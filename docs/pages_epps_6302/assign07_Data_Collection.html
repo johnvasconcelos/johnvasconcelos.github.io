@@ -1,0 +1,2194 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.9.38">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="John Vasconcelos">
+<meta name="dcterms.date" content="2026-11-13">
+
+<title>Assignment 7 — Social media data from the YouTube API – John Vasconcelos</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<script src="../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-daee3dbc31499a3618572225bd8afd09.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-cf1c33a087c0a85e603096bb70efc310.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+
+<link rel="stylesheet" href="../styles.css">
+</head>
+
+<body class="nav-fixed quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top quarto-banner">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../index.html"> 
+<span class="menu-text">Home</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../pages/research.html"> 
+<span class="menu-text">Research</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../pages/teaching.html"> 
+<span class="menu-text">Teaching</span></a>
+  </li>  
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-statapps" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">StatApps</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-statapps">    
+        <li>
+    <a class="dropdown-item" href="../pages/w6_binomial_distribution.html">
+ <span class="dropdown-text">Binomial Distribution</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../pages/w6_hypergeometric_distribution.html">
+ <span class="dropdown-text">Hypergeometric Distribution</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../pages/w6_poisson_distribution.html">
+ <span class="dropdown-text">Poisson Distribution</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../pages/w8_sampling_distribution.html">
+ <span class="dropdown-text">Sampling Distributions</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../pages/w9_confidence_intervals.html">
+ <span class="dropdown-text">Confidence Intervals</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../pages/w9_t_distribution.html">
+ <span class="dropdown-text">Normal vs.&nbsp;t Distribution</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../pages/w10_hypothesis_testing.html">
+ <span class="dropdown-text">Hypothesis Testing</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../pages/w10_errors_power.html">
+ <span class="dropdown-text">Type I &amp; II Errors</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../pages/w11_anova.html">
+ <span class="dropdown-text">One-Way ANOVA</span></a>
+  </li>  
+    </ul>
+  </li>
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-stattables" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">StatTables</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-stattables">    
+        <li>
+    <a class="dropdown-item" href="../pages/z_table.html">
+ <span class="dropdown-text">Z-Table</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../pages/t_table.html">
+ <span class="dropdown-text">T-Table</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../pages/chi_square_table.html">
+ <span class="dropdown-text">Chi-Square Table</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../pages/f_table.html">
+ <span class="dropdown-text">F-Table</span></a>
+  </li>  
+    </ul>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link" href="../pages/cv.html"> 
+<span class="menu-text">CV</span></a>
+  </li>  
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-portfolio" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Portfolio</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-portfolio">    
+        <li>
+    <a class="dropdown-item" href="../pages/apps.html">
+ <span class="dropdown-text">Apps</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../pages/powerbi.html">
+ <span class="dropdown-text">Power BI</span></a>
+  </li>  
+    </ul>
+  </li>
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-epps-6356" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">EPPS 6356</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-epps-6356">    
+        <li>
+    <a class="dropdown-item" href="../pages_epps_6356/assign01_Data_Visualization.html">
+ <span class="dropdown-text">Assignment 01</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../pages_epps_6356/assign02_Data_Visualization.html">
+ <span class="dropdown-text">Assignment 02</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../pages_epps_6356/assign03_Data_Visualization.html">
+ <span class="dropdown-text">Assignment 03</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../pages_epps_6356/assign04_2_Data_Visualization.html">
+ <span class="dropdown-text">Note on Grammar of Graphics</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../pages_epps_6356/assign04_Hackathon1_Data_Visualization.html">
+ <span class="dropdown-text">Assignment 04 (Hackathon 1)</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../pages_epps_6356/assign05_Data_Visualization.html">
+ <span class="dropdown-text">Assignment 05</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../pages_epps_6356/assign06_Data_Visualization.html">
+ <span class="dropdown-text">Assignment 06</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../pages_epps_6356/assign07_Hackathon2_Data_Visualization.html">
+ <span class="dropdown-text">Assignment 07 (Hackathon 2)</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../pages_epps_6356/assign08_Dashboard_Data_Visualization.html">
+ <span class="dropdown-text">Assignment 08 (Dashboard)</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../pages_epps_6356/va_dashboard.html">
+ <span class="dropdown-text">VA Budget Dashboard</span></a>
+  </li>  
+    </ul>
+  </li>
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-epps-6302" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">EPPS 6302</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-epps-6302">    
+        <li>
+    <a class="dropdown-item" href="../pages_epps_6302/assign02_Data_Collection.html">
+ <span class="dropdown-text">Assignment 02</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../pages_epps_6302/assign03_Data_Collection.html">
+ <span class="dropdown-text">Assignment 03</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../pages_epps_6302/assign04_Data_Collection.html">
+ <span class="dropdown-text">Assignment 04</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../pages_epps_6302/assign05_Data_Collection.html">
+ <span class="dropdown-text">Assignment 05</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../pages_epps_6302/assign06_Data_Collection.html">
+ <span class="dropdown-text">Assignment 06</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../pages_epps_6302/assign07_Data_Collection.html">
+ <span class="dropdown-text">Assignment 07</span></a>
+  </li>  
+    </ul>
+  </li>
+</ul>
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/johnvasconcelos"> <i class="bi bi-github" role="img">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="mailto:john.vasconcelos@utdallas.edu"> <i class="bi bi-envelope" role="img">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<header id="title-block-header" class="quarto-title-block default page-columns page-full">
+  <div class="quarto-title-banner page-columns page-full">
+    <div class="quarto-title column-body">
+      <h1 class="title">Assignment 7 — Social media data from the YouTube API</h1>
+            <p class="subtitle lead">EPPS 6302 · 2026 US midterm elections on YouTube</p>
+                      </div>
+  </div>
+    
+  
+  <div class="quarto-title-meta">
+
+      <div>
+      <div class="quarto-title-meta-heading">Author</div>
+      <div class="quarto-title-meta-contents">
+               <p>John Vasconcelos </p>
+            </div>
+    </div>
+      
+      <div>
+      <div class="quarto-title-meta-heading">Published</div>
+      <div class="quarto-title-meta-contents">
+        <p class="date">November 13, 2026</p>
+      </div>
+    </div>
+    
+      
+    </div>
+    
+  
+  </header><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#quota-plan" id="toc-quota-plan" class="nav-link active" data-scroll-target="#quota-plan">1. Quota plan</a></li>
+  <li><a href="#collect" id="toc-collect" class="nav-link" data-scroll-target="#collect">2. Collect</a>
+  <ul class="collapse">
+  <li><a href="#b.-search-twice-pre-election-window" id="toc-b.-search-twice-pre-election-window" class="nav-link" data-scroll-target="#b.-search-twice-pre-election-window">2b. Search twice (pre-election window)</a></li>
+  <li><a href="#video-statistics-part-4" id="toc-video-statistics-part-4" class="nav-link" data-scroll-target="#video-statistics-part-4">Video statistics (Part 4)</a></li>
+  <li><a href="#c.-three-channels-via-the-uploads-list" id="toc-c.-three-channels-via-the-uploads-list" class="nav-link" data-scroll-target="#c.-three-channels-via-the-uploads-list">2c. Three channels via the uploads list</a></li>
+  <li><a href="#d.-comments-log-and-manifest" id="toc-d.-comments-log-and-manifest" class="nav-link" data-scroll-target="#d.-comments-log-and-manifest">2d. Comments, log and manifest</a></li>
+  <li><a href="#e.-after-election-day" id="toc-e.-after-election-day" class="nav-link" data-scroll-target="#e.-after-election-day">2e. After Election Day</a></li>
+  </ul></li>
+  <li><a href="#analyze" id="toc-analyze" class="nav-link" data-scroll-target="#analyze">3. Analyze</a>
+  <ul class="collapse">
+  <li><a href="#a.-describe-the-collection" id="toc-a.-describe-the-collection" class="nav-link" data-scroll-target="#a.-describe-the-collection">3a. Describe the collection</a></li>
+  <li><a href="#b.-read-then-count" id="toc-b.-read-then-count" class="nav-link" data-scroll-target="#b.-read-then-count">3b. Read, then count</a>
+  <ul class="collapse">
+  <li><a href="#validation-40-hand-coded-comments" id="toc-validation-40-hand-coded-comments" class="nav-link" data-scroll-target="#validation-40-hand-coded-comments">Validation: 40 hand-coded comments</a></li>
+  </ul></li>
+  </ul></li>
+  <li><a href="#report" id="toc-report" class="nav-link" data-scroll-target="#report">Report</a></li>
+  <li><a href="#data-note" id="toc-data-note" class="nav-link" data-scroll-target="#data-note">Data note</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content quarto-banner-title-block" id="quarto-document-content">
+
+
+
+
+
+<p>This page collects YouTube comments on the 2026 US midterm elections through the YouTube Data API v3 (with the R package tuber), before and after Election Day, and analyses them with quanteda. Collection chunks are shown but not re-run when the page is rendered (<code>eval: false</code>); the analysis reads the saved files, so rendering uses no API quota. Raw comments are kept on my computer only and are not published.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tuber)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyr)</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(stringr)</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(purrr)</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(lubridate)</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(quanteda)</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(quanteda.textstats)</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(quanteda.textplots)</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="fu">stopifnot</span>(<span class="fu">nzchar</span>(<span class="fu">Sys.getenv</span>(<span class="st">"YOUTUBE_KEY"</span>)))   <span class="co"># key is set? (never print it)</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a><span class="fu">packageVersion</span>(<span class="st">"tuber"</span>); <span class="fu">packageVersion</span>(<span class="st">"httr2"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] '3.0.0'</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] '1.3.0'</code></pre>
+</div>
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">dir.create</span>(here<span class="sc">::</span><span class="fu">here</span>(<span class="st">"data-raw/youtube"</span>), <span class="at">recursive =</span> <span class="cn">TRUE</span>, <span class="at">showWarnings =</span> <span class="cn">FALSE</span>)  <span class="co"># ignorado pelo git</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="fu">dir.create</span>(here<span class="sc">::</span><span class="fu">here</span>(<span class="st">"logs"</span>), <span class="at">showWarnings =</span> <span class="cn">FALSE</span>)                                <span class="co"># publicado</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="co"># check that data-raw/ and .Renviron are git-ignored:</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="fu">readLines</span>(here<span class="sc">::</span><span class="fu">here</span>(<span class="st">".gitignore"</span>)) <span class="sc">|&gt;</span> <span class="fu">str_subset</span>(<span class="st">"data-raw|Renviron"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] ".Renviron" "data-raw/"</code></pre>
+</div>
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co"># tuber 3.0 returns "tuber_result" objects that print only metadata and hide the table.</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="co"># plain() turns them into ordinary tibbles; total_of() reads the total the API reports.</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>plain    <span class="ot">&lt;-</span> <span class="cf">function</span>(x) <span class="fu">as_tibble</span>(<span class="fu">as.data.frame</span>(x))</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>total_of <span class="ot">&lt;-</span> <span class="cf">function</span>(x) <span class="fu">attr</span>(x, <span class="st">"total_results"</span>) <span class="sc">%||%</span> <span class="cn">NA</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>TERM <span class="ot">&lt;-</span> <span class="st">"US midterm election"</span>          <span class="co"># the exact term sent to the API</span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>PRE_START  <span class="ot">&lt;-</span> <span class="st">"2026-09-01T00:00:00Z"</span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>PRE_END    <span class="ot">&lt;-</span> <span class="st">"2026-10-27T23:59:59Z"</span></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>POST_START <span class="ot">&lt;-</span> <span class="st">"2026-11-04T00:00:00Z"</span></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a><span class="co"># The three channels of part 2c (IDs checked with get_channel_details())</span></span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>channels <span class="ot">&lt;-</span> <span class="fu">tribble</span>(</span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>  <span class="sc">~</span>kind,            <span class="sc">~</span>channel_id,</span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>  <span class="st">"national network"</span>, <span class="st">"UCeY0bbntWzzVIaj2z3QigXg"</span>,  <span class="co"># NBC News</span></span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a>  <span class="st">"cable news"</span>,       <span class="st">"UCXIJgqnII2ZOINSWNOGFThA"</span>,  <span class="co"># Fox News (ou CNN: UCupvZG-5ko_eiXAupbDfxWw)</span></span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a>  <span class="st">"international"</span>,    <span class="st">"UC16niRr50-MSBwiO3YDb3RA"</span>   <span class="co"># BBC News</span></span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+<section id="quota-plan" class="level1">
+<h1>1. Quota plan</h1>
+<p>Planned before any call. Search has its own budget (100 calls/day); everything else draws on 10,000 units/day. A <code>search.list</code> page (50 results) costs 100 units.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>quota_plan <span class="ot">&lt;-</span> <span class="fu">tribble</span>(</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>  <span class="sc">~</span>step, <span class="sc">~</span>endpoint, <span class="sc">~</span>calls_or_pages, <span class="sc">~</span>unit_cost, <span class="sc">~</span>units,</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>  <span class="st">"2b search pre, relevance"</span>,  <span class="st">"search.list"</span>,        <span class="dv">2</span>,   <span class="dv">100</span>, <span class="dv">200</span>,</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>  <span class="st">"2b search pre, viewCount"</span>,  <span class="st">"search.list"</span>,        <span class="dv">2</span>,   <span class="dv">100</span>, <span class="dv">200</span>,</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>  <span class="st">"2e search post, relevance"</span>, <span class="st">"search.list"</span>,        <span class="dv">2</span>,   <span class="dv">100</span>, <span class="dv">200</span>,</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>  <span class="st">"2e search post, viewCount"</span>, <span class="st">"search.list"</span>,        <span class="dv">2</span>,   <span class="dv">100</span>, <span class="dv">200</span>,</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>  <span class="st">"Video stats (≈400 ids)"</span>,    <span class="st">"videos.list"</span>,        <span class="dv">8</span>,     <span class="dv">1</span>,   <span class="dv">8</span>,</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>  <span class="st">"Channel details (3)"</span>,       <span class="st">"channels.list"</span>,      <span class="dv">3</span>,     <span class="dv">1</span>,   <span class="dv">3</span>,</span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>  <span class="st">"Uploads lists (3 × ≤80 pp)"</span>,<span class="st">"playlistItems.list"</span>,<span class="dv">240</span>,    <span class="dv">1</span>, <span class="dv">240</span>,</span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>  <span class="st">"Comments pre (≈10 videos)"</span>, <span class="st">"commentThreads+comments"</span>, <span class="dv">60</span>, <span class="dv">1</span>, <span class="dv">60</span>,</span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>  <span class="st">"Comments post (≈10 videos)"</span>,<span class="st">"commentThreads+comments"</span>, <span class="dv">60</span>, <span class="dv">1</span>, <span class="dv">60</span></span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>quota_plan <span class="sc">|&gt;</span> janitor<span class="sc">::</span><span class="fu">adorn_totals</span>() <span class="sc">|&gt;</span> knitr<span class="sc">::</span><span class="fu">kable</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output-display">
+<table class="caption-top table table-sm table-striped small">
+<colgroup>
+<col style="width: 32%">
+<col style="width: 29%">
+<col style="width: 18%">
+<col style="width: 12%">
+<col style="width: 7%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">step</th>
+<th style="text-align: left;">endpoint</th>
+<th style="text-align: right;">calls_or_pages</th>
+<th style="text-align: right;">unit_cost</th>
+<th style="text-align: right;">units</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">2b search pre, relevance</td>
+<td style="text-align: left;">search.list</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">100</td>
+<td style="text-align: right;">200</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">2b search pre, viewCount</td>
+<td style="text-align: left;">search.list</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">100</td>
+<td style="text-align: right;">200</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">2e search post, relevance</td>
+<td style="text-align: left;">search.list</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">100</td>
+<td style="text-align: right;">200</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">2e search post, viewCount</td>
+<td style="text-align: left;">search.list</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">100</td>
+<td style="text-align: right;">200</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Video stats (≈400 ids)</td>
+<td style="text-align: left;">videos.list</td>
+<td style="text-align: right;">8</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">8</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Channel details (3)</td>
+<td style="text-align: left;">channels.list</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">3</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Uploads lists (3 × ≤80 pp)</td>
+<td style="text-align: left;">playlistItems.list</td>
+<td style="text-align: right;">240</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">240</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Comments pre (≈10 videos)</td>
+<td style="text-align: left;">commentThreads+comments</td>
+<td style="text-align: right;">60</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">60</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Comments post (≈10 videos)</td>
+<td style="text-align: left;">commentThreads+comments</td>
+<td style="text-align: right;">60</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">60</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Total</td>
+<td style="text-align: left;">-</td>
+<td style="text-align: right;">379</td>
+<td style="text-align: right;">405</td>
+<td style="text-align: right;">1171</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<p>After collecting:</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">yt_get_quota_usage</span>()   <span class="co"># run at the end of the collection</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+<p>The plan above already includes the revised uploads step; my first plan allowed only 30 units for it (10 pages per channel). That was the main miss: because NBC and Fox each post over 50 videos a day, reaching 1 September took 194 units (34 for BBC, 79 for NBC, 81 for Fox), plus two earlier attempts with 500 and 4,000 uploads. Search used 8 of its 100 daily calls, as planned. tuber counts quota only within one R session (after a restart it showed 164 data units and 4 search calls), so it cannot replace the daily total in the Google Cloud Console; overall the collection stayed far below the 10,000-unit limit.</p>
+</section>
+<section id="collect" class="level1">
+<h1>2. Collect</h1>
+<section id="b.-search-twice-pre-election-window" class="level2">
+<h2 class="anchored" data-anchor-id="b.-search-twice-pre-election-window">2b. Search twice (pre-election window)</h2>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>search_pre_rel <span class="ot">&lt;-</span> <span class="fu">yt_search</span>(TERM, <span class="at">order =</span> <span class="st">"relevance"</span>, <span class="at">max_results =</span> <span class="dv">100</span>,</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>                            <span class="at">published_after =</span> PRE_START, <span class="at">published_before =</span> PRE_END)</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>search_pre_view <span class="ot">&lt;-</span> <span class="fu">yt_search</span>(TERM, <span class="at">order =</span> <span class="st">"viewCount"</span>, <span class="at">max_results =</span> <span class="dv">100</span>,</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>                             <span class="at">published_after =</span> PRE_START, <span class="at">published_before =</span> PRE_END)</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a><span class="fu">saveRDS</span>(search_pre_rel,  here<span class="sc">::</span><span class="fu">here</span>(<span class="st">"data-raw/youtube/search_pre_rel.rds"</span>))</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a><span class="fu">saveRDS</span>(search_pre_view, here<span class="sc">::</span><span class="fu">here</span>(<span class="st">"data-raw/youtube/search_pre_view.rds"</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>search_pre_rel  <span class="ot">&lt;-</span> <span class="fu">readRDS</span>(here<span class="sc">::</span><span class="fu">here</span>(<span class="st">"data-raw/youtube/search_pre_rel.rds"</span>))</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>search_pre_view <span class="ot">&lt;-</span> <span class="fu">readRDS</span>(here<span class="sc">::</span><span class="fu">here</span>(<span class="st">"data-raw/youtube/search_pre_view.rds"</span>))</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a><span class="co"># ii. what YouTube says exists vs. what it gave</span></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a><span class="fu">tibble</span>(<span class="at">list =</span> <span class="fu">c</span>(<span class="st">"relevance"</span>, <span class="st">"viewCount"</span>),</span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>       <span class="at">total_results =</span> <span class="fu">c</span>(<span class="fu">total_of</span>(search_pre_rel), <span class="fu">total_of</span>(search_pre_view)),</span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>       <span class="at">rows_returned =</span> <span class="fu">c</span>(<span class="fu">nrow</span>(search_pre_rel), <span class="fu">nrow</span>(search_pre_view)),</span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>       <span class="at">duplicates    =</span> <span class="fu">c</span>(<span class="fu">sum</span>(<span class="fu">duplicated</span>(search_pre_rel<span class="sc">$</span>video_id)),</span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>                         <span class="fu">sum</span>(<span class="fu">duplicated</span>(search_pre_view<span class="sc">$</span>video_id))))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 2 × 4
+  list      total_results rows_returned duplicates
+  &lt;chr&gt;             &lt;int&gt;         &lt;int&gt;      &lt;int&gt;
+1 relevance       1000000           100          2
+2 viewCount       1000000           100          6</code></pre>
+</div>
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="co"># iii. one row per video</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>rel  <span class="ot">&lt;-</span> <span class="fu">distinct</span>(<span class="fu">plain</span>(search_pre_rel),  video_id, <span class="at">.keep_all =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>view <span class="ot">&lt;-</span> <span class="fu">distinct</span>(<span class="fu">plain</span>(search_pre_view), video_id, <span class="at">.keep_all =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a><span class="co"># i. overlap and dominant channels</span></span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a><span class="fu">length</span>(<span class="fu">intersect</span>(rel<span class="sc">$</span>video_id, view<span class="sc">$</span>video_id))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 28</code></pre>
+</div>
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">count</span>(rel,  channel_title, <span class="at">sort =</span> <span class="cn">TRUE</span>) <span class="sc">|&gt;</span> <span class="fu">head</span>(<span class="dv">10</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 10 × 2
+   channel_title                     n
+   &lt;chr&gt;                         &lt;int&gt;
+ 1 CNN                              11
+ 2 Election Predictions Official     7
+ 3 FRANCE 24 English                 7
+ 4 Let's Talk Elections              7
+ 5 India Global Review               4
+ 6 DW News                           3
+ 7 NBC News                          3
+ 8 TODAY                             3
+ 9 The United States Chronicles      3
+10 EUREKA US                         2</code></pre>
+</div>
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">count</span>(view, channel_title, <span class="at">sort =</span> <span class="cn">TRUE</span>) <span class="sc">|&gt;</span> <span class="fu">head</span>(<span class="dv">10</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 10 × 2
+   channel_title          n
+   &lt;chr&gt;              &lt;int&gt;
+ 1 CNN                   34
+ 2 MS NOW                 6
+ 3 Al Jazeera English     4
+ 4 NBC News               3
+ 5 TLDR News Global       3
+ 6 CBS News               2
+ 7 CNN-News18             2
+ 8 ITV News               2
+ 9 LastWeekTonight        2
+10 TODAY                  2</code></pre>
+</div>
+</div>
+<ol type="i">
+<li><p>The two orders give different pictures of the same topic. Sorted by views, the list is concentrated: CNN alone has 34 of the 94 unique videos, and the ten largest channels account for 60. Sorted by relevance, CNN still leads but with only 11 videos, followed by small channels that specialise in election forecasts. In both lists many channels are not American (France 24, DW, Al Jazeera, India Global Review, ITV), so an English-language search for a US election reaches a global audience. Fox News does not appear in either top ten, so what I can study through search depends on YouTube’s ranking, not on which outlets cover the election.</p></li>
+<li><p>The API reported about 1,000,000 results for both orders. This is a rounded estimate, not a count, so the true size of the population is unknown. Each request returned exactly the 100 rows I asked for: what I can study is decided by YouTube’s ranking, not by what exists.</p></li>
+<li><p>Within the same list, 2 videos (relevance) and 6 (viewCount) came back twice, because the ranking shifts between the 50-result pages. After keeping one row per video, I have 98 and 94 unique videos.</p></li>
+</ol>
+</section>
+<section id="video-statistics-part-4" class="level2">
+<h2 class="anchored" data-anchor-id="video-statistics-part-4">Video statistics (Part 4)</h2>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>all_ids <span class="ot">&lt;-</span> <span class="fu">unique</span>(<span class="fu">c</span>(rel<span class="sc">$</span>video_id, view<span class="sc">$</span>video_id))</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>video_stats_pre <span class="ot">&lt;-</span> <span class="fu">plain</span>(<span class="fu">get_video_stats</span>(all_ids))</span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a><span class="fu">saveRDS</span>(video_stats_pre, here<span class="sc">::</span><span class="fu">here</span>(<span class="st">"data-raw/youtube/video_stats_pre.rds"</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+</section>
+<section id="c.-three-channels-via-the-uploads-list" class="level2">
+<h2 class="anchored" data-anchor-id="c.-three-channels-via-the-uploads-list">2c. Three channels via the uploads list</h2>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="co"># (the `channels` table is defined in the setup chunk)</span></span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>channel_info <span class="ot">&lt;-</span> <span class="fu">plain</span>(<span class="fu">get_channel_details</span>(<span class="at">channel_ids =</span> channels<span class="sc">$</span>channel_id))</span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a><span class="fu">saveRDS</span>(channel_info, here<span class="sc">::</span><span class="fu">here</span>(<span class="st">"data-raw/youtube/channel_info.rds"</span>))</span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a><span class="co"># uploads: newest first, 50 per page (1 unit per page).</span></span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a><span class="co"># 500 were not enough to reach 1 September (NBC and Fox post over 50 videos a day);</span></span>
+<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a><span class="co"># 4,000 per channel = up to 80 units each, about 240 in total.</span></span>
+<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a>uploads <span class="ot">&lt;-</span> <span class="fu">map</span>(channels<span class="sc">$</span>channel_id, \(id) <span class="fu">list_channel_videos</span>(id, <span class="at">max_results =</span> <span class="dv">4000</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb19-9"><a href="#cb19-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">set_names</span>(channels<span class="sc">$</span>channel_id)</span>
+<span id="cb19-10"><a href="#cb19-10" aria-hidden="true" tabindex="-1"></a><span class="fu">saveRDS</span>(uploads, here<span class="sc">::</span><span class="fu">here</span>(<span class="st">"data-raw/youtube/uploads.rds"</span>))</span>
+<span id="cb19-11"><a href="#cb19-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-12"><a href="#cb19-12" aria-hidden="true" tabindex="-1"></a><span class="co"># Fox was then extended to 4,100 uploads, because 4,000 stopped at 07:15 UTC on 1 September:</span></span>
+<span id="cb19-13"><a href="#cb19-13" aria-hidden="true" tabindex="-1"></a><span class="co"># uploads[["UCXIJgqnII2ZOINSWNOGFThA"]] &lt;- list_channel_videos("UCXIJgqnII2ZOINSWNOGFThA", max_results = 4100)</span></span>
+<span id="cb19-14"><a href="#cb19-14" aria-hidden="true" tabindex="-1"></a><span class="co"># saveRDS(uploads, here::here("data-raw/youtube/uploads.rds"))</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>uploads <span class="ot">&lt;-</span> <span class="fu">readRDS</span>(here<span class="sc">::</span><span class="fu">here</span>(<span class="st">"data-raw/youtube/uploads.rds"</span>))</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Pattern revised after reading 20 kept and 20 dropped titles (see iii): single words</span></span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a><span class="co"># ("senate", "governor", "vote") let in hearings, executions and "Fat Bear Week"; they now count</span></span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a><span class="co"># only as part of a race. "primary", "campaign", "candidate" and the party names were added.</span></span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a>TITLE_PATTERN <span class="ot">&lt;-</span> <span class="fu">regex</span>(<span class="fu">paste</span>(</span>
+<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a>  <span class="st">"midterm"</span>, <span class="st">"election"</span>, <span class="st">"ballot"</span>, <span class="st">"campaign"</span>, <span class="st">"primar(y|ies)"</span>, <span class="st">"candidate"</span>,</span>
+<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a>  <span class="st">"(house|senate|governor'?s?|gubernatorial) race"</span>, <span class="st">"</span><span class="sc">\\</span><span class="st">bvoters?</span><span class="sc">\\</span><span class="st">b"</span>, <span class="st">"early voting"</span>,</span>
+<span id="cb20-9"><a href="#cb20-9" aria-hidden="true" tabindex="-1"></a>  <span class="st">"</span><span class="sc">\\</span><span class="st">bpolls?</span><span class="sc">\\</span><span class="st">b"</span>, <span class="st">"</span><span class="sc">\\</span><span class="st">bGOP</span><span class="sc">\\</span><span class="st">b"</span>, <span class="st">"Democrat"</span>, <span class="st">"Republican"</span>, <span class="at">sep =</span> <span class="st">"|"</span>), <span class="at">ignore_case =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb20-10"><a href="#cb20-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-11"><a href="#cb20-11" aria-hidden="true" tabindex="-1"></a><span class="co"># STRICT filter, used only to choose the videos whose comments are collected (2d and 2e).</span></span>
+<span id="cb20-12"><a href="#cb20-12" aria-hidden="true" tabindex="-1"></a><span class="co"># The broad filter above COUNTS election videos; for SAMPLING, party names pulled in</span></span>
+<span id="cb20-13"><a href="#cb20-13" aria-hidden="true" tabindex="-1"></a><span class="co"># controversial non-election videos, and foreign elections entered through "election".</span></span>
+<span id="cb20-14"><a href="#cb20-14" aria-hidden="true" tabindex="-1"></a>SAMPLE_PATTERN <span class="ot">&lt;-</span> <span class="fu">regex</span>(<span class="fu">paste</span>(</span>
+<span id="cb20-15"><a href="#cb20-15" aria-hidden="true" tabindex="-1"></a>  <span class="st">"midterm"</span>, <span class="st">"election"</span>, <span class="st">"ballot"</span>, <span class="st">"campaign"</span>, <span class="st">"primar(y|ies)"</span>, <span class="st">"candidate"</span>,</span>
+<span id="cb20-16"><a href="#cb20-16" aria-hidden="true" tabindex="-1"></a>  <span class="st">"(house|senate|governor'?s?|gubernatorial) race"</span>, <span class="st">"</span><span class="sc">\\</span><span class="st">bvoters?</span><span class="sc">\\</span><span class="st">b"</span>, <span class="st">"early voting"</span>,</span>
+<span id="cb20-17"><a href="#cb20-17" aria-hidden="true" tabindex="-1"></a>  <span class="st">"</span><span class="sc">\\</span><span class="st">bpolls?</span><span class="sc">\\</span><span class="st">b"</span>, <span class="at">sep =</span> <span class="st">"|"</span>), <span class="at">ignore_case =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb20-18"><a href="#cb20-18" aria-hidden="true" tabindex="-1"></a>NOT_US <span class="ot">&lt;-</span> <span class="fu">regex</span>(<span class="st">"Israel|Netanyahu|Brazil|Serbia|Japan|Canada|</span><span class="sc">\\</span><span class="st">bUK</span><span class="sc">\\</span><span class="st">b|Britain|Scotland"</span>, <span class="at">ignore_case =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb20-19"><a href="#cb20-19" aria-hidden="true" tabindex="-1"></a>US_ANCHOR <span class="ot">&lt;-</span> <span class="fu">regex</span>(<span class="st">"midterm|</span><span class="sc">\\</span><span class="st">bUS</span><span class="sc">\\</span><span class="st">b|U</span><span class="sc">\\</span><span class="st">.S</span><span class="sc">\\</span><span class="st">.|America|Trump|Democrat|Republican|GOP|MAGA|Senate|House|governor|Congress"</span>,</span>
+<span id="cb20-20"><a href="#cb20-20" aria-hidden="true" tabindex="-1"></a>                   <span class="at">ignore_case =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb20-21"><a href="#cb20-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-22"><a href="#cb20-22" aria-hidden="true" tabindex="-1"></a>up <span class="ot">&lt;-</span> <span class="fu">imap_dfr</span>(uploads, \(df, id) <span class="fu">mutate</span>(<span class="fu">plain</span>(df), <span class="at">channel_id =</span> id, <span class="at">row =</span> <span class="fu">row_number</span>())) <span class="sc">|&gt;</span></span>
+<span id="cb20-23"><a href="#cb20-23" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">pub =</span> <span class="fu">ymd_hms</span>(<span class="fu">coalesce</span>(video_published_at, published_at)),</span>
+<span id="cb20-24"><a href="#cb20-24" aria-hidden="true" tabindex="-1"></a>         <span class="at">keep =</span> <span class="fu">str_detect</span>(title, TITLE_PATTERN))</span>
+<span id="cb20-25"><a href="#cb20-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-26"><a href="#cb20-26" aria-hidden="true" tabindex="-1"></a><span class="co"># ii. how many units to reach 1 September</span></span>
+<span id="cb20-27"><a href="#cb20-27" aria-hidden="true" tabindex="-1"></a>up <span class="sc">|&gt;</span> <span class="fu">group_by</span>(channel_id) <span class="sc">|&gt;</span></span>
+<span id="cb20-28"><a href="#cb20-28" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">n_uploads =</span> <span class="fu">n</span>(), <span class="at">newest =</span> <span class="fu">max</span>(pub), <span class="at">oldest =</span> <span class="fu">min</span>(pub),</span>
+<span id="cb20-29"><a href="#cb20-29" aria-hidden="true" tabindex="-1"></a>            <span class="at">per_day =</span> <span class="fu">round</span>(<span class="fu">n</span>() <span class="sc">/</span> <span class="fu">as.numeric</span>(<span class="fu">difftime</span>(<span class="fu">max</span>(pub), <span class="fu">min</span>(pub), <span class="at">units =</span> <span class="st">"days"</span>)), <span class="dv">1</span>),</span>
+<span id="cb20-30"><a href="#cb20-30" aria-hidden="true" tabindex="-1"></a>            <span class="at">reached_sep1 =</span> <span class="fu">any</span>(pub <span class="sc">&lt;</span> <span class="fu">ymd</span>(<span class="st">"2026-09-01"</span>)),</span>
+<span id="cb20-31"><a href="#cb20-31" aria-hidden="true" tabindex="-1"></a>            <span class="at">first_row_before_sep1 =</span> <span class="cf">if</span> (reached_sep1) <span class="fu">min</span>(row[pub <span class="sc">&lt;</span> <span class="fu">ymd</span>(<span class="st">"2026-09-01"</span>)]) <span class="cf">else</span> <span class="cn">NA_integer_</span>,</span>
+<span id="cb20-32"><a href="#cb20-32" aria-hidden="true" tabindex="-1"></a>            <span class="at">units_needed =</span> <span class="fu">ceiling</span>(first_row_before_sep1 <span class="sc">/</span> <span class="dv">50</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 3 × 8
+  channel_id           n_uploads newest              oldest              per_day
+  &lt;chr&gt;                    &lt;int&gt; &lt;dttm&gt;              &lt;dttm&gt;                &lt;dbl&gt;
+1 UC16niRr50-MSBwiO3Y…      4000 2026-11-14 00:55:38 2026-05-19 11:53:59    22.4
+2 UCXIJgqnII2ZOINSWNO…      4100 2026-11-14 01:30:43 2026-08-30 14:30:13    54.3
+3 UCeY0bbntWzzVIaj2z3…      4000 2026-11-14 01:31:48 2026-08-28 23:34:40    51.9
+# ℹ 3 more variables: reached_sep1 &lt;lgl&gt;, first_row_before_sep1 &lt;int&gt;,
+#   units_needed &lt;dbl&gt;</code></pre>
+</div>
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>election_vids_pre <span class="ot">&lt;-</span> up <span class="sc">|&gt;</span></span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(keep, pub <span class="sc">&gt;=</span> <span class="fu">ymd</span>(<span class="st">"2026-09-01"</span>), pub <span class="sc">&lt;</span> <span class="fu">ymd</span>(<span class="st">"2026-10-28"</span>))</span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a><span class="co"># i. did the channel route find videos that search missed?</span></span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a>election_vids_pre <span class="sc">|&gt;</span> <span class="fu">group_by</span>(channel_id) <span class="sc">|&gt;</span></span>
+<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">n =</span> <span class="fu">n</span>(), <span class="at">not_in_search =</span> <span class="fu">sum</span>(<span class="sc">!</span>video_id <span class="sc">%in%</span> <span class="fu">c</span>(rel<span class="sc">$</span>video_id, view<span class="sc">$</span>video_id)))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 3 × 3
+  channel_id                   n not_in_search
+  &lt;chr&gt;                    &lt;int&gt;         &lt;int&gt;
+1 UC16niRr50-MSBwiO3YDb3RA    71            70
+2 UCXIJgqnII2ZOINSWNOGFThA   243           242
+3 UCeY0bbntWzzVIaj2z3QigXg   273           268</code></pre>
+</div>
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="co"># iii. read 20 kept and 20 dropped titles</span></span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">6302</span>)</span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>up <span class="sc">|&gt;</span> <span class="fu">filter</span>(pub <span class="sc">&gt;=</span> <span class="fu">ymd</span>(<span class="st">"2026-09-01"</span>), pub <span class="sc">&lt;</span> <span class="fu">ymd</span>(<span class="st">"2026-10-28"</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(keep) <span class="sc">|&gt;</span> <span class="fu">slice_sample</span>(<span class="at">n =</span> <span class="dv">20</span>) <span class="sc">|&gt;</span> <span class="fu">select</span>(keep, title) <span class="sc">|&gt;</span> <span class="fu">print</span>(<span class="at">n =</span> <span class="dv">40</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 40 × 2
+# Groups:   keep [2]
+   keep  title                                                                  
+   &lt;lgl&gt; &lt;chr&gt;                                                                  
+ 1 FALSE Robot kicks developer, knocking remote from his hand #shorts #breaking…
+ 2 FALSE WATCH: Texas crowd cheers nervous boy on diving board #shorts #foxnews…
+ 3 FALSE France's latest art heist: the hunt for two missing Renoir paintings |…
+ 4 FALSE What Trump and Xi dined on at the White House state dinner | BBC News  
+ 5 FALSE MIT is building space stations like you would build with magnatiles    
+ 6 FALSE Trump defends Ramaswamy's ad featuring Amy Acton's mom                 
+ 7 FALSE McEnany: This is CRAZY                                                 
+ 8 FALSE Florida couple sues after IVF mix-up                                   
+ 9 FALSE Mamdani gives migrants tips to AVOID ICE in Spanish #shorts            
+10 FALSE Retired FDNY medical officer on impacts of 9/11-related illnesses      
+11 FALSE Colbert gets standing ovation accepting Emmy for 'Late Show'           
+12 FALSE Experts find deleted Snapchats after Wells went missing                
+13 FALSE Oregon man fires at police drone in SWAT standoff                      
+14 FALSE 'GO GET A JOB': Vance delivers BLISTERING anti-fraud message           
+15 FALSE Cornell University police made drug arrest hours before alleged sexual…
+16 FALSE Trump says he let Katie Zacharia decide to leave press sec role        
+17 FALSE Three dead, one hospitalized after LA news helicopter crash #shorts #u…
+18 FALSE Full Episode: TODAY Show - Oct. 12                                     
+19 FALSE Bodycam shows moments after ICE shoots DoorDash driver                 
+20 FALSE US central bank raises interest rates for first time in three years. #…
+21 TRUE  Survivors work to keep Epstein files in spotlight ahead of midterms    
+22 TRUE  Clancy holdout juror says he was targeted for being Black Republican #…
+23 TRUE  Michigan US Senate race is ‘still competitive,’ Democratic congresswom…
+24 TRUE  Netanyahu loses majority in Israel - but no clear election winner. Wha…
+25 TRUE  Israelis ‘deciding on direction of country’ in pivotal election. #Isra…
+26 TRUE  Democrats are fundamentally 'AGAINST AMERICAN SOVEREIGNTY': Rep Brando…
+27 TRUE  'NO BRAINER': Trump devises MAJOR midterm plan for stay-at-home parents
+28 TRUE  Byron Donalds: When you lead with common sense, your people thrive #sh…
+29 TRUE  Republican House candidate looking to flip Ohio seat says there’s an ‘…
+30 TRUE  Trump hits campaign trail with midterms CLOSING IN                     
+31 TRUE  LIVE: Trump campaigns in North Carolina ahead of the midterms | NBC Ne…
+32 TRUE  Wisconsin governor candidate survives plane crash                      
+33 TRUE  Russian operative likely behind fake videos targeting Texas Senate can…
+34 TRUE  WATCH: GOP senators step in as confusion erupts over McConnell vote    
+35 TRUE  MASSIVE migrant caravan marches toward US border ahead of midterms     
+36 TRUE  Kentucky Democrat says he'll 'repair the damage that Mitch McConnell h…
+37 TRUE  Laura Ingraham: The ONLY poll that matters is on Election Day #shorts …
+38 TRUE  Introducing: Here’s the Scoop Election Edition                         
+39 TRUE  GOP lawmaker: We have this habit of 'medicalizing evil' #shorts #fox #…
+40 TRUE  Justice Department sues California over alleged noncitizen voters      </code></pre>
+</div>
+</div>
+<ol type="i">
+<li><p>Yes, almost entirely. Through the uploads lists, the three channels posted 587 election-related videos between 1 September and 27 October (BBC 71, Fox 243, NBC 273), and only 7 of them (1, 1 and 5) had appeared in either search list. Fox, which was absent from the search results, turns out to be one of the heaviest publishers on the topic. The two routes produce almost disjoint samples: search shows what YouTube chooses to rank for a term, while the channel route shows what an outlet actually published.</p></li>
+<li><p>The uploads list returns 50 videos per unit, newest first, so how far back I can go is set by how much each channel publishes. BBC News posts about 22 videos a day and reached 1 September after 34 units; NBC News (about 52 a day) needed 79 units, and Fox News (about 54 a day) needed 81, for 194 units in total against the 30 I had planned. My first attempt, 500 videos per channel (10 units), covered only the last few weeks for every channel, and even 4,000 videos stopped at 07:15 UTC on 1 September for Fox, so I extended Fox to 4,100. The budget for this step has to be planned from each channel’s posting rate, not from a fixed number of pages.</p></li>
+<li><p>Reading 20 kept and 20 dropped titles shows the first pattern was both too broad and too narrow: single words such as “governor”, “vote” and “senate” let in an execution in Tennessee, a UK vote on assisted dying, a Senate hearing and “Fat Bear Week”, while a Democratic primary was dropped. The revised pattern ties those words to a race (“senate race”, “governor’s race”) and adds “primary”, “campaign”, “candidate” and the party names. In a new sample of 40 titles, the kept ones are mostly about the US campaign, but two kinds of error remain. Party names let in political stories that are not about the election, and foreign elections (Israel) still pass. In the other direction, titles that name only the candidates, such as Ramaswamy’s ad against Amy Acton in the Ohio governor’s race, are missed. A keyword filter on titles trades one error for the other; I kept the broader version and treat it as an upper bound.</p></li>
+</ol>
+</section>
+<section id="d.-comments-log-and-manifest" class="level2">
+<h2 class="anchored" data-anchor-id="d.-comments-log-and-manifest">2d. Comments, log and manifest</h2>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Collects up to max_per_video comments per video and logs the status of each video</span></span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="sc">!</span><span class="fu">exists</span>(<span class="st">"collect_comments"</span>)) {</span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>  collect_comments <span class="ot">&lt;-</span> <span class="cf">function</span>(video_ids, <span class="at">max_per_video =</span> <span class="dv">300</span>) {</span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a>    res <span class="ot">&lt;-</span> <span class="fu">map</span>(video_ids, \(v) {</span>
+<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a>      out <span class="ot">&lt;-</span> <span class="fu">tryCatch</span>(<span class="fu">get_all_comments</span>(v, <span class="at">max_results =</span> max_per_video),</span>
+<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a>                      <span class="at">error =</span> <span class="cf">function</span>(e) e)</span>
+<span id="cb26-7"><a href="#cb26-7" aria-hidden="true" tabindex="-1"></a>      status <span class="ot">&lt;-</span> <span class="cf">if</span> (<span class="fu">inherits</span>(out, <span class="st">"error"</span>)) {</span>
+<span id="cb26-8"><a href="#cb26-8" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> (<span class="fu">str_detect</span>(<span class="fu">conditionMessage</span>(out), <span class="st">"disabled"</span>)) <span class="st">"disabled"</span> <span class="cf">else</span> <span class="st">"error"</span></span>
+<span id="cb26-9"><a href="#cb26-9" aria-hidden="true" tabindex="-1"></a>      } <span class="cf">else</span> <span class="cf">if</span> (<span class="fu">nrow</span>(out) <span class="sc">==</span> <span class="dv">0</span>) <span class="st">"none"</span> <span class="cf">else</span> <span class="st">"ok"</span></span>
+<span id="cb26-10"><a href="#cb26-10" aria-hidden="true" tabindex="-1"></a>      <span class="fu">list</span>(<span class="at">data =</span> <span class="cf">if</span> (status <span class="sc">==</span> <span class="st">"ok"</span>) <span class="fu">plain</span>(out) <span class="cf">else</span> <span class="cn">NULL</span>,</span>
+<span id="cb26-11"><a href="#cb26-11" aria-hidden="true" tabindex="-1"></a>           <span class="at">log =</span> <span class="fu">tibble</span>(<span class="at">video_id =</span> v, <span class="at">status =</span> status,</span>
+<span id="cb26-12"><a href="#cb26-12" aria-hidden="true" tabindex="-1"></a>                        <span class="at">n_received =</span> <span class="cf">if</span> (status <span class="sc">==</span> <span class="st">"ok"</span>) <span class="fu">nrow</span>(out) <span class="cf">else</span> <span class="dv">0</span>L,</span>
+<span id="cb26-13"><a href="#cb26-13" aria-hidden="true" tabindex="-1"></a>                        <span class="at">collected_at =</span> <span class="fu">Sys.time</span>()))</span>
+<span id="cb26-14"><a href="#cb26-14" aria-hidden="true" tabindex="-1"></a>    })</span>
+<span id="cb26-15"><a href="#cb26-15" aria-hidden="true" tabindex="-1"></a>    <span class="fu">list</span>(<span class="at">comments =</span> <span class="fu">bind_rows</span>(<span class="fu">map</span>(res, <span class="st">"data"</span>)), <span class="at">log =</span> <span class="fu">bind_rows</span>(<span class="fu">map</span>(res, <span class="st">"log"</span>)))</span>
+<span id="cb26-16"><a href="#cb26-16" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb26-17"><a href="#cb26-17" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb26-18"><a href="#cb26-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-19"><a href="#cb26-19" aria-hidden="true" tabindex="-1"></a>write_manifest <span class="ot">&lt;-</span> <span class="cf">function</span>(path, window, videos, n_comments) {</span>
+<span id="cb26-20"><a href="#cb26-20" aria-hidden="true" tabindex="-1"></a>  m <span class="ot">&lt;-</span> <span class="fu">list</span>(</span>
+<span id="cb26-21"><a href="#cb26-21" aria-hidden="true" tabindex="-1"></a>    <span class="at">source =</span> <span class="st">"YouTube Data API v3 via tuber"</span>,</span>
+<span id="cb26-22"><a href="#cb26-22" aria-hidden="true" tabindex="-1"></a>    <span class="at">tuber_version =</span> <span class="fu">as.character</span>(<span class="fu">packageVersion</span>(<span class="st">"tuber"</span>)),</span>
+<span id="cb26-23"><a href="#cb26-23" aria-hidden="true" tabindex="-1"></a>    <span class="at">search_term =</span> TERM,                <span class="co"># exact term</span></span>
+<span id="cb26-24"><a href="#cb26-24" aria-hidden="true" tabindex="-1"></a>    <span class="at">orders =</span> <span class="fu">c</span>(<span class="st">"relevance"</span>, <span class="st">"viewCount"</span>),</span>
+<span id="cb26-25"><a href="#cb26-25" aria-hidden="true" tabindex="-1"></a>    <span class="at">window =</span> window,</span>
+<span id="cb26-26"><a href="#cb26-26" aria-hidden="true" tabindex="-1"></a>    <span class="at">channels =</span> channels<span class="sc">$</span>channel_id,</span>
+<span id="cb26-27"><a href="#cb26-27" aria-hidden="true" tabindex="-1"></a>    <span class="at">title_pattern =</span> <span class="fu">as.character</span>(TITLE_PATTERN),          <span class="co"># broad filter (counting, 2c)</span></span>
+<span id="cb26-28"><a href="#cb26-28" aria-hidden="true" tabindex="-1"></a>    <span class="at">sample_pattern =</span> <span class="fu">as.character</span>(SAMPLE_PATTERN),        <span class="co"># strict filter (choice of videos)</span></span>
+<span id="cb26-29"><a href="#cb26-29" aria-hidden="true" tabindex="-1"></a>    <span class="at">excluded =</span> <span class="fu">as.character</span>(NOT_US),</span>
+<span id="cb26-30"><a href="#cb26-30" aria-hidden="true" tabindex="-1"></a>    <span class="at">cap_per_video =</span> <span class="dv">300</span>,</span>
+<span id="cb26-31"><a href="#cb26-31" aria-hidden="true" tabindex="-1"></a>    <span class="at">videos =</span> videos,</span>
+<span id="cb26-32"><a href="#cb26-32" aria-hidden="true" tabindex="-1"></a>    <span class="at">n_comments =</span> n_comments,</span>
+<span id="cb26-33"><a href="#cb26-33" aria-hidden="true" tabindex="-1"></a>    <span class="at">collected_at =</span> <span class="fu">format</span>(<span class="fu">Sys.time</span>(), <span class="at">tz =</span> <span class="st">"UTC"</span>),</span>
+<span id="cb26-34"><a href="#cb26-34" aria-hidden="true" tabindex="-1"></a>    <span class="at">delete_by =</span> <span class="fu">as.character</span>(<span class="fu">Sys.Date</span>() <span class="sc">+</span> <span class="dv">30</span>)   <span class="co"># III.E.4.d: keep at most 30 days</span></span>
+<span id="cb26-35"><a href="#cb26-35" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb26-36"><a href="#cb26-36" aria-hidden="true" tabindex="-1"></a>  jsonlite<span class="sc">::</span><span class="fu">write_json</span>(m, path, <span class="at">auto_unbox =</span> <span class="cn">TRUE</span>, <span class="at">pretty =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb26-37"><a href="#cb26-37" aria-hidden="true" tabindex="-1"></a>  <span class="co"># the key must NOT appear in the manifest:</span></span>
+<span id="cb26-38"><a href="#cb26-38" aria-hidden="true" tabindex="-1"></a>  <span class="fu">stopifnot</span>(<span class="sc">!</span><span class="fu">any</span>(<span class="fu">str_detect</span>(<span class="fu">readLines</span>(path), <span class="fu">fixed</span>(<span class="fu">Sys.getenv</span>(<span class="st">"YOUTUBE_KEY"</span>)))))</span>
+<span id="cb26-39"><a href="#cb26-39" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="co"># 3 videos per channel: the most-commented among those passing the STRICT filter</span></span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>vids_pre <span class="ot">&lt;-</span> election_vids_pre <span class="sc">|&gt;</span></span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="fu">str_detect</span>(title, SAMPLE_PATTERN), <span class="fu">str_detect</span>(title, US_ANCHOR), <span class="sc">!</span><span class="fu">str_detect</span>(title, NOT_US)) <span class="sc">|&gt;</span></span>
+<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(<span class="fu">plain</span>(<span class="fu">readRDS</span>(here<span class="sc">::</span><span class="fu">here</span>(<span class="st">"data-raw/youtube/video_stats_pre.rds"</span>))) <span class="sc">|&gt;</span></span>
+<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a>              <span class="fu">bind_rows</span>(<span class="fu">plain</span>(<span class="fu">get_video_stats</span>(election_vids_pre<span class="sc">$</span>video_id))) <span class="sc">|&gt;</span></span>
+<span id="cb27-6"><a href="#cb27-6" aria-hidden="true" tabindex="-1"></a>              <span class="fu">distinct</span>(video_id, <span class="at">.keep_all =</span> <span class="cn">TRUE</span>) <span class="sc">|&gt;</span></span>
+<span id="cb27-7"><a href="#cb27-7" aria-hidden="true" tabindex="-1"></a>              <span class="fu">mutate</span>(<span class="at">comment_count =</span> <span class="fu">as.numeric</span>(comment_count)),   <span class="co"># as text, "99" would sort above "1500"</span></span>
+<span id="cb27-8"><a href="#cb27-8" aria-hidden="true" tabindex="-1"></a>            <span class="at">by =</span> <span class="st">"video_id"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb27-9"><a href="#cb27-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(channel_id) <span class="sc">|&gt;</span> <span class="fu">slice_max</span>(comment_count, <span class="at">n =</span> <span class="dv">3</span>, <span class="at">with_ties =</span> <span class="cn">FALSE</span>) <span class="sc">|&gt;</span> <span class="fu">ungroup</span>()</span>
+<span id="cb27-10"><a href="#cb27-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-11"><a href="#cb27-11" aria-hidden="true" tabindex="-1"></a>pre <span class="ot">&lt;-</span> <span class="fu">collect_comments</span>(vids_pre<span class="sc">$</span>video_id, <span class="at">max_per_video =</span> <span class="dv">300</span>)</span>
+<span id="cb27-12"><a href="#cb27-12" aria-hidden="true" tabindex="-1"></a>log_pre <span class="ot">&lt;-</span> pre<span class="sc">$</span>log <span class="sc">|&gt;</span> <span class="fu">left_join</span>(<span class="fu">select</span>(vids_pre, video_id, channel_id, title,</span>
+<span id="cb27-13"><a href="#cb27-13" aria-hidden="true" tabindex="-1"></a>                                       <span class="at">reported =</span> comment_count), <span class="at">by =</span> <span class="st">"video_id"</span>)</span>
+<span id="cb27-14"><a href="#cb27-14" aria-hidden="true" tabindex="-1"></a><span class="fu">saveRDS</span>(pre<span class="sc">$</span>comments, here<span class="sc">::</span><span class="fu">here</span>(<span class="st">"data-raw/youtube/comments_pre.rds"</span>))</span>
+<span id="cb27-15"><a href="#cb27-15" aria-hidden="true" tabindex="-1"></a><span class="fu">saveRDS</span>(vids_pre, here<span class="sc">::</span><span class="fu">here</span>(<span class="st">"data-raw/youtube/vids_pre.rds"</span>))</span>
+<span id="cb27-16"><a href="#cb27-16" aria-hidden="true" tabindex="-1"></a><span class="fu">write.csv</span>(log_pre, here<span class="sc">::</span><span class="fu">here</span>(<span class="st">"logs/collection_log_pre.csv"</span>), <span class="at">row.names =</span> <span class="cn">FALSE</span>)    <span class="co"># published (no author data)</span></span>
+<span id="cb27-17"><a href="#cb27-17" aria-hidden="true" tabindex="-1"></a><span class="fu">write_manifest</span>(here<span class="sc">::</span><span class="fu">here</span>(<span class="st">"logs/manifest_pre.json"</span>), <span class="fu">c</span>(PRE_START, PRE_END), vids_pre<span class="sc">$</span>video_id, <span class="fu">nrow</span>(pre<span class="sc">$</span>comments))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+</section>
+<section id="e.-after-election-day" class="level2">
+<h2 class="anchored" data-anchor-id="e.-after-election-day">2e. After Election Day</h2>
+<p>Same as 2b–2d with <code>published_after = POST_START</code> and <code>published_before = NULL</code> (until collection day).</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>search_post_rel  <span class="ot">&lt;-</span> <span class="fu">yt_search</span>(TERM, <span class="at">order =</span> <span class="st">"relevance"</span>, <span class="at">max_results =</span> <span class="dv">100</span>, <span class="at">published_after =</span> POST_START)</span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a>search_post_view <span class="ot">&lt;-</span> <span class="fu">yt_search</span>(TERM, <span class="at">order =</span> <span class="st">"viewCount"</span>, <span class="at">max_results =</span> <span class="dv">100</span>, <span class="at">published_after =</span> POST_START)</span>
+<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a><span class="fu">saveRDS</span>(search_post_rel, here<span class="sc">::</span><span class="fu">here</span>(<span class="st">"data-raw/youtube/search_post_rel.rds"</span>))</span>
+<span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a><span class="fu">saveRDS</span>(search_post_view, here<span class="sc">::</span><span class="fu">here</span>(<span class="st">"data-raw/youtube/search_post_view.rds"</span>))</span>
+<span id="cb28-5"><a href="#cb28-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-6"><a href="#cb28-6" aria-hidden="true" tabindex="-1"></a>uploads_post <span class="ot">&lt;-</span> <span class="fu">map</span>(channels<span class="sc">$</span>channel_id, \(id) <span class="fu">list_channel_videos</span>(id, <span class="at">max_results =</span> <span class="dv">700</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb28-7"><a href="#cb28-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">set_names</span>(channels<span class="sc">$</span>channel_id)</span>
+<span id="cb28-8"><a href="#cb28-8" aria-hidden="true" tabindex="-1"></a>election_vids_post <span class="ot">&lt;-</span> <span class="fu">imap_dfr</span>(uploads_post, \(df, id) <span class="fu">mutate</span>(<span class="fu">plain</span>(df), <span class="at">channel_id =</span> id)) <span class="sc">|&gt;</span></span>
+<span id="cb28-9"><a href="#cb28-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">pub =</span> <span class="fu">ymd_hms</span>(<span class="fu">coalesce</span>(video_published_at, published_at))) <span class="sc">|&gt;</span></span>
+<span id="cb28-10"><a href="#cb28-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="fu">str_detect</span>(title, TITLE_PATTERN), pub <span class="sc">&gt;=</span> <span class="fu">ymd</span>(<span class="st">"2026-11-04"</span>))</span>
+<span id="cb28-11"><a href="#cb28-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-12"><a href="#cb28-12" aria-hidden="true" tabindex="-1"></a>vids_post_pool <span class="ot">&lt;-</span> election_vids_post <span class="sc">|&gt;</span></span>
+<span id="cb28-13"><a href="#cb28-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="fu">str_detect</span>(title, SAMPLE_PATTERN), <span class="fu">str_detect</span>(title, US_ANCHOR), <span class="sc">!</span><span class="fu">str_detect</span>(title, NOT_US))   <span class="co"># same strict filter as 2d</span></span>
+<span id="cb28-14"><a href="#cb28-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-15"><a href="#cb28-15" aria-hidden="true" tabindex="-1"></a>vids_post <span class="ot">&lt;-</span> vids_post_pool <span class="sc">|&gt;</span></span>
+<span id="cb28-16"><a href="#cb28-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(<span class="fu">plain</span>(<span class="fu">get_video_stats</span>(<span class="fu">unique</span>(vids_post_pool<span class="sc">$</span>video_id))) <span class="sc">|&gt;</span></span>
+<span id="cb28-17"><a href="#cb28-17" aria-hidden="true" tabindex="-1"></a>              <span class="fu">mutate</span>(<span class="at">comment_count =</span> <span class="fu">as.numeric</span>(comment_count)), <span class="at">by =</span> <span class="st">"video_id"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb28-18"><a href="#cb28-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(channel_id) <span class="sc">|&gt;</span> <span class="fu">slice_max</span>(comment_count, <span class="at">n =</span> <span class="dv">3</span>, <span class="at">with_ties =</span> <span class="cn">FALSE</span>) <span class="sc">|&gt;</span> <span class="fu">ungroup</span>()</span>
+<span id="cb28-19"><a href="#cb28-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-20"><a href="#cb28-20" aria-hidden="true" tabindex="-1"></a>post <span class="ot">&lt;-</span> <span class="fu">collect_comments</span>(vids_post<span class="sc">$</span>video_id, <span class="at">max_per_video =</span> <span class="dv">300</span>)</span>
+<span id="cb28-21"><a href="#cb28-21" aria-hidden="true" tabindex="-1"></a>log_post <span class="ot">&lt;-</span> post<span class="sc">$</span>log <span class="sc">|&gt;</span> <span class="fu">left_join</span>(<span class="fu">select</span>(vids_post, video_id, channel_id, title,</span>
+<span id="cb28-22"><a href="#cb28-22" aria-hidden="true" tabindex="-1"></a>                                         <span class="at">reported =</span> comment_count), <span class="at">by =</span> <span class="st">"video_id"</span>)</span>
+<span id="cb28-23"><a href="#cb28-23" aria-hidden="true" tabindex="-1"></a><span class="fu">saveRDS</span>(post<span class="sc">$</span>comments, here<span class="sc">::</span><span class="fu">here</span>(<span class="st">"data-raw/youtube/comments_post.rds"</span>))</span>
+<span id="cb28-24"><a href="#cb28-24" aria-hidden="true" tabindex="-1"></a><span class="fu">saveRDS</span>(vids_post, here<span class="sc">::</span><span class="fu">here</span>(<span class="st">"data-raw/youtube/vids_post.rds"</span>))</span>
+<span id="cb28-25"><a href="#cb28-25" aria-hidden="true" tabindex="-1"></a><span class="fu">write.csv</span>(log_post, here<span class="sc">::</span><span class="fu">here</span>(<span class="st">"logs/collection_log_post.csv"</span>), <span class="at">row.names =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb28-26"><a href="#cb28-26" aria-hidden="true" tabindex="-1"></a><span class="fu">write_manifest</span>(here<span class="sc">::</span><span class="fu">here</span>(<span class="st">"logs/manifest_post.json"</span>), <span class="fu">c</span>(POST_START, <span class="fu">as.character</span>(<span class="fu">Sys.Date</span>())),</span>
+<span id="cb28-27"><a href="#cb28-27" aria-hidden="true" tabindex="-1"></a>               vids_post<span class="sc">$</span>video_id, <span class="fu">nrow</span>(post<span class="sc">$</span>comments))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+</section>
+</section>
+<section id="analyze" class="level1">
+<h1>3. Analyze</h1>
+<section id="a.-describe-the-collection" class="level2">
+<h2 class="anchored" data-anchor-id="a.-describe-the-collection">3a. Describe the collection</h2>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>videos <span class="ot">&lt;-</span> <span class="fu">bind_rows</span>(<span class="fu">readRDS</span>(here<span class="sc">::</span><span class="fu">here</span>(<span class="st">"data-raw/youtube/vids_pre.rds"</span>))  <span class="sc">|&gt;</span> <span class="fu">mutate</span>(<span class="at">period =</span> <span class="st">"before"</span>),</span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>                    <span class="fu">readRDS</span>(here<span class="sc">::</span><span class="fu">here</span>(<span class="st">"data-raw/youtube/vids_post.rds"</span>)) <span class="sc">|&gt;</span> <span class="fu">mutate</span>(<span class="at">period =</span> <span class="st">"after"</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">distinct</span>(video_id, <span class="at">.keep_all =</span> <span class="cn">TRUE</span>)       </span>
+<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-5"><a href="#cb29-5" aria-hidden="true" tabindex="-1"></a>comments <span class="ot">&lt;-</span> <span class="fu">bind_rows</span>(<span class="fu">readRDS</span>(here<span class="sc">::</span><span class="fu">here</span>(<span class="st">"data-raw/youtube/comments_pre.rds"</span>)),</span>
+<span id="cb29-6"><a href="#cb29-6" aria-hidden="true" tabindex="-1"></a>                      <span class="fu">readRDS</span>(here<span class="sc">::</span><span class="fu">here</span>(<span class="st">"data-raw/youtube/comments_post.rds"</span>))) <span class="sc">|&gt;</span></span>
+<span id="cb29-7"><a href="#cb29-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">distinct</span>(comment_id, <span class="at">.keep_all =</span> <span class="cn">TRUE</span>)                   <span class="co"># each comment once</span></span>
+<span id="cb29-8"><a href="#cb29-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-9"><a href="#cb29-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Replies come without video_id: they inherit their parent's (a reply ID starts with the parent ID)</span></span>
+<span id="cb29-10"><a href="#cb29-10" aria-hidden="true" tabindex="-1"></a>parent_video <span class="ot">&lt;-</span> comments <span class="sc">|&gt;</span> <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">str_detect</span>(comment_id, <span class="st">"</span><span class="sc">\\</span><span class="st">."</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb29-11"><a href="#cb29-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="at">top_id =</span> comment_id, <span class="at">parent_video =</span> video_id)</span>
+<span id="cb29-12"><a href="#cb29-12" aria-hidden="true" tabindex="-1"></a>comments <span class="ot">&lt;-</span> comments <span class="sc">|&gt;</span></span>
+<span id="cb29-13"><a href="#cb29-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">top_id =</span> <span class="fu">str_remove</span>(comment_id, <span class="st">"</span><span class="sc">\\</span><span class="st">..*"</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb29-14"><a href="#cb29-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(parent_video, <span class="at">by =</span> <span class="st">"top_id"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb29-15"><a href="#cb29-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">video_id =</span> <span class="fu">coalesce</span>(video_id, parent_video)) <span class="sc">|&gt;</span></span>
+<span id="cb29-16"><a href="#cb29-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="sc">-</span>top_id, <span class="sc">-</span>parent_video) <span class="sc">|&gt;</span></span>
+<span id="cb29-17"><a href="#cb29-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(<span class="fu">select</span>(videos, video_id, channel_title, period, <span class="at">video_title =</span> title),</span>
+<span id="cb29-18"><a href="#cb29-18" aria-hidden="true" tabindex="-1"></a>            <span class="at">by =</span> <span class="st">"video_id"</span>, <span class="at">relationship =</span> <span class="st">"many-to-one"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb29-19"><a href="#cb29-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">is_reply =</span> <span class="sc">!</span><span class="fu">is.na</span>(parent_id) <span class="sc">&amp;</span> parent_id <span class="sc">!=</span> <span class="st">""</span>,</span>
+<span id="cb29-20"><a href="#cb29-20" aria-hidden="true" tabindex="-1"></a>         <span class="at">date =</span> <span class="fu">as_date</span>(<span class="fu">ymd_hms</span>(published_at)))</span>
+<span id="cb29-21"><a href="#cb29-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-22"><a href="#cb29-22" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(<span class="fu">is.na</span>(comments<span class="sc">$</span>channel_title))   <span class="co"># should be 0</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0</code></pre>
+</div>
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>logs <span class="ot">&lt;-</span> <span class="fu">bind_rows</span>(<span class="fu">read.csv</span>(here<span class="sc">::</span><span class="fu">here</span>(<span class="st">"logs/collection_log_pre.csv"</span>)), <span class="fu">read.csv</span>(here<span class="sc">::</span><span class="fu">here</span>(<span class="st">"logs/collection_log_post.csv"</span>)))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="co"># i. received vs reported</span></span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a>logs <span class="sc">|&gt;</span> <span class="fu">select</span>(channel_id, title, reported, n_received, status) <span class="sc">|&gt;</span></span>
+<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">gap =</span> reported <span class="sc">-</span> n_received) <span class="sc">|&gt;</span> knitr<span class="sc">::</span><span class="fu">kable</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output-display">
+<table class="caption-top table table-sm table-striped small">
+<colgroup>
+<col style="width: 16%">
+<col style="width: 62%">
+<col style="width: 6%">
+<col style="width: 7%">
+<col style="width: 4%">
+<col style="width: 3%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">channel_id</th>
+<th style="text-align: left;">title</th>
+<th style="text-align: right;">reported</th>
+<th style="text-align: right;">n_received</th>
+<th style="text-align: left;">status</th>
+<th style="text-align: right;">gap</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">UC16niRr50-MSBwiO3YDb3RA</td>
+<td style="text-align: left;">Trump says every adult American will get $5,000 if Republicans win midterms | BBC News</td>
+<td style="text-align: right;">2485</td>
+<td style="text-align: right;">300</td>
+<td style="text-align: left;">ok</td>
+<td style="text-align: right;">2185</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">UC16niRr50-MSBwiO3YDb3RA</td>
+<td style="text-align: left;">Are the Democrats heading for a midterms landslide? | BBC Americast</td>
+<td style="text-align: right;">793</td>
+<td style="text-align: right;">300</td>
+<td style="text-align: left;">ok</td>
+<td style="text-align: right;">493</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">UC16niRr50-MSBwiO3YDb3RA</td>
+<td style="text-align: left;">Is US President Donald Trump’s $5,000 election pledge legal? #Midterms #BBCNews</td>
+<td style="text-align: right;">293</td>
+<td style="text-align: right;">293</td>
+<td style="text-align: left;">ok</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">UCXIJgqnII2ZOINSWNOGFThA</td>
+<td style="text-align: left;">Trump SHOCKS with $5,000 offer for midterm voters</td>
+<td style="text-align: right;">5418</td>
+<td style="text-align: right;">300</td>
+<td style="text-align: left;">ok</td>
+<td style="text-align: right;">5118</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">UCXIJgqnII2ZOINSWNOGFThA</td>
+<td style="text-align: left;">MASSIVE migrant caravan marches toward US border ahead of midterms</td>
+<td style="text-align: right;">4830</td>
+<td style="text-align: right;">300</td>
+<td style="text-align: left;">ok</td>
+<td style="text-align: right;">4530</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">UCXIJgqnII2ZOINSWNOGFThA</td>
+<td style="text-align: left;">Trump vows $5k PAYOUT if GOP sweeps midterms #shorts #foxnews #politics #news #trump</td>
+<td style="text-align: right;">3681</td>
+<td style="text-align: right;">300</td>
+<td style="text-align: left;">ok</td>
+<td style="text-align: right;">3381</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">UCeY0bbntWzzVIaj2z3QigXg</td>
+<td style="text-align: left;">Abdul El-Sayed says Democrats must win midterms by ‘massive numbers’: Full interview</td>
+<td style="text-align: right;">1959</td>
+<td style="text-align: right;">300</td>
+<td style="text-align: left;">ok</td>
+<td style="text-align: right;">1659</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">UCeY0bbntWzzVIaj2z3QigXg</td>
+<td style="text-align: left;">‘I felt so guilty’ that ‘I had to officially change parties’: Latino voters shift on Trump</td>
+<td style="text-align: right;">1354</td>
+<td style="text-align: right;">300</td>
+<td style="text-align: left;">ok</td>
+<td style="text-align: right;">1054</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">UCeY0bbntWzzVIaj2z3QigXg</td>
+<td style="text-align: left;">Kornacki: Poll shows shift among those who call themselves a MAGA vs.&nbsp;traditional Republican</td>
+<td style="text-align: right;">997</td>
+<td style="text-align: right;">300</td>
+<td style="text-align: left;">ok</td>
+<td style="text-align: right;">697</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">UC16niRr50-MSBwiO3YDb3RA</td>
+<td style="text-align: left;">What do the US election results mean for the world? | BBC News</td>
+<td style="text-align: right;">634</td>
+<td style="text-align: right;">300</td>
+<td style="text-align: left;">ok</td>
+<td style="text-align: right;">334</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">UC16niRr50-MSBwiO3YDb3RA</td>
+<td style="text-align: left;">Why did Trump’s Republicans lose the US midterm elections? | Global News Podcast</td>
+<td style="text-align: right;">609</td>
+<td style="text-align: right;">300</td>
+<td style="text-align: left;">ok</td>
+<td style="text-align: right;">309</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">UC16niRr50-MSBwiO3YDb3RA</td>
+<td style="text-align: left;">Donald Trump and JD Vance blame Iran war for midterm losses | BBC News</td>
+<td style="text-align: right;">536</td>
+<td style="text-align: right;">300</td>
+<td style="text-align: left;">ok</td>
+<td style="text-align: right;">236</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">UCXIJgqnII2ZOINSWNOGFThA</td>
+<td style="text-align: left;">Dems take control of Congress in STUNNING midterm sweep</td>
+<td style="text-align: right;">6410</td>
+<td style="text-align: right;">300</td>
+<td style="text-align: left;">ok</td>
+<td style="text-align: right;">6110</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">UCXIJgqnII2ZOINSWNOGFThA</td>
+<td style="text-align: left;">BREAKING: Dems FLIP Texas as Talarico wins Senate, Abbott loses governor race</td>
+<td style="text-align: right;">6268</td>
+<td style="text-align: right;">300</td>
+<td style="text-align: left;">ok</td>
+<td style="text-align: right;">5968</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">UCXIJgqnII2ZOINSWNOGFThA</td>
+<td style="text-align: left;">‘Susie Wiles must RESIGN’: Fox News panel on midterm BLOWOUT</td>
+<td style="text-align: right;">6150</td>
+<td style="text-align: right;">300</td>
+<td style="text-align: left;">ok</td>
+<td style="text-align: right;">5850</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">UCeY0bbntWzzVIaj2z3QigXg</td>
+<td style="text-align: left;">President Trump speaks to various media outlets reacting to midterm results</td>
+<td style="text-align: right;">927</td>
+<td style="text-align: right;">300</td>
+<td style="text-align: left;">ok</td>
+<td style="text-align: right;">627</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">UCeY0bbntWzzVIaj2z3QigXg</td>
+<td style="text-align: left;">Iran says Americans voted against the war after midterm results</td>
+<td style="text-align: right;">907</td>
+<td style="text-align: right;">300</td>
+<td style="text-align: left;">ok</td>
+<td style="text-align: right;">607</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">UCeY0bbntWzzVIaj2z3QigXg</td>
+<td style="text-align: left;">Republicans ‘feel like they did not go hard enough to the right’ after midterm loss</td>
+<td style="text-align: right;">841</td>
+<td style="text-align: right;">300</td>
+<td style="text-align: left;">ok</td>
+<td style="text-align: right;">541</td>
+</tr>
+</tbody>
+</table>
+</div>
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="co"># ii. status</span></span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a><span class="fu">count</span>(logs, status)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>  status  n
+1     ok 18</code></pre>
+</div>
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb35"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="fu">count</span>(logs, channel_id, status)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>                channel_id status n
+1 UC16niRr50-MSBwiO3YDb3RA     ok 6
+2 UCXIJgqnII2ZOINSWNOGFThA     ok 6
+3 UCeY0bbntWzzVIaj2z3QigXg     ok 6</code></pre>
+</div>
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb37"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a><span class="co"># iii. replies and likes</span></span>
+<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a><span class="fu">mean</span>(comments<span class="sc">$</span>is_reply)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0.1060634</code></pre>
+</div>
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb39"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a>likes <span class="ot">&lt;-</span> <span class="fu">sort</span>(comments<span class="sc">$</span>like_count, <span class="at">decreasing =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb39-2"><a href="#cb39-2" aria-hidden="true" tabindex="-1"></a>top1 <span class="ot">&lt;-</span> <span class="fu">ceiling</span>(<span class="fl">0.01</span> <span class="sc">*</span> <span class="fu">length</span>(likes))</span>
+<span id="cb39-3"><a href="#cb39-3" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(likes[<span class="dv">1</span><span class="sc">:</span>top1]) <span class="sc">/</span> <span class="fu">sum</span>(likes)              <span class="co"># share of likes to top 1%</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0.5280799</code></pre>
+</div>
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb41"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(comments, <span class="fu">aes</span>(like_count <span class="sc">+</span> <span class="dv">1</span>)) <span class="sc">+</span> <span class="fu">geom_histogram</span>(<span class="at">bins =</span> <span class="dv">40</span>) <span class="sc">+</span></span>
+<span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_x_log10</span>() <span class="sc">+</span> <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"likes + 1 (log)"</span>, <span class="at">y =</span> <span class="st">"comments"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="assign07_Data_Collection_files/figure-html/describe-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb42"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a><span class="co"># iv. authorship concentration and duplicates (counts only, no names)</span></span>
+<span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a>by_author <span class="ot">&lt;-</span> <span class="fu">count</span>(comments, author_channel_id, <span class="at">sort =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb42-3"><a href="#cb42-3" aria-hidden="true" tabindex="-1"></a>top10 <span class="ot">&lt;-</span> <span class="fu">ceiling</span>(<span class="fl">0.10</span> <span class="sc">*</span> <span class="fu">nrow</span>(by_author))</span>
+<span id="cb42-4"><a href="#cb42-4" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(by_author<span class="sc">$</span>n[<span class="dv">1</span><span class="sc">:</span>top10]) <span class="sc">/</span> <span class="fu">nrow</span>(comments)  <span class="co"># share from the 10% most active authors</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0.2152791</code></pre>
+</div>
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb44"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(<span class="fu">duplicated</span>(comments<span class="sc">$</span>text_original))     <span class="co"># exact duplicate texts</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 46</code></pre>
+</div>
+</div>
+<ol type="i">
+<li><p>Received vs.&nbsp;reported. The 18 videos reported 45,092 comments; I received 5,393 (12%). The gap is mostly my own cap of 300 per video: Fox videos had 3,700–6,400 comments each, so I kept about 6% of Fox’s comments before the election and 5% after, against 25% and 51% for BBC. The cap makes every channel the same size in my data even though Fox’s audience comments about ten times more. Part of the gap also comes from comments that YouTube counts but does not return (held for review, removed as spam, deleted by authors); the API does not let me tell these apart from the cap.</p></li>
+<li><p>Status. All 18 videos returned comments (“ok”). No video had comments disabled, but this is by design rather than a finding: I chose the most-commented videos, so a video with comments turned off could never be selected.</p></li>
+<li><p>Replies and likes. 10.6% of the comments are replies; the rest are top-level. Attention is very unequal: the top 1% of comments receive 53% of all likes, about three in four comments received no like at all, so a handful of comments define what a viewer sees first.</p></li>
+<li><p>Authors and duplicates. The 10% most active authors wrote 22% of the comments, and 46 comments are exact copies of another comment. A count of comments is therefore not a count of people: a small group of heavy commenters, and repeated text, weigh more than their number.</p></li>
+</ol>
+</section>
+<section id="b.-read-then-count" class="level2">
+<h2 class="anchored" data-anchor-id="b.-read-then-count">3b. Read, then count</h2>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb46"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a>clean <span class="ot">&lt;-</span> comments <span class="sc">|&gt;</span></span>
+<span id="cb46-2"><a href="#cb46-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">text =</span> text_original <span class="sc">|&gt;</span></span>
+<span id="cb46-3"><a href="#cb46-3" aria-hidden="true" tabindex="-1"></a>           <span class="fu">str_remove_all</span>(<span class="st">"https?://</span><span class="sc">\\</span><span class="st">S+"</span>) <span class="sc">|&gt;</span>       <span class="co"># drop URLs</span></span>
+<span id="cb46-4"><a href="#cb46-4" aria-hidden="true" tabindex="-1"></a>           <span class="fu">str_remove_all</span>(<span class="st">"@[</span><span class="sc">\\</span><span class="st">w.-]+"</span>))             <span class="co"># drop @mentions</span></span>
+<span id="cb46-5"><a href="#cb46-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-6"><a href="#cb46-6" aria-hidden="true" tabindex="-1"></a>corp <span class="ot">&lt;-</span> <span class="fu">corpus</span>(clean, <span class="at">docid_field =</span> <span class="st">"comment_id"</span>, <span class="at">text_field =</span> <span class="st">"text"</span>)</span>
+<span id="cb46-7"><a href="#cb46-7" aria-hidden="true" tabindex="-1"></a><span class="fu">docvars</span>(corp) <span class="ot">&lt;-</span> <span class="fu">select</span>(clean, channel_title, video_id, is_reply, like_count, date, period)</span>
+<span id="cb46-8"><a href="#cb46-8" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(corp, <span class="at">n =</span> <span class="dv">5</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>Corpus consisting of 5393 documents, showing 5 documents:
+
+                       Text Types Tokens Sentences channel_title    video_id
+ UgymNlFnvzZTmQtSo2l4AaABAg    12     13         1      BBC News HGRNZwbzktQ
+ Ugwgz_C32uHyyzY2ggJ4AaABAg    27     28         3      BBC News HGRNZwbzktQ
+ UgzdjbZf8IYiUmmwcxx4AaABAg    49     57         3      BBC News HGRNZwbzktQ
+ Ugyah2_NZCMB8kobnn94AaABAg    22     26         3      BBC News HGRNZwbzktQ
+ Ugz0954a6R65uZrRcS94AaABAg     9      9         1      BBC News HGRNZwbzktQ
+ is_reply like_count       date period
+    FALSE          0 2026-10-24 before
+    FALSE          0 2026-10-06 before
+    FALSE          0 2026-09-29 before
+    FALSE          0 2026-09-26 before
+    FALSE          0 2026-09-25 before</code></pre>
+</div>
+</div>
+<p><strong>Unit of analysis:</strong> each comment, top-level or reply, is one document. Likes, authors and timing belong to single comments, and a thread mixes several people, often arguing with each other, so a thread-level document would blur exactly the disagreement I want to see. URLs and <span class="citation" data-cites="mentions">@mentions</span> are removed. Emoji are kept in the text, but they are dropped as symbols when tokenising and the sentiment dictionary ignores them; the validation below shows what that costs.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb48"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true" tabindex="-1"></a>toks <span class="ot">&lt;-</span> <span class="fu">tokens</span>(corp, <span class="at">remove_punct =</span> <span class="cn">TRUE</span>, <span class="at">remove_symbols =</span> <span class="cn">TRUE</span>, <span class="at">remove_numbers =</span> <span class="cn">TRUE</span>) <span class="sc">|&gt;</span></span>
+<span id="cb48-2"><a href="#cb48-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tokens_tolower</span>()</span>
+<span id="cb48-3"><a href="#cb48-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-4"><a href="#cb48-4" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">6302</span>)</span>
+<span id="cb48-5"><a href="#cb48-5" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (p <span class="cf">in</span> <span class="fu">c</span>(<span class="st">"democrat*"</span>, <span class="st">"republican*"</span>, <span class="st">"trump"</span>, <span class="st">"vote*"</span>, <span class="st">"ballot*"</span>)) {</span>
+<span id="cb48-6"><a href="#cb48-6" aria-hidden="true" tabindex="-1"></a>  k <span class="ot">&lt;-</span> <span class="fu">kwic</span>(toks, <span class="at">pattern =</span> p, <span class="at">window =</span> <span class="dv">6</span>)</span>
+<span id="cb48-7"><a href="#cb48-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">print</span>(<span class="fu">head</span>(k[<span class="fu">sample</span>(<span class="fu">nrow</span>(k), <span class="fu">min</span>(<span class="dv">20</span>, <span class="fu">nrow</span>(k))), ], <span class="dv">20</span>))</span>
+<span id="cb48-8"><a href="#cb48-8" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>Keyword-in-context with 20 matches.
+                                                         
+                          [Ugwap2DirimCzWkrxax4AaABAg, 9]
+                         [UgxNdCjn-cidTzKnabp4AaABAg, 31]
+                          [Ugxsr5SR1PxOTyTdJ4Z4AaABAg, 1]
+                          [UgxIWTKxYiTB5SJ49bB4AaABAg, 2]
+                        [UgwAHY10pQyXsCjv0w54AaABAg, 105]
+                         [UgzyEnR6zIHTgocoY2t4AaABAg, 77]
+ [UgzbuAuoCVGVYSse9z54AaABAg.Acps01_yIWSAcpv_N4O9Li, 129]
+                         [UgzXuy8urbCnMAz5Atx4AaABAg, 11]
+                         [UgyBGx9OLzc5z3vvU5x4AaABAg, 24]
+                         [UgyfAtJF5mt50A2dVul4AaABAg, 12]
+                          [UgzZjZXsROoTW6LT1N94AaABAg, 7]
+                          [Ugzd_ggxyrR8Omz_hGR4AaABAg, 7]
+                         [UgzY8tqmz5As1yAzcDN4AaABAg, 18]
+                         [Ugy11UR7mKDOyo8nEgp4AaABAg, 21]
+                         [UgzlQouPvz0CTgY0ehh4AaABAg, 42]
+                         [UgwDb80DyaLCAf8o2hl4AaABAg, 17]
+                          [Ugz8pGt2Gmpebl6umFh4AaABAg, 8]
+                         [UgwmXK2P6Cmq5n3MovB4AaABAg, 65]
+                          [Ugw93aUoG43kQYDepPh4AaABAg, 1]
+                         [UgwpMhXOxPd-fs_ah894AaABAg, 11]
+                                                             
+           are asking yourselves what will the | democrats  |
+                  could blame the bad parts on | democrats  |
+                                               | democrats  |
+                                           the | democrats  |
+             approval comes from his not being |  democrat  |
+        the mid-terms clinched victory for the | democrats  |
+ have consistently performed much better under | democratic |
+                  afford a home now wait until | democratic |
+            the rising cost of everyday things | democrats  |
+              to be found and held accountable | democrats  |
+        hey bertt it’s democratic governor not |  democrat  |
+         republican voters better vote for the | democrats  |
+                   to anyone who wants to vote |  democrat  |
+          is crazy both parties republican and | democratic |
+            that voted for trump not communist | democrats  |
+            union member and continued to back | democrats  |
+                       this up front or i vote |  democrat  |
+         or tranport system dismantling the us | democratic |
+                                               | democrats  |
+                   but we cant loose that seat | democrats  |
+                                                            
+ do if they win you should                                  
+                                                            
+ will continue to wreck because you                         
+ gave me eggs so stop lying                                 
+ and not from any actual understanding                      
+ but still appear to be quite                               
+ leadership that respects legal guardrails and              
+ socialist policies kick in game over                       
+ vs republicans voters don’t seem to                        
+ are communist pigs and they won't                          
+ governor                                                   
+ the only one winning is trump                              
+ or republican they aren’t satisfied with                   
+ are evil just as much as                                   
+ who don’t love jesus amen hallelujah                       
+ because dems backed unions but eventually                  
+ ps you owe me from doge                                    
+ institution harrasing journalists intimidating nations with
+ are trying their best to lose                              
+ are hell bent on americas destruction                      
+Keyword-in-context with 20 matches.
+                                                       
+ [UgxuFqSxQJpuSyHmdUt4AaABAg.Acn26O1WYPuAcnEyisR3Hm, 1]
+                       [UgywI5fZC-3YJDs6syp4AaABAg, 12]
+                       [UgyCq9TM7qBjMlDgR3x4AaABAg, 44]
+                      [UgwJy6J4q-dGx7va4wB4AaABAg, 100]
+                       [UgykkiiLz8IDNAIEEZ54AaABAg, 36]
+                       [UgySsBXlGmnHW8uEuNN4AaABAg, 12]
+                       [UgwhWCAR5hZ3Cs38LJh4AaABAg, 28]
+                        [UgwWcjB7JwC1VQQZ0JN4AaABAg, 5]
+                       [UgzFDrV1udqBUxj4fMh4AaABAg, 16]
+                        [UgyxaYnV67ev3PGi5YR4AaABAg, 2]
+                       [UgxeGXrTJxwlcPj4_-14AaABAg, 44]
+                       [UgzMxft-Q5lL0d5bXcB4AaABAg, 13]
+                        [UgxSWCCT-ViCvPYb1dd4AaABAg, 6]
+                        [UgyG6v4V3JFUjd_XNLV4AaABAg, 4]
+                       [UgzUyiW2uPZ5hTPA_bB4AaABAg, 41]
+                       [UgyxaYnV67ev3PGi5YR4AaABAg, 41]
+                       [UgwIQ5_lsWyv82bBlzF4AaABAg, 13]
+                       [Ugyw5uexsiQ4OAnWZ8d4AaABAg, 17]
+                        [Ugzx2x--SbjEZu7fcjx4AaABAg, 5]
+                        [Ugx-MChNEaG1PZxbioZ4AaABAg, 2]
+                                                       
+                                        | republicans |
+             on sounds like such a hack | republicans |
+           every show all day every day | republicans |
+       win the midterm elections if the | republicans |
+           having to fight in court the | republican  |
+         let’s see how many decades the | republican  |
+      by republicans and those who lean | republican  |
+                i'm from wyoming voting | republican  |
+       hindered by mitch the turtle and | republicans |
+                                  texas | republicans |
+        a criminal and i'm a registered | republican  |
+               what a waste of time for | republicans |
+                 with jim jordan as the | republican  |
+                              it is the | republican  |
+           and in the future best thing | republicans |
+             may be able to convict him | republicans |
+   suffering from donald trump and maga | republicans |
+ his ability and willingness to primary | republican  |
+               after every election the | republicans |
+                           aipac-backed | republicans |
+                                              
+                                              
+ didn't lose because they were off            
+ will go insane                               
+ win you win with us and                      
+ party will have several years to             
+ party gets locked out of government          
+ independents soured on trump and republican  
+ god bless the president                      
+ opposed him in everything he tried           
+ showed obvious corruption especially with the
+ disgusting and pathetic                      
+ ending being losers                          
+ leader in the house republicans will         
+ senators and representatives that keep trump 
+ can do is break from trump                   
+ will start scrambling vote independent please
+ in the past years we finally                 
+ members of congress who disagree with        
+ say two things they didn't go                
+ lost aipac through its political action      
+Keyword-in-context with 20 matches.
+                                                        
+                        [Ugz36WgKvq2ZRlwUSE54AaABAg, 15]
+                       [UgzuODK4p9S2DZVVIod4AaABAg, 112]
+                         [UgwEces1tcSlTsRLTlF4AaABAg, 2]
+                        [UgypenQnFIoBa-C7MR94AaABAg, 70]
+                         [UgySisJysXIKD-UdqUZ4AaABAg, 1]
+                         [UgzBMf9rNPv-MOnXkhR4AaABAg, 3]
+                         [UgyyJ-b80KzpebI_itp4AaABAg, 1]
+                        [UgzlQouPvz0CTgY0ehh4AaABAg, 51]
+                        [Ugwon97SZykfnbtLpjB4AaABAg, 16]
+                        [UgxIiXeo2IVw9SCHcQp4AaABAg, 25]
+                        [Ugx4wW19T2E0jrg6oDt4AaABAg, 14]
+                        [UgzsfunBNUgtmDhPr1V4AaABAg, 17]
+                        [UgzLKRoiNXCbi8oO6Xt4AaABAg, 59]
+                        [UgwIov8PGXLjIJGFZcV4AaABAg, 34]
+                         [UgwqB48azfGQB1NT6D94AaABAg, 2]
+ [UgyCpsHjQEijyt3UTJp4AaABAg.AcoCZ3CFxINAcoSQQKWAj3, 21]
+                        [UgwmSdnfqKYme5noLut4AaABAg, 99]
+ [Ugz4gw8V3ZhM-3ff0RV4AaABAg.Aa_xsZaYt5OAahM6CKkSAN, 30]
+ [Ugx_APLYptezJbkbE7V4AaABAg.AcqxYrpwtk5Acr20Qk1mzn, 21]
+                         [UgwmxvAvS46MKDznRVN4AaABAg, 7]
+                                                     
+       united states of america donald duck | trump |
+   media losing viewers on video delusional | trump |
+                                  president | trump |
+    supposed reality i don't understand how | trump |
+                                            | trump |
+                                donald duck | trump |
+                                            | trump |
+         love jesus amen hallelujah maga in | trump |
+            matter for debate after the way | trump |
+             over of the country and donald | trump |
+           the crazy and corrupt stuff that | trump |
+      they gerrymandered to steal seats for | trump |
+                   can elect an other one a | trump |
+    republican legal costs will be billions | trump |
+                                       when | trump |
+                decided not to vote do care | trump |
+                 a very poor judgment by jd | trump |
+             due to the covid relief checks | trump |
+                the wh got killed thanks to | trump |
+ americans are so tiresome after everything | trump |
+                                                      
+ when he finished his term in                         
+ blames election losses on on video                   
+ knows they cheated wait and see                      
+ still has a stranglehold over the                    
+ will continue to give putin and                      
+ must resign it was always a                          
+ hat einen hervorragenden fbi direktor entlassen.trump
+ name we pray                                         
+ behaves in the name of america                       
+ stands up in front of people                         
+ has done the second he got                           
+ and it failed spectacularly                          
+ smarter more disciplined more dangerous and          
+ his criminal supporters must be held                 
+ is running trump always does better                  
+ was rekd because he lied about                       
+ brought jd on the world stage                        
+ sent the government is in debt                       
+ and netanyahu fact all fact                          
+ has done how does he still                           
+Keyword-in-context with 20 matches.
+                                                        
+                        [UgzlaAeFOFAX9oPFd9B4AaABAg, 10]
+                        [UgynJS6Upvs9RfHeKJF4AaABAg, 20]
+                        [Ugw6ZQamJCQsRVr56pR4AaABAg, 48]
+                       [UgwRs2GUGh9elsQ2dod4AaABAg, 203]
+  [UgwJDIzqyeRTR5J7wwZ4AaABAg.Aa_2uRAeCfzAa_BAA5RUsf, 5]
+                         [UgxsnrqS5y0wn-0dE8Z4AaABAg, 4]
+                        [UgxDqD71WVBRd48aEAx4AaABAg, 19]
+                         [UgwcK17M7Bk-qIIHH6x4AaABAg, 4]
+                        [UgyHr5s9FVuf_GSzvId4AaABAg, 21]
+                        [Ugy1HEn0yekWunkXl9V4AaABAg, 24]
+                         [UgwEyY1QN0JtcXoQEL14AaABAg, 3]
+                        [Ugx8Zkd5NU3DTHaHoiB4AaABAg, 64]
+                        [UgxIr5rMKmGnEwBHE854AaABAg, 14]
+                         [UgzrZ7KuO5XILY_xk5t4AaABAg, 8]
+                         [UgyiIE-jgspxgXnZBc14AaABAg, 8]
+                        [UgzhWdeBHdciWf04ox14AaABAg, 13]
+                        [Ugz538EujAUupcdMt_x4AaABAg, 11]
+                        [UgwAwJKBpKUVULGHoeV4AaABAg, 15]
+ [Ugz4gw8V3ZhM-3ff0RV4AaABAg.Aa_xsZaYt5OAaa0QVZ2YT7, 24]
+                         [UgzhWdeBHdciWf04ox14AaABAg, 8]
+                                                        
+                   a lot was what made latino | voters |
+              who didn't vote for him because | votes  |
+                   the final word win or loss |  vote  |
+ immediately feasible when leveraged to drive | voter  |
+                     thankfully for trump his | voters |
+                            trump selling for | votes  |
+                 were begging to be done they | voted  |
+                               vote early and |  vote  |
+               gop why bribe people for their | votes  |
+         actually got off their rear-ends and | voted  |
+                                     you said |  vote  |
+                   on nov vote vote vote vote |  vote  |
+                 side he just doesn't have to |  vote  |
+                 as a conservative i will not |  vote  |
+                 all the people who say their |  vote  |
+                paid votes who u think people |  vote  |
+      about that insignificant country iran i | voted  |
+                     the last year he gets my |  vote  |
+               either to vote or withhold his |  vote  |
+         democrates pay votes welfare is paid | votes  |
+                                        
+ think trump is telling the truth       
+ are private so how could those         
+ blue and be through with this          
+ turnout for an election on the         
+ are like goldfish he also said         
+ pig                                    
+ as if he was on the                    
+ often                                  
+ only idiots believe this               
+ they just assume victory without effort
+ like you were on the ballot            
+ vote vote vote vote                    
+ for republicans                        
+ red or blue anyone who takes           
+ don’t matter as one person this        
+ when they r supported with ebt         
+ agai inst the economy which is         
+ all day every day                      
+ or to vote for or against              
+ who u think people vote when           
+Keyword-in-context with 20 matches.
+                                 
+  [Ugz7UF1cTJIVzSspysd4AaABAg, 8]
+  [Ugx7xqp16q_tbTt8YAt4AaABAg, 9]
+  [UgyQsCSw9mul3xYn_XJ4AaABAg, 9]
+  [Ugz6CTjFd8obcRCyxO14AaABAg, 9]
+  [Ugw-68Y0axw9sJc7Djx4AaABAg, 6]
+ [UgyI8SZ-ZhIWlrX9W6h4AaABAg, 21]
+  [UgyIcOPLUoAQfm7KTnN4AaABAg, 8]
+  [UgwfG0rWHSSnQ3egtJR4AaABAg, 5]
+ [Ugw6ZQamJCQsRVr56pR4AaABAg, 19]
+ [UgzYuVSvOt1kq27W0G94AaABAg, 11]
+ [UgxwgSoEXf80xegqbOV4AaABAg, 23]
+  [Ugx6pXRAqMNU1Ow6p3h4AaABAg, 8]
+ [Ugxf0lQonKgQbI9FeOh4AaABAg, 12]
+  [UgyMkg-ENsTFksZiyfB4AaABAg, 6]
+  [UgyjtRX7eJXosWtM-a94AaABAg, 7]
+  [UgwYyNjGjHQR-Ue-8iV4AaABAg, 5]
+ [Ugw3IM96S_r6C3M8SzV4AaABAg, 21]
+  [UgzIoTj_-3PKpdNeqDx4AaABAg, 4]
+  [Ugyh_UkktMnZveuGY-F4AaABAg, 6]
+ [UgzTJknNTCf-yrFNiDB4AaABAg, 11]
+                                                             
+          it was election fraud overseas absentee | ballot  |
+                           as if trump was on the | ballot  |
+                    for saying pretend i'm on the | ballot  |
+                          vote like he was on the | ballot  |
+                          trump is clearly on the | ballot  |
+                    writing johnny depp in on the | ballot  |
+                         voted like he was on the | ballot  |
+                                 he wasn't on the | ballot  |
+        when trump’s criminal crew confiscate the | ballot  |
+                 not in especially when the paper | ballots |
+                           vote like he is on the | ballot  |
+                               as if i was on the | ballot  |
+ show democrats leading the generic congressional | ballot  |
+                                 if i were on the | ballot  |
+                   let’s pretend trump was on the | ballot  |
+                                      he was on a | ballot  |
+                         to vote like he’s in the | ballot  |
+                                double check your | ballots |
+                                  if i was in the | ballot  |
+                      imagine his name was on the | ballot  |
+                                                      
+ fraud investigate dearborn                           
+ thats why maga lost                                  
+ we are still winning so much                         
+ trump didn't listen to us i                          
+ in trump's mind he's constantly talking              
+ jack sparrow has my vote                             
+                                                      
+ if he was it would have                              
+ boxes of americans are fed up                        
+ are being found all over the                         
+ and they did                                         
+ the idiot cant grasp the notion                      
+ by roughly points nationally realclearpolling average
+ we probably would have won only                      
+ yeee he lost he should resign                        
+                                                      
+                                                      
+ before submitting them early voters in               
+   we would have won 🤦🏻‍♂️                              
+ they did                                             </code></pre>
+</div>
+</div>
+<p>My reading of the 20 random lines per word (main focus of each line):</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Word</th>
+<th>Party</th>
+<th>Candidate</th>
+<th>Process</th>
+<th>Grievance</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>democrat*</td>
+<td>7</td>
+<td>0</td>
+<td>4</td>
+<td>9</td>
+</tr>
+<tr class="even">
+<td>republican*</td>
+<td>6</td>
+<td>4</td>
+<td>7</td>
+<td>3</td>
+</tr>
+<tr class="odd">
+<td>trump</td>
+<td>–</td>
+<td>20</td>
+<td>3</td>
+<td>~12</td>
+</tr>
+<tr class="even">
+<td>vote*</td>
+<td>1</td>
+<td>2</td>
+<td>11</td>
+<td>6</td>
+</tr>
+<tr class="odd">
+<td>ballot*</td>
+<td>0</td>
+<td>13</td>
+<td>4</td>
+<td>3</td>
+</tr>
+</tbody>
+</table>
+<p>Reading 20 random lines per word changes what the counts mean. “Democrat” is used more as an insult (“communist”, “evil”) than to name the party, while “republican” appears mostly in comments about the process: the loss, primaries, what the party should do next. Thirteen of the 20 “ballot” lines repeat the campaign line “vote as if Trump was on the ballot”, mostly with irony after the defeat, so a count of “ballot” would mostly measure a meme, not talk about voting. “Vote” carries a vote-buying theme (“paid votes”, “bribe people for their votes”) that comes from the four videos on the $5,000 pledge. Every “trump” line names the candidate, but most of them are attacks. I added “on the ballot” and “donald duck” as compounds because both appear repeatedly as fixed phrases.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb50"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb50-1"><a href="#cb50-1" aria-hidden="true" tabindex="-1"></a>phrases <span class="ot">&lt;-</span> <span class="fu">phrase</span>(<span class="fu">c</span>(<span class="st">"house majority"</span>, <span class="st">"senate race"</span>, <span class="st">"early voting"</span>, <span class="st">"mail in"</span>,</span>
+<span id="cb50-2"><a href="#cb50-2" aria-hidden="true" tabindex="-1"></a>                    <span class="st">"election fraud"</span>,</span>
+<span id="cb50-3"><a href="#cb50-3" aria-hidden="true" tabindex="-1"></a>                    <span class="st">"on the ballot"</span>, <span class="st">"donald duck"</span>))   <span class="co"># my two, from reading the kwic lines</span></span>
+<span id="cb50-4"><a href="#cb50-4" aria-hidden="true" tabindex="-1"></a>toks_c <span class="ot">&lt;-</span> toks <span class="sc">|&gt;</span> <span class="fu">tokens_compound</span>(phrases) <span class="sc">|&gt;</span></span>
+<span id="cb50-5"><a href="#cb50-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tokens_remove</span>(<span class="fu">stopwords</span>(<span class="st">"en"</span>))</span>
+<span id="cb50-6"><a href="#cb50-6" aria-hidden="true" tabindex="-1"></a>dfm_c <span class="ot">&lt;-</span> <span class="fu">dfm</span>(toks_c)</span>
+<span id="cb50-7"><a href="#cb50-7" aria-hidden="true" tabindex="-1"></a><span class="fu">topfeatures</span>(dfm_c, <span class="dv">30</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>      trump      people        vote         war        just          us 
+       1197         691         522         456         430         428 
+       like     america         now         can        iran         get 
+        372         350         337         325         320         313 
+republicans   democrats    american       going         one       money 
+        302         283         269         259         258         254 
+  president   americans        want     country          go        even 
+        248         233         230         218         216         216 
+      right        time       still       never        maga       world 
+        212         210         204         194         191         191 </code></pre>
+</div>
+</div>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb52"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb52-1"><a href="#cb52-1" aria-hidden="true" tabindex="-1"></a>dfm_ch <span class="ot">&lt;-</span> <span class="fu">dfm_group</span>(dfm_c, <span class="at">groups =</span> channel_title)           <span class="co"># group once</span></span>
+<span id="cb52-2"><a href="#cb52-2" aria-hidden="true" tabindex="-1"></a>key_plots <span class="ot">&lt;-</span> <span class="fu">map</span>(<span class="fu">docnames</span>(dfm_ch), \(target) {                <span class="co"># one plot per channel</span></span>
+<span id="cb52-3"><a href="#cb52-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">textstat_keyness</span>(dfm_ch, <span class="at">target =</span> target) <span class="sc">|&gt;</span></span>
+<span id="cb52-4"><a href="#cb52-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">textplot_keyness</span>(<span class="at">n =</span> <span class="dv">15</span>) <span class="sc">+</span> <span class="fu">ggtitle</span>(<span class="fu">paste</span>(target, <span class="st">"vs. the other two"</span>))</span>
+<span id="cb52-5"><a href="#cb52-5" aria-hidden="true" tabindex="-1"></a>})</span>
+<span id="cb52-6"><a href="#cb52-6" aria-hidden="true" tabindex="-1"></a>key_plots</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>[[1]]</code></pre>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="assign07_Data_Collection_files/figure-html/keyness-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+[[2]]</code></pre>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="assign07_Data_Collection_files/figure-html/keyness-2.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+[[3]]</code></pre>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="assign07_Data_Collection_files/figure-html/keyness-3.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb56"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb56-1"><a href="#cb56-1" aria-hidden="true" tabindex="-1"></a>dfm_c <span class="sc">|&gt;</span> <span class="fu">dfm_group</span>(<span class="at">groups =</span> period) <span class="sc">|&gt;</span></span>
+<span id="cb56-2"><a href="#cb56-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">textstat_keyness</span>(<span class="at">target =</span> <span class="st">"before"</span>) <span class="sc">|&gt;</span> <span class="fu">textplot_keyness</span>(<span class="at">n =</span> <span class="dv">15</span>) <span class="sc">+</span></span>
+<span id="cb56-3"><a href="#cb56-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggtitle</span>(<span class="st">"Before vs. after Election Day"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="assign07_Data_Collection_files/figure-html/keyness-4.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Most of what is distinctive comes from the videos I chose rather than from the election or from the audience. Each channel is represented by three videos, and the top keywords map onto their topics: “border” and “mexico” (Fox’s migrant caravan video), “wiles”, “susie” and “resign” (Fox’s panel on Susie Wiles), “abdul” and “latinos” (NBC’s El-Sayed interview and its story on Latino voters). The audience shows through on top of that: BBC commenters frame the result through the world, the war, Russia and the UK, Fox commenters taunt (“cope”) and talk about the network itself, and the outlets’ names are among the most distinctive words for each channel. Over time the change is sharp: before Election Day the comments are about the $5,000 pledge (“bribe”, “bribery”, “money”, “5k”, “liar”); afterwards they are about blame for the loss and the war with Iran (“war”, “iran”, “lost”, “israel”, “blame”). With three videos per channel, a keyness comparison between channels is really a comparison between nine videos.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb57"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb57-1"><a href="#cb57-1" aria-hidden="true" tabindex="-1"></a>sent <span class="ot">&lt;-</span> <span class="fu">tokens</span>(corp, <span class="at">remove_punct =</span> <span class="cn">TRUE</span>) <span class="sc">|&gt;</span> <span class="fu">tokens_tolower</span>() <span class="sc">|&gt;</span></span>
+<span id="cb57-2"><a href="#cb57-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tokens_lookup</span>(data_dictionary_LSD2015[<span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>]) <span class="sc">|&gt;</span> <span class="fu">dfm</span>()   <span class="co"># equivalent to dfm_lookup()</span></span>
+<span id="cb57-3"><a href="#cb57-3" aria-hidden="true" tabindex="-1"></a>sent_df <span class="ot">&lt;-</span> <span class="fu">convert</span>(sent, <span class="st">"data.frame"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb57-4"><a href="#cb57-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">bind_cols</span>(<span class="fu">docvars</span>(corp)) <span class="sc">|&gt;</span></span>
+<span id="cb57-5"><a href="#cb57-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">net =</span> (positive <span class="sc">-</span> negative) <span class="sc">/</span> <span class="fu">pmax</span>(positive <span class="sc">+</span> negative, <span class="dv">1</span>),</span>
+<span id="cb57-6"><a href="#cb57-6" aria-hidden="true" tabindex="-1"></a>         <span class="at">label =</span> <span class="fu">case_when</span>(positive <span class="sc">&gt;</span> negative <span class="sc">~</span> <span class="st">"positive"</span>,</span>
+<span id="cb57-7"><a href="#cb57-7" aria-hidden="true" tabindex="-1"></a>                           negative <span class="sc">&gt;</span> positive <span class="sc">~</span> <span class="st">"negative"</span>,</span>
+<span id="cb57-8"><a href="#cb57-8" aria-hidden="true" tabindex="-1"></a>                           <span class="cn">TRUE</span> <span class="sc">~</span> <span class="st">"neither"</span>))</span>
+<span id="cb57-9"><a href="#cb57-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb57-10"><a href="#cb57-10" aria-hidden="true" tabindex="-1"></a>sent_df <span class="sc">|&gt;</span> <span class="fu">group_by</span>(channel_title, period) <span class="sc">|&gt;</span></span>
+<span id="cb57-11"><a href="#cb57-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">mean_net =</span> <span class="fu">mean</span>(net), <span class="at">n =</span> <span class="fu">n</span>(), <span class="at">.groups =</span> <span class="st">"drop"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb57-12"><a href="#cb57-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(channel_title, mean_net, <span class="at">fill =</span> period)) <span class="sc">+</span></span>
+<span id="cb57-13"><a href="#cb57-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_col</span>(<span class="at">position =</span> <span class="st">"dodge"</span>) <span class="sc">+</span> <span class="fu">coord_flip</span>() <span class="sc">+</span> <span class="fu">labs</span>(<span class="at">y =</span> <span class="st">"mean net tone (LSD2015)"</span>, <span class="at">x =</span> <span class="cn">NULL</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="assign07_Data_Collection_files/figure-html/sentiment-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>According to LSD2015, comments are negative on average in every channel and period (between −0.07 and −0.19). Tone becomes more negative after Election Day for BBC (about −0.10 to −0.19) and Fox (−0.11 to −0.14), and stays flat for NBC. This should not be read as audiences becoming angrier: the dictionary scores words, and after the election the comments shift to the war with Iran, so negative words like “war”, “regime” and “nuclear” enter whether or not the commenter is upset about the result. The validation below tests how far the dictionary’s labels match a human reading.</p>
+<section id="validation-40-hand-coded-comments" class="level3">
+<h3 class="anchored" data-anchor-id="validation-40-hand-coded-comments">Validation: 40 hand-coded comments</h3>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb58"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb58-1"><a href="#cb58-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">6302</span>)</span>
+<span id="cb58-2"><a href="#cb58-2" aria-hidden="true" tabindex="-1"></a>val <span class="ot">&lt;-</span> sent_df <span class="sc">|&gt;</span> <span class="fu">slice_sample</span>(<span class="at">n =</span> <span class="dv">40</span>) <span class="sc">|&gt;</span> <span class="fu">select</span>(doc_id, label) <span class="sc">|&gt;</span></span>
+<span id="cb58-3"><a href="#cb58-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(<span class="fu">select</span>(clean, <span class="at">doc_id =</span> comment_id, text), <span class="at">by =</span> <span class="st">"doc_id"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb58-4"><a href="#cb58-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">hand =</span> <span class="cn">NA_character_</span>)</span>
+<span id="cb58-5"><a href="#cb58-5" aria-hidden="true" tabindex="-1"></a><span class="fu">write.csv</span>(val, here<span class="sc">::</span><span class="fu">here</span>(<span class="st">"data-raw/youtube/validation_to_code.csv"</span>), <span class="at">row.names =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb58-6"><a href="#cb58-6" aria-hidden="true" tabindex="-1"></a><span class="co"># coded by hand in a spreadsheet (column "hand": positive / negative / neither) and saved as validation_coded.csv</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb59"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb59-1"><a href="#cb59-1" aria-hidden="true" tabindex="-1"></a>val <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(here<span class="sc">::</span><span class="fu">here</span>(<span class="st">"data-raw/youtube/validation_coded.csv"</span>))</span>
+<span id="cb59-2"><a href="#cb59-2" aria-hidden="true" tabindex="-1"></a><span class="fu">mean</span>(val<span class="sc">$</span>hand <span class="sc">==</span> val<span class="sc">$</span>label)                  <span class="co"># agreement</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0.825</code></pre>
+</div>
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb61"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb61-1"><a href="#cb61-1" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(<span class="at">hand =</span> val<span class="sc">$</span>hand, <span class="at">dictionary =</span> val<span class="sc">$</span>label)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>          dictionary
+hand       negative neither positive
+  negative       15       3        1
+  neither         2      11        0
+  positive        0       1        7</code></pre>
+</div>
+</div>
+<p>The dictionary agreed with my reading in 33 of 40 comments (82.5%). Its errors run in one direction: it misses negativity that is not carried by negative words. “He is faithful to no one” is scored positive because “faithful” is a positive word and the negation is lost; “this changes absolutely nothing” and a sarcastic “lunatics believe him 😂”, where “happy” cancels “lunatics”, come out neutral. Praise without emotional vocabulary (“a man of his word”) is also missed, and emoji, which carry much of the sarcasm, are ignored. The dictionary is reasonable for plain statements but undercounts sarcasm and implicit criticism, so the net tone above, already negative, is probably understated rather than exaggerated.</p>
+</section>
+</section>
+</section>
+<section id="report" class="level1">
+<h1>Report</h1>
+<p><strong>What I collected and how.</strong> I studied how the 2026 US midterm elections were discussed in YouTube comments, using the YouTube Data API v3 through tuber with an API key, so only public data. I first searched for “US midterm election” in the two months before the vote (1 September–27 October), sorting once by relevance and once by view count. I then took a second route: the full list of uploads of three outlets, NBC News (national network), Fox News (cable) and BBC News (international), filtered by title. From each outlet I chose the three most-commented videos about the US campaign and downloaded up to 300 comments per video, and I repeated the same steps for 4–13 November, after Election Day. The result is 5,393 comments from 18 videos, kept on my computer for at most 30 days; only the logs, manifests and aggregate results are published.</p>
+<p><strong>What the collection looks like.</strong> The two routes see different things. Search returned 100 videos per order out of “about 1,000,000”, shared only 28 videos between its two orders, and was dominated by CNN when sorted by views. Through the uploads lists, the three outlets posted 587 election videos in the same window, and only 7 of them had appeared in search; Fox, absent from the search results, was one of the heaviest publishers. Reaching back to 1 September cost 194 units, six times my plan, because NBC and Fox post more than 50 videos a day. Building the title filter took three rounds: single words let in a Tennessee execution and “Fat Bear Week”, party names let in non-election controversies, and foreign elections (Israel, Germany) kept slipping in until I required a US anchor in the title.</p>
+<p>The comments are not a sample of a conversation but a slice of it. The 18 videos reported 45,092 comments; I kept 12%. My cap of 300 per video means I hold about 5% of the Fox comments and half of the BBC comments, and it makes the three outlets the same size in my data although Fox’s audience comments about ten times more. Attention and voice are concentrated: the top 1% of comments receive 53% of the likes, three in four have none, the 10% most active authors wrote 22% of the comments, and 46 comments are exact duplicates.</p>
+<p><strong>What the text says.</strong> Reading before counting mattered. “Democrat” is used mostly as an insult, “republican” mostly in talk about the loss and the party’s next steps, and 13 of 20 “ballot” lines repeat the slogan “vote as if Trump was on the ballot”, usually ironically. Before Election Day the distinctive words are about the $5,000 pledge (“bribe”, “money”, “5k”, “liar”); afterwards they are about blame and the war with Iran (“war”, “iran”, “lost”, “blame”). The words that set each outlet apart mostly come from the topics of its three videos (the migrant caravan and Susie Wiles on Fox, Abdul El-Sayed and Latino voters on NBC), with an international frame on BBC (“world”, “uk”, “russia”). By the LSD2015 dictionary, tone is negative everywhere and more negative after the election on BBC and Fox. The dictionary agreed with my own reading of 40 comments 33 times (82.5%), but its errors all go one way: it misses sarcasm and criticism without negative words, and it ignores emoji.</p>
+<p><strong>The data-generating process.</strong> These numbers describe the comments YouTube showed me under my choices, not voters. First, the people: commenters choose to comment, a few comment a lot, and the audiences of BBC, Fox and NBC differ. Second, the platform: search ranking decided what search could find, YouTube’s moderation removes or holds some comments that are still counted, and the order in which the API returns comments decided which 300 I kept. Third, my own choices: picking the most-commented videos pulled the sample toward the most controversial story of the week (four of nine pre-election videos are about the $5,000 pledge), the cap equalised outlets of very different size, and with only three videos per outlet, comparing outlets is really comparing nine videos. Timing matters too: I collected the “before” comments after the election, so they include anything added, edited or deleted since. The safe claim is about what a reader of these videos would have seen in their comment sections, not about what Americans thought of the election.</p>
+</section>
+<section id="data-note" class="level1">
+<h1>Data note</h1>
+<ul>
+<li><strong>Source:</strong> YouTube Data API v3 via the R package tuber 3.0.0, public (non-authorized) data with an API key stored in <code>.Renviron</code>, never in this page.</li>
+<li><strong>Terms:</strong> YouTube API Services Terms of Service and Developer Policies; no scraping (III.E.6); comments kept at most 30 days (III.E.4.d), with the deletion date (<code>delete_by</code>, 13 December 2026) written in each manifest; raw data in <code>data-raw/</code>, which is excluded from git.</li>
+<li><strong>Method:</strong> search term “US midterm election”; windows 1 September–27 October 2026 and 4–13 November 2026; search orders relevance and viewCount (100 results each); uploads lists of NBC News, Fox News and BBC News (4,000–4,100 videos per channel before, 700 after); broad title filter to count election videos, strict filter with a US anchor to choose the comment videos; the 3 most-commented videos per channel and period; at most 300 comments per video; collected on 13 November 2026.</li>
+<li><strong>What was collected:</strong> 18 videos, 5,393 comments (10.6% replies). Collection logs and manifests: <code>logs/collection_log_pre.csv</code>, <code>logs/collection_log_post.csv</code>, <code>logs/manifest_pre.json</code>, <code>logs/manifest_post.json</code>.</li>
+<li><strong>Selection:</strong> search ranking; my choice of three outlets; the title filters; selecting the most-commented videos, which favours controversial topics and excludes videos with comments disabled.</li>
+<li><strong>Known gaps:</strong> 88% of the reported comments were not collected (mainly the 300 cap, plus comments held for review, removed or deleted); the order of returned comments decides which ones were kept; the “before” comments were collected after Election Day; titles cannot always tell a US story from a foreign one; the sentiment dictionary misses sarcasm and emoji (82.5% agreement on 40 hand-coded comments).</li>
+</ul>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

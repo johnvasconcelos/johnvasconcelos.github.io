@@ -1,0 +1,16 @@
+{
+  "source": "YouTube Data API v3 via tuber",
+  "tuber_version": "3.0.0",
+  "search_term": "US midterm election",
+  "orders": ["relevance", "viewCount"],
+  "window": ["2026-11-04T00:00:00Z", "2026-11-13"],
+  "channels": ["UCeY0bbntWzzVIaj2z3QigXg", "UCXIJgqnII2ZOINSWNOGFThA", "UC16niRr50-MSBwiO3YDb3RA"],
+  "title_pattern": "midterm|election|ballot|campaign|primar(y|ies)|candidate|(house|senate|governor'?s?|gubernatorial) race|\\bvoters?\\b|early voting|\\bpolls?\\b|\\bGOP\\b|Democrat|Republican",
+  "sample_pattern": "midterm|election|ballot|campaign|primar(y|ies)|candidate|(house|senate|governor'?s?|gubernatorial) race|\\bvoters?\\b|early voting|\\bpolls?\\b",
+  "excluded": "Israel|Netanyahu|Brazil|Serbia|Japan|Canada|\\bUK\\b|Britain|Scotland",
+  "cap_per_video": 300,
+  "videos": ["Pp5HAuHIUTs", "rVYnYzeY-9A", "n_GPIGuL5lk", "gcR_uANqXFs", "8aHhIOBLPwM", "cTX4gcXStxQ", "hY2pr51lw4M", "yPsRCMef2Kg", "rxGlzCGz-lY"],
+  "n_comments": 2700,
+  "collected_at": "2026-11-14 02:35:29",
+  "delete_by": "2026-12-13"
+}

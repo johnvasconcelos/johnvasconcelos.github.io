@@ -1,0 +1,486 @@
+---
+title: "Assignment 7 — Social media data from the YouTube API"
+subtitle: "EPPS 6302 · 2026 US midterm elections on YouTube"
+author: "John Vasconcelos"
+date: today
+format:
+  html:
+    toc: true
+    code-fold: true
+execute:
+  warning: false
+  message: false
+---
+
+This page collects YouTube comments on the 2026 US midterm elections through the YouTube Data API v3 (with the R package tuber), before and after Election Day, and analyses them with quanteda. Collection chunks are shown but not re-run when the page is rendered (`eval: false`); the analysis reads the saved files, so rendering uses no API quota. Raw comments are kept on my computer only and are not published.
+
+```{r setup}
+library(tuber)
+library(dplyr)
+library(tidyr)
+library(stringr)
+library(purrr)
+library(lubridate)
+library(ggplot2)
+library(quanteda)
+library(quanteda.textstats)
+library(quanteda.textplots)
+
+stopifnot(nzchar(Sys.getenv("YOUTUBE_KEY")))   # key is set? (never print it)
+packageVersion("tuber"); packageVersion("httr2")
+
+dir.create(here::here("data-raw/youtube"), recursive = TRUE, showWarnings = FALSE)  # ignorado pelo git
+dir.create(here::here("logs"), showWarnings = FALSE)                                # publicado
+# check that data-raw/ and .Renviron are git-ignored:
+readLines(here::here(".gitignore")) |> str_subset("data-raw|Renviron")
+
+# tuber 3.0 returns "tuber_result" objects that print only metadata and hide the table.
+# plain() turns them into ordinary tibbles; total_of() reads the total the API reports.
+plain    <- function(x) as_tibble(as.data.frame(x))
+total_of <- function(x) attr(x, "total_results") %||% NA
+
+TERM <- "US midterm election"          # the exact term sent to the API
+PRE_START  <- "2026-09-01T00:00:00Z"
+PRE_END    <- "2026-10-27T23:59:59Z"
+POST_START <- "2026-11-04T00:00:00Z"
+
+# The three channels of part 2c (IDs checked with get_channel_details())
+channels <- tribble(
+  ~kind,            ~channel_id,
+  "national network", "UCeY0bbntWzzVIaj2z3QigXg",  # NBC News
+  "cable news",       "UCXIJgqnII2ZOINSWNOGFThA",  # Fox News (ou CNN: UCupvZG-5ko_eiXAupbDfxWw)
+  "international",    "UC16niRr50-MSBwiO3YDb3RA"   # BBC News
+)
+```
+
+# 1. Quota plan
+
+Planned before any call. Search has its own budget (100 calls/day); everything else draws on 10,000 units/day. A `search.list` page (50 results) costs 100 units.
+
+```{r quota-plan}
+quota_plan <- tribble(
+  ~step, ~endpoint, ~calls_or_pages, ~unit_cost, ~units,
+  "2b search pre, relevance",  "search.list",        2,   100, 200,
+  "2b search pre, viewCount",  "search.list",        2,   100, 200,
+  "2e search post, relevance", "search.list",        2,   100, 200,
+  "2e search post, viewCount", "search.list",        2,   100, 200,
+  "Video stats (≈400 ids)",    "videos.list",        8,     1,   8,
+  "Channel details (3)",       "channels.list",      3,     1,   3,
+  "Uploads lists (3 × ≤80 pp)","playlistItems.list",240,    1, 240,
+  "Comments pre (≈10 videos)", "commentThreads+comments", 60, 1, 60,
+  "Comments post (≈10 videos)","commentThreads+comments", 60, 1, 60
+)
+quota_plan |> janitor::adorn_totals() |> knitr::kable()
+```
+
+After collecting:
+
+```{r quota-used, eval=FALSE}
+yt_get_quota_usage()   # run at the end of the collection
+```
+
+The plan above already includes the revised uploads step; my first plan allowed only 30 units for it (10 pages per channel). That was the main miss: because NBC and Fox each post over 50 videos a day, reaching 1 September took 194 units (34 for BBC, 79 for NBC, 81 for Fox), plus two earlier attempts with 500 and 4,000 uploads. Search used 8 of its 100 daily calls, as planned. tuber counts quota only within one R session (after a restart it showed 164 data units and 4 search calls), so it cannot replace the daily total in the Google Cloud Console; overall the collection stayed far below the 10,000-unit limit.
+
+# 2. Collect
+
+## 2b. Search twice (pre-election window)
+
+```{r search-pre, eval=FALSE}
+search_pre_rel <- yt_search(TERM, order = "relevance", max_results = 100,
+                            published_after = PRE_START, published_before = PRE_END)
+search_pre_view <- yt_search(TERM, order = "viewCount", max_results = 100,
+                             published_after = PRE_START, published_before = PRE_END)
+saveRDS(search_pre_rel,  here::here("data-raw/youtube/search_pre_rel.rds"))
+saveRDS(search_pre_view, here::here("data-raw/youtube/search_pre_view.rds"))
+```
+
+```{r search-pre-analysis}
+search_pre_rel  <- readRDS(here::here("data-raw/youtube/search_pre_rel.rds"))
+search_pre_view <- readRDS(here::here("data-raw/youtube/search_pre_view.rds"))
+
+# ii. what YouTube says exists vs. what it gave
+tibble(list = c("relevance", "viewCount"),
+       total_results = c(total_of(search_pre_rel), total_of(search_pre_view)),
+       rows_returned = c(nrow(search_pre_rel), nrow(search_pre_view)),
+       duplicates    = c(sum(duplicated(search_pre_rel$video_id)),
+                         sum(duplicated(search_pre_view$video_id))))
+
+# iii. one row per video
+rel  <- distinct(plain(search_pre_rel),  video_id, .keep_all = TRUE)
+view <- distinct(plain(search_pre_view), video_id, .keep_all = TRUE)
+
+# i. overlap and dominant channels
+length(intersect(rel$video_id, view$video_id))
+count(rel,  channel_title, sort = TRUE) |> head(10)
+count(view, channel_title, sort = TRUE) |> head(10)
+```
+
+i. The two orders give different pictures of the same topic. Sorted by views, the list is concentrated: CNN alone has 34 of the 94 unique videos, and the ten largest channels account for 60. Sorted by relevance, CNN still leads but with only 11 videos, followed by small channels that specialise in election forecasts. In both lists many channels are not American (France 24, DW, Al Jazeera, India Global Review, ITV), so an English-language search for a US election reaches a global audience. Fox News does not appear in either top ten, so what I can study through search depends on YouTube’s ranking, not on which outlets cover the election.
+
+ii. The API reported about 1,000,000 results for both orders. This is a rounded estimate, not a count, so the true size of the population is unknown. Each request returned exactly the 100 rows I asked for: what I can study is decided by YouTube’s ranking, not by what exists.
+
+iii. Within the same list, 2 videos (relevance) and 6 (viewCount) came back twice, because the ranking shifts between the 50-result pages. After keeping one row per video, I have 98 and 94 unique videos.
+
+## Video statistics (Part 4)
+
+```{r video-stats, eval=FALSE}
+all_ids <- unique(c(rel$video_id, view$video_id))
+video_stats_pre <- plain(get_video_stats(all_ids))
+saveRDS(video_stats_pre, here::here("data-raw/youtube/video_stats_pre.rds"))
+```
+
+## 2c. Three channels via the uploads list
+
+```{r channels, eval=FALSE}
+# (the `channels` table is defined in the setup chunk)
+channel_info <- plain(get_channel_details(channel_ids = channels$channel_id))
+saveRDS(channel_info, here::here("data-raw/youtube/channel_info.rds"))
+
+# uploads: newest first, 50 per page (1 unit per page).
+# 500 were not enough to reach 1 September (NBC and Fox post over 50 videos a day);
+# 4,000 per channel = up to 80 units each, about 240 in total.
+uploads <- map(channels$channel_id, \(id) list_channel_videos(id, max_results = 4000)) |>
+  set_names(channels$channel_id)
+saveRDS(uploads, here::here("data-raw/youtube/uploads.rds"))
+
+# Fox was then extended to 4,100 uploads, because 4,000 stopped at 07:15 UTC on 1 September:
+# uploads[["UCXIJgqnII2ZOINSWNOGFThA"]] <- list_channel_videos("UCXIJgqnII2ZOINSWNOGFThA", max_results = 4100)
+# saveRDS(uploads, here::here("data-raw/youtube/uploads.rds"))
+```
+
+```{r channels-analysis}
+uploads <- readRDS(here::here("data-raw/youtube/uploads.rds"))
+
+# Pattern revised after reading 20 kept and 20 dropped titles (see iii): single words
+# ("senate", "governor", "vote") let in hearings, executions and "Fat Bear Week"; they now count
+# only as part of a race. "primary", "campaign", "candidate" and the party names were added.
+TITLE_PATTERN <- regex(paste(
+  "midterm", "election", "ballot", "campaign", "primar(y|ies)", "candidate",
+  "(house|senate|governor'?s?|gubernatorial) race", "\\bvoters?\\b", "early voting",
+  "\\bpolls?\\b", "\\bGOP\\b", "Democrat", "Republican", sep = "|"), ignore_case = TRUE)
+
+# STRICT filter, used only to choose the videos whose comments are collected (2d and 2e).
+# The broad filter above COUNTS election videos; for SAMPLING, party names pulled in
+# controversial non-election videos, and foreign elections entered through "election".
+SAMPLE_PATTERN <- regex(paste(
+  "midterm", "election", "ballot", "campaign", "primar(y|ies)", "candidate",
+  "(house|senate|governor'?s?|gubernatorial) race", "\\bvoters?\\b", "early voting",
+  "\\bpolls?\\b", sep = "|"), ignore_case = TRUE)
+NOT_US <- regex("Israel|Netanyahu|Brazil|Serbia|Japan|Canada|\\bUK\\b|Britain|Scotland", ignore_case = TRUE)
+US_ANCHOR <- regex("midterm|\\bUS\\b|U\\.S\\.|America|Trump|Democrat|Republican|GOP|MAGA|Senate|House|governor|Congress",
+                   ignore_case = TRUE)
+
+up <- imap_dfr(uploads, \(df, id) mutate(plain(df), channel_id = id, row = row_number())) |>
+  mutate(pub = ymd_hms(coalesce(video_published_at, published_at)),
+         keep = str_detect(title, TITLE_PATTERN))
+
+# ii. how many units to reach 1 September
+up |> group_by(channel_id) |>
+  summarise(n_uploads = n(), newest = max(pub), oldest = min(pub),
+            per_day = round(n() / as.numeric(difftime(max(pub), min(pub), units = "days")), 1),
+            reached_sep1 = any(pub < ymd("2026-09-01")),
+            first_row_before_sep1 = if (reached_sep1) min(row[pub < ymd("2026-09-01")]) else NA_integer_,
+            units_needed = ceiling(first_row_before_sep1 / 50))
+
+election_vids_pre <- up |>
+  filter(keep, pub >= ymd("2026-09-01"), pub < ymd("2026-10-28"))
+
+# i. did the channel route find videos that search missed?
+election_vids_pre |> group_by(channel_id) |>
+  summarise(n = n(), not_in_search = sum(!video_id %in% c(rel$video_id, view$video_id)))
+
+# iii. read 20 kept and 20 dropped titles
+set.seed(6302)
+up |> filter(pub >= ymd("2026-09-01"), pub < ymd("2026-10-28")) |>
+  group_by(keep) |> slice_sample(n = 20) |> select(keep, title) |> print(n = 40)
+```
+
+i. Yes, almost entirely. Through the uploads lists, the three channels posted 587 election-related videos between 1 September and 27 October (BBC 71, Fox 243, NBC 273), and only 7 of them (1, 1 and 5) had appeared in either search list. Fox, which was absent from the search results, turns out to be one of the heaviest publishers on the topic. The two routes produce almost disjoint samples: search shows what YouTube chooses to rank for a term, while the channel route shows what an outlet actually published.
+
+ii. The uploads list returns 50 videos per unit, newest first, so how far back I can go is set by how much each channel publishes. BBC News posts about 22 videos a day and reached 1 September after 34 units; NBC News (about 52 a day) needed 79 units, and Fox News (about 54 a day) needed 81, for 194 units in total against the 30 I had planned. My first attempt, 500 videos per channel (10 units), covered only the last few weeks for every channel, and even 4,000 videos stopped at 07:15 UTC on 1 September for Fox, so I extended Fox to 4,100. The budget for this step has to be planned from each channel’s posting rate, not from a fixed number of pages.
+
+iii. Reading 20 kept and 20 dropped titles shows the first pattern was both too broad and too narrow: single words such as “governor”, “vote” and “senate” let in an execution in Tennessee, a UK vote on assisted dying, a Senate hearing and “Fat Bear Week”, while a Democratic primary was dropped. The revised pattern ties those words to a race (“senate race”, “governor’s race”) and adds “primary”, “campaign”, “candidate” and the party names. In a new sample of 40 titles, the kept ones are mostly about the US campaign, but two kinds of error remain. Party names let in political stories that are not about the election, and foreign elections (Israel) still pass. In the other direction, titles that name only the candidates, such as Ramaswamy’s ad against Amy Acton in the Ohio governor’s race, are missed. A keyword filter on titles trades one error for the other; I kept the broader version and treat it as an upper bound.
+
+## 2d. Comments, log and manifest
+
+```{r collect-fn}
+# Collects up to max_per_video comments per video and logs the status of each video
+if (!exists("collect_comments")) {
+  collect_comments <- function(video_ids, max_per_video = 300) {
+    res <- map(video_ids, \(v) {
+      out <- tryCatch(get_all_comments(v, max_results = max_per_video),
+                      error = function(e) e)
+      status <- if (inherits(out, "error")) {
+        if (str_detect(conditionMessage(out), "disabled")) "disabled" else "error"
+      } else if (nrow(out) == 0) "none" else "ok"
+      list(data = if (status == "ok") plain(out) else NULL,
+           log = tibble(video_id = v, status = status,
+                        n_received = if (status == "ok") nrow(out) else 0L,
+                        collected_at = Sys.time()))
+    })
+    list(comments = bind_rows(map(res, "data")), log = bind_rows(map(res, "log")))
+  }
+}
+
+write_manifest <- function(path, window, videos, n_comments) {
+  m <- list(
+    source = "YouTube Data API v3 via tuber",
+    tuber_version = as.character(packageVersion("tuber")),
+    search_term = TERM,                # exact term
+    orders = c("relevance", "viewCount"),
+    window = window,
+    channels = channels$channel_id,
+    title_pattern = as.character(TITLE_PATTERN),          # broad filter (counting, 2c)
+    sample_pattern = as.character(SAMPLE_PATTERN),        # strict filter (choice of videos)
+    excluded = as.character(NOT_US),
+    cap_per_video = 300,
+    videos = videos,
+    n_comments = n_comments,
+    collected_at = format(Sys.time(), tz = "UTC"),
+    delete_by = as.character(Sys.Date() + 30)   # III.E.4.d: keep at most 30 days
+  )
+  jsonlite::write_json(m, path, auto_unbox = TRUE, pretty = TRUE)
+  # the key must NOT appear in the manifest:
+  stopifnot(!any(str_detect(readLines(path), fixed(Sys.getenv("YOUTUBE_KEY")))))
+}
+```
+
+```{r comments-pre, eval=FALSE}
+# 3 videos per channel: the most-commented among those passing the STRICT filter
+vids_pre <- election_vids_pre |>
+  filter(str_detect(title, SAMPLE_PATTERN), str_detect(title, US_ANCHOR), !str_detect(title, NOT_US)) |>
+  left_join(plain(readRDS(here::here("data-raw/youtube/video_stats_pre.rds"))) |>
+              bind_rows(plain(get_video_stats(election_vids_pre$video_id))) |>
+              distinct(video_id, .keep_all = TRUE) |>
+              mutate(comment_count = as.numeric(comment_count)),   # as text, "99" would sort above "1500"
+            by = "video_id") |>
+  group_by(channel_id) |> slice_max(comment_count, n = 3, with_ties = FALSE) |> ungroup()
+
+pre <- collect_comments(vids_pre$video_id, max_per_video = 300)
+log_pre <- pre$log |> left_join(select(vids_pre, video_id, channel_id, title,
+                                       reported = comment_count), by = "video_id")
+saveRDS(pre$comments, here::here("data-raw/youtube/comments_pre.rds"))
+saveRDS(vids_pre, here::here("data-raw/youtube/vids_pre.rds"))
+write.csv(log_pre, here::here("logs/collection_log_pre.csv"), row.names = FALSE)    # published (no author data)
+write_manifest(here::here("logs/manifest_pre.json"), c(PRE_START, PRE_END), vids_pre$video_id, nrow(pre$comments))
+```
+
+## 2e. After Election Day
+
+Same as 2b–2d with `published_after = POST_START` and `published_before = NULL` (until collection day).
+
+```{r post, eval=FALSE}
+search_post_rel  <- yt_search(TERM, order = "relevance", max_results = 100, published_after = POST_START)
+search_post_view <- yt_search(TERM, order = "viewCount", max_results = 100, published_after = POST_START)
+saveRDS(search_post_rel, here::here("data-raw/youtube/search_post_rel.rds"))
+saveRDS(search_post_view, here::here("data-raw/youtube/search_post_view.rds"))
+
+uploads_post <- map(channels$channel_id, \(id) list_channel_videos(id, max_results = 700)) |>
+  set_names(channels$channel_id)
+election_vids_post <- imap_dfr(uploads_post, \(df, id) mutate(plain(df), channel_id = id)) |>
+  mutate(pub = ymd_hms(coalesce(video_published_at, published_at))) |>
+  filter(str_detect(title, TITLE_PATTERN), pub >= ymd("2026-11-04"))
+
+vids_post_pool <- election_vids_post |>
+  filter(str_detect(title, SAMPLE_PATTERN), str_detect(title, US_ANCHOR), !str_detect(title, NOT_US))   # same strict filter as 2d
+
+vids_post <- vids_post_pool |>
+  left_join(plain(get_video_stats(unique(vids_post_pool$video_id))) |>
+              mutate(comment_count = as.numeric(comment_count)), by = "video_id") |>
+  group_by(channel_id) |> slice_max(comment_count, n = 3, with_ties = FALSE) |> ungroup()
+
+post <- collect_comments(vids_post$video_id, max_per_video = 300)
+log_post <- post$log |> left_join(select(vids_post, video_id, channel_id, title,
+                                         reported = comment_count), by = "video_id")
+saveRDS(post$comments, here::here("data-raw/youtube/comments_post.rds"))
+saveRDS(vids_post, here::here("data-raw/youtube/vids_post.rds"))
+write.csv(log_post, here::here("logs/collection_log_post.csv"), row.names = FALSE)
+write_manifest(here::here("logs/manifest_post.json"), c(POST_START, as.character(Sys.Date())),
+               vids_post$video_id, nrow(post$comments))
+```
+
+# 3. Analyze
+
+## 3a. Describe the collection
+
+```{r assemble}
+videos <- bind_rows(readRDS(here::here("data-raw/youtube/vids_pre.rds"))  |> mutate(period = "before"),
+                    readRDS(here::here("data-raw/youtube/vids_post.rds")) |> mutate(period = "after")) |>
+  distinct(video_id, .keep_all = TRUE)       
+
+comments <- bind_rows(readRDS(here::here("data-raw/youtube/comments_pre.rds")),
+                      readRDS(here::here("data-raw/youtube/comments_post.rds"))) |>
+  distinct(comment_id, .keep_all = TRUE)                   # each comment once
+
+# Replies come without video_id: they inherit their parent's (a reply ID starts with the parent ID)
+parent_video <- comments |> filter(!str_detect(comment_id, "\\.")) |>
+  select(top_id = comment_id, parent_video = video_id)
+comments <- comments |>
+  mutate(top_id = str_remove(comment_id, "\\..*")) |>
+  left_join(parent_video, by = "top_id") |>
+  mutate(video_id = coalesce(video_id, parent_video)) |>
+  select(-top_id, -parent_video) |>
+  left_join(select(videos, video_id, channel_title, period, video_title = title),
+            by = "video_id", relationship = "many-to-one") |>
+  mutate(is_reply = !is.na(parent_id) & parent_id != "",
+         date = as_date(ymd_hms(published_at)))
+
+sum(is.na(comments$channel_title))   # should be 0
+
+logs <- bind_rows(read.csv(here::here("logs/collection_log_pre.csv")), read.csv(here::here("logs/collection_log_post.csv")))
+```
+
+```{r describe}
+# i. received vs reported
+logs |> select(channel_id, title, reported, n_received, status) |>
+  mutate(gap = reported - n_received) |> knitr::kable()
+
+# ii. status
+count(logs, status)
+count(logs, channel_id, status)
+
+# iii. replies and likes
+mean(comments$is_reply)
+likes <- sort(comments$like_count, decreasing = TRUE)
+top1 <- ceiling(0.01 * length(likes))
+sum(likes[1:top1]) / sum(likes)              # share of likes to top 1%
+
+ggplot(comments, aes(like_count + 1)) + geom_histogram(bins = 40) +
+  scale_x_log10() + labs(x = "likes + 1 (log)", y = "comments")
+
+# iv. authorship concentration and duplicates (counts only, no names)
+by_author <- count(comments, author_channel_id, sort = TRUE)
+top10 <- ceiling(0.10 * nrow(by_author))
+sum(by_author$n[1:top10]) / nrow(comments)  # share from the 10% most active authors
+sum(duplicated(comments$text_original))     # exact duplicate texts
+```
+
+i. Received vs. reported. The 18 videos reported 45,092 comments; I received 5,393 (12%). The gap is mostly my own cap of 300 per video: Fox videos had 3,700–6,400 comments each, so I kept about 6% of Fox's comments before the election and 5% after, against 25% and 51% for BBC. The cap makes every channel the same size in my data even though Fox’s audience comments about ten times more. Part of the gap also comes from comments that YouTube counts but does not return (held for review, removed as spam, deleted by authors); the API does not let me tell these apart from the cap.
+
+ii. Status. All 18 videos returned comments (“ok”). No video had comments disabled, but this is by design rather than a finding: I chose the most-commented videos, so a video with comments turned off could never be selected.
+
+iii. Replies and likes. 10.6% of the comments are replies; the rest are top-level. Attention is very unequal: the top 1% of comments receive 53% of all likes, about three in four comments received no like at all, so a handful of comments define what a viewer sees first.
+
+iv. Authors and duplicates. The 10% most active authors wrote 22% of the comments, and 46 comments are exact copies of another comment. A count of comments is therefore not a count of people: a small group of heavy commenters, and repeated text, weigh more than their number.
+
+## 3b. Read, then count
+
+```{r corpus}
+clean <- comments |>
+  mutate(text = text_original |>
+           str_remove_all("https?://\\S+") |>       # drop URLs
+           str_remove_all("@[\\w.-]+"))             # drop @mentions
+
+corp <- corpus(clean, docid_field = "comment_id", text_field = "text")
+docvars(corp) <- select(clean, channel_title, video_id, is_reply, like_count, date, period)
+summary(corp, n = 5)
+```
+
+**Unit of analysis:** each comment, top-level or reply, is one document. Likes, authors and timing belong to single comments, and a thread mixes several people, often arguing with each other, so a thread-level document would blur exactly the disagreement I want to see. URLs and @mentions are removed. Emoji are kept in the text, but they are dropped as symbols when tokenising and the sentiment dictionary ignores them; the validation below shows what that costs.
+
+```{r kwic}
+toks <- tokens(corp, remove_punct = TRUE, remove_symbols = TRUE, remove_numbers = TRUE) |>
+  tokens_tolower()
+
+set.seed(6302)
+for (p in c("democrat*", "republican*", "trump", "vote*", "ballot*")) {
+  k <- kwic(toks, pattern = p, window = 6)
+  print(head(k[sample(nrow(k), min(20, nrow(k))), ], 20))
+}
+```
+
+My reading of the 20 random lines per word (main focus of each line):
+
+| Word | Party | Candidate | Process | Grievance |
+|---|---|---|---|---|
+| democrat* | 7 | 0 | 4 | 9 |
+| republican* | 6 | 4 | 7 | 3 |
+| trump | – | 20 | 3 | ~12 |
+| vote* | 1 | 2 | 11 | 6 |
+| ballot* | 0 | 13 | 4 | 3 |
+
+Reading 20 random lines per word changes what the counts mean. “Democrat” is used more as an insult (“communist”, “evil”) than to name the party, while “republican” appears mostly in comments about the process: the loss, primaries, what the party should do next. Thirteen of the 20 “ballot” lines repeat the campaign line “vote as if Trump was on the ballot”, mostly with irony after the defeat, so a count of “ballot” would mostly measure a meme, not talk about voting. “Vote” carries a vote-buying theme (“paid votes”, “bribe people for their votes”) that comes from the four videos on the $5,000 pledge. Every “trump” line names the candidate, but most of them are attacks. I added “on the ballot” and “donald duck” as compounds because both appear repeatedly as fixed phrases.
+
+```{r compounds}
+phrases <- phrase(c("house majority", "senate race", "early voting", "mail in",
+                    "election fraud",
+                    "on the ballot", "donald duck"))   # my two, from reading the kwic lines
+toks_c <- toks |> tokens_compound(phrases) |>
+  tokens_remove(stopwords("en"))
+dfm_c <- dfm(toks_c)
+topfeatures(dfm_c, 30)
+```
+
+```{r keyness}
+dfm_ch <- dfm_group(dfm_c, groups = channel_title)           # group once
+key_plots <- map(docnames(dfm_ch), \(target) {                # one plot per channel
+  textstat_keyness(dfm_ch, target = target) |>
+    textplot_keyness(n = 15) + ggtitle(paste(target, "vs. the other two"))
+})
+key_plots
+
+dfm_c |> dfm_group(groups = period) |>
+  textstat_keyness(target = "before") |> textplot_keyness(n = 15) +
+  ggtitle("Before vs. after Election Day")
+```
+
+Most of what is distinctive comes from the videos I chose rather than from the election or from the audience. Each channel is represented by three videos, and the top keywords map onto their topics: “border” and “mexico” (Fox’s migrant caravan video), “wiles”, “susie” and “resign” (Fox’s panel on Susie Wiles), “abdul” and “latinos” (NBC’s El-Sayed interview and its story on Latino voters). The audience shows through on top of that: BBC commenters frame the result through the world, the war, Russia and the UK, Fox commenters taunt (“cope”) and talk about the network itself, and the outlets’ names are among the most distinctive words for each channel. Over time the change is sharp: before Election Day the comments are about the $5,000 pledge (“bribe”, “bribery”, “money”, “5k”, “liar”); afterwards they are about blame for the loss and the war with Iran (“war”, “iran”, “lost”, “israel”, “blame”). With three videos per channel, a keyness comparison between channels is really a comparison between nine videos.
+
+
+```{r sentiment}
+sent <- tokens(corp, remove_punct = TRUE) |> tokens_tolower() |>
+  tokens_lookup(data_dictionary_LSD2015[1:2]) |> dfm()   # equivalent to dfm_lookup()
+sent_df <- convert(sent, "data.frame") |>
+  bind_cols(docvars(corp)) |>
+  mutate(net = (positive - negative) / pmax(positive + negative, 1),
+         label = case_when(positive > negative ~ "positive",
+                           negative > positive ~ "negative",
+                           TRUE ~ "neither"))
+
+sent_df |> group_by(channel_title, period) |>
+  summarise(mean_net = mean(net), n = n(), .groups = "drop") |>
+  ggplot(aes(channel_title, mean_net, fill = period)) +
+  geom_col(position = "dodge") + coord_flip() + labs(y = "mean net tone (LSD2015)", x = NULL)
+```
+
+According to LSD2015, comments are negative on average in every channel and period (between −0.07 and −0.19). Tone becomes more negative after Election Day for BBC (about −0.10 to −0.19) and Fox (−0.11 to −0.14), and stays flat for NBC. This should not be read as audiences becoming angrier: the dictionary scores words, and after the election the comments shift to the war with Iran, so negative words like “war”, “regime” and “nuclear” enter whether or not the commenter is upset about the result. The validation below tests how far the dictionary’s labels match a human reading.
+
+### Validation: 40 hand-coded comments
+
+```{r validation-sample, eval=FALSE}
+set.seed(6302)
+val <- sent_df |> slice_sample(n = 40) |> select(doc_id, label) |>
+  left_join(select(clean, doc_id = comment_id, text), by = "doc_id") |>
+  mutate(hand = NA_character_)
+write.csv(val, here::here("data-raw/youtube/validation_to_code.csv"), row.names = FALSE)
+# coded by hand in a spreadsheet (column "hand": positive / negative / neither) and saved as validation_coded.csv
+```
+
+```{r validation}
+val <- read.csv(here::here("data-raw/youtube/validation_coded.csv"))
+mean(val$hand == val$label)                  # agreement
+table(hand = val$hand, dictionary = val$label)
+```
+
+The dictionary agreed with my reading in 33 of 40 comments (82.5%). Its errors run in one direction: it misses negativity that is not carried by negative words. “He is faithful to no one” is scored positive because “faithful” is a positive word and the negation is lost; “this changes absolutely nothing” and a sarcastic “lunatics believe him 😂”, where “happy” cancels “lunatics”, come out neutral. Praise without emotional vocabulary (“a man of his word”) is also missed, and emoji, which carry much of the sarcasm, are ignored. The dictionary is reasonable for plain statements but undercounts sarcasm and implicit criticism, so the net tone above, already negative, is probably understated rather than exaggerated.
+
+# Report
+
+**What I collected and how.** I studied how the 2026 US midterm elections were discussed in YouTube comments, using the YouTube Data API v3 through tuber with an API key, so only public data. I first searched for "US midterm election" in the two months before the vote (1 September–27 October), sorting once by relevance and once by view count. I then took a second route: the full list of uploads of three outlets, NBC News (national network), Fox News (cable) and BBC News (international), filtered by title. From each outlet I chose the three most-commented videos about the US campaign and downloaded up to 300 comments per video, and I repeated the same steps for 4–13 November, after Election Day. The result is 5,393 comments from 18 videos, kept on my computer for at most 30 days; only the logs, manifests and aggregate results are published.
+
+**What the collection looks like.** The two routes see different things. Search returned 100 videos per order out of "about 1,000,000", shared only 28 videos between its two orders, and was dominated by CNN when sorted by views. Through the uploads lists, the three outlets posted 587 election videos in the same window, and only 7 of them had appeared in search; Fox, absent from the search results, was one of the heaviest publishers. Reaching back to 1 September cost 194 units, six times my plan, because NBC and Fox post more than 50 videos a day. Building the title filter took three rounds: single words let in a Tennessee execution and "Fat Bear Week", party names let in non-election controversies, and foreign elections (Israel, Germany) kept slipping in until I required a US anchor in the title.
+
+The comments are not a sample of a conversation but a slice of it. The 18 videos reported 45,092 comments; I kept 12%. My cap of 300 per video means I hold about 5% of the Fox comments and half of the BBC comments, and it makes the three outlets the same size in my data although Fox's audience comments about ten times more. Attention and voice are concentrated: the top 1% of comments receive 53% of the likes, three in four have none, the 10% most active authors wrote 22% of the comments, and 46 comments are exact duplicates.
+
+**What the text says.** Reading before counting mattered. "Democrat" is used mostly as an insult, "republican" mostly in talk about the loss and the party's next steps, and 13 of 20 "ballot" lines repeat the slogan "vote as if Trump was on the ballot", usually ironically. Before Election Day the distinctive words are about the $5,000 pledge ("bribe", "money", "5k", "liar"); afterwards they are about blame and the war with Iran ("war", "iran", "lost", "blame"). The words that set each outlet apart mostly come from the topics of its three videos (the migrant caravan and Susie Wiles on Fox, Abdul El-Sayed and Latino voters on NBC), with an international frame on BBC ("world", "uk", "russia"). By the LSD2015 dictionary, tone is negative everywhere and more negative after the election on BBC and Fox. The dictionary agreed with my own reading of 40 comments 33 times (82.5%), but its errors all go one way: it misses sarcasm and criticism without negative words, and it ignores emoji.
+
+**The data-generating process.** These numbers describe the comments YouTube showed me under my choices, not voters. First, the people: commenters choose to comment, a few comment a lot, and the audiences of BBC, Fox and NBC differ. Second, the platform: search ranking decided what search could find, YouTube's moderation removes or holds some comments that are still counted, and the order in which the API returns comments decided which 300 I kept. Third, my own choices: picking the most-commented videos pulled the sample toward the most controversial story of the week (four of nine pre-election videos are about the $5,000 pledge), the cap equalised outlets of very different size, and with only three videos per outlet, comparing outlets is really comparing nine videos. Timing matters too: I collected the "before" comments after the election, so they include anything added, edited or deleted since. The safe claim is about what a reader of these videos would have seen in their comment sections, not about what Americans thought of the election.
+
+# Data note
+
+- **Source:** YouTube Data API v3 via the R package tuber `r packageVersion("tuber")`, public (non-authorized) data with an API key stored in `.Renviron`, never in this page.
+- **Terms:** YouTube API Services Terms of Service and Developer Policies; no scraping (III.E.6); comments kept at most 30 days (III.E.4.d), with the deletion date (`delete_by`, 13 December 2026) written in each manifest; raw data in `data-raw/`, which is excluded from git.
+- **Method:** search term "`r TERM`"; windows 1 September–27 October 2026 and 4–13 November 2026; search orders relevance and viewCount (100 results each); uploads lists of NBC News, Fox News and BBC News (4,000–4,100 videos per channel before, 700 after); broad title filter to count election videos, strict filter with a US anchor to choose the comment videos; the 3 most-commented videos per channel and period; at most 300 comments per video; collected on 13 November 2026.
+- **What was collected:** 18 videos, 5,393 comments (10.6% replies). Collection logs and manifests: `logs/collection_log_pre.csv`, `logs/collection_log_post.csv`, `logs/manifest_pre.json`, `logs/manifest_post.json`.
+- **Selection:** search ranking; my choice of three outlets; the title filters; selecting the most-commented videos, which favours controversial topics and excludes videos with comments disabled.
+- **Known gaps:** 88% of the reported comments were not collected (mainly the 300 cap, plus comments held for review, removed or deleted); the order of returned comments decides which ones were kept; the "before" comments were collected after Election Day; titles cannot always tell a US story from a foreign one; the sentiment dictionary misses sarcasm and emoji (82.5% agreement on 40 hand-coded comments).
