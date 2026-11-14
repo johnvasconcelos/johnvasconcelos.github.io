@@ -81,6 +81,8 @@
   .stat.tn { background: #fef6f0; } .stat.tn .v { color: #c4702f; }
   .stat.pw { background: #f0f6fc; } .stat.pw .v { color: #4f84bd; }
 
+  .stat.pw.on { background: #efe7f8; } .stat.pw.on .v { color: #6a3d9a; }
+
   /* ---------- this draw ---------- */
   #c_draw .ctl { gap: 6px; }
   .verdict { border-radius: 8px; padding: 7px 10px; background: var(--accent-soft); margin-top: 6px; }
@@ -189,6 +191,20 @@
           <button data-v="two">Always two-sided</button>
         </div>
       </div>
+      <div>
+        <span class="lab">Power area <span class="sym">1 − β</span></span>
+        <div class="seg" id="seg_pw">
+          <button data-v="on" aria-pressed="true">Highlight</button>
+          <button data-v="off">Hide</button>
+        </div>
+      </div>
+      <div>
+        <span class="lab">Effect size on plot</span>
+        <div class="seg" id="seg_eff">
+          <button data-v="on" aria-pressed="true">Show</button>
+          <button data-v="off">Hide</button>
+        </div>
+      </div>
       <div class="full btns">
         <button class="btn" id="b_draw">Draw a sample</button>
         <button class="btn ghost small" id="b_100">+100</button>
@@ -206,7 +222,7 @@
       <span><i style="background:#e6550d"></i> Type I error α</span>
       <span><i style="background:#08519c"></i> Type II error β</span>
       <span><i style="background:#f6c8a6"></i> True negative 1 − α</span>
-      <span><i style="background:#b9cfe6"></i> True positive (power) 1 − β</span>
+      <span id="lg_pw"><i style="background:rgba(106,61,154,0.55)"></i> True positive (power) 1 − β</span>
       <span><i class="dash" style="border-color:#1f2933"></i> Critical value</span>
       <span><i class="ln" style="border-color:#2b7a3d"></i> Sample mean x̄ and its CI</span>
     </div>
@@ -217,7 +233,7 @@
     <div class="stat al"><div class="t">Type I · α</div><div class="v" id="s_a"></div><div class="r">reject | H₀ true</div></div>
     <div class="stat tn"><div class="t">True neg. · 1 − α</div><div class="v" id="s_tn"></div><div class="r">fail to reject | H₀ true</div></div>
     <div class="stat be"><div class="t">Type II · β</div><div class="v" id="s_b"></div><div class="r">fail to reject | H₁ true</div></div>
-    <div class="stat pw"><div class="t">Power · 1 − β</div><div class="v" id="s_pw"></div><div class="r">reject | H₁ true</div></div>
+    <div class="stat pw" id="st_pw"><div class="t">Power · 1 − β</div><div class="v" id="s_pw"></div><div class="r">reject | H₁ true</div></div>
     <div class="stat"><div class="t">Critical value</div><div class="v" id="s_cv"></div><div class="r" id="s_cvz"></div></div>
     <div class="stat"><div class="t">Effect size d</div><div class="v" id="s_d"></div><div class="r">(μ₁ − μ₀) / σ</div></div>
   </section>
@@ -297,7 +313,7 @@ const FONT = { family: "system-ui, -apple-system, Segoe UI, Roboto, sans-serif",
 const CFG = { displayModeBar: false, responsive: true };
 
 const S = { mu0: 100, mu1: 106, sig: 15, n: 25, alpha: 0.05, tail: "right", truth: "h1", ci: "match",
-  u: null, draws: [] };   // u = standard-normal noise of the current sample; draws = {x, rej, c0, c1}
+  u: null, draws: [], showPw: true, showEff: true };   // u = standard-normal noise of the current sample; draws = {x, rej, c0, c1}
 
 const tex = (el, s) => katex.render(s, $(el), { throwOnError: false });
 const f1 = x => Number(x).toFixed(1).replace(/^-/, "−");
@@ -315,6 +331,11 @@ bindSeg("seg_tail", v => S.tail = v);
 bindSeg("seg_alpha", v => S.alpha = +v);
 bindSeg("seg_truth", v => S.truth = v);
 bindSeg("seg_ci", v => S.ci = v);
+// display-only toggles: they do not change the numbers, so the tally is kept
+function bindView(id, fn) { document.querySelectorAll(`#${id} button`).forEach(b => b.addEventListener("click", () => {
+  setSeg(id, b.dataset.v); fn(b.dataset.v); render(); })); }
+bindView("seg_pw",  v => S.showPw  = v === "on");
+bindView("seg_eff", v => S.showEff = v === "on");
 [["mu0", "mu0"], ["mu1", "mu1"], ["sig", "sig"], ["nn", "n"]].forEach(([id, k]) =>
   $(id).addEventListener("input", () => { S[k] = +$(id).value; S.draws = []; render(); }));
 
@@ -384,7 +405,7 @@ function drawPlot(M, cur) {
   tr.push(fillTrace(region(S.mu0, se, accR[0], accR[1], xmin, xmax), COL.tn));
   const pwR = [], aR = [];
   rej.forEach(([a, b]) => { pwR.push(region(S.mu1, se, a, b, xmin, xmax)); aR.push(region(S.mu0, se, a, b, xmin, xmax)); });
-  pwR.forEach(r => tr.push(fillTrace(r, COL.pw)));
+  if (S.showPw) pwR.forEach(r => tr.push(fillTrace(r, "rgba(106,61,154,0.55)")));
   // strong fills: β (H1, accept) and α (H0, reject)
   const bR = region(S.mu1, se, accR[0], accR[1], xmin, xmax);
   tr.push(fillTrace(bR, "rgba(8,81,156,0.75)"));
@@ -425,6 +446,19 @@ function drawPlot(M, cur) {
     const y = dnorm((cx - m) / se) / se; ann.push({ x: cx, y: Math.max(y * 0.45, ymax * 0.04), text, showarrow: false,
       font: { size: 12.5, color: "#fff", family: FONT.family }, bgcolor: color, borderpad: 2 }); };
   if (M.beta > 0.004) lab(bR, S.mu1, "β", COL.b);
+  if (S.showPw && M.power > 0.004) {            // label the largest power region
+    const big = pwR.filter(Boolean).sort((p, q) => areaMass(S.mu1, se, q.x[0], q.x[q.x.length - 1]) - areaMass(S.mu1, se, p.x[0], p.x[p.x.length - 1]))[0];
+    if (big) lab(big, S.mu1, "1 − β", "#6a3d9a");
+  }
+  // effect size ruler between μ0 and μ1
+  if (S.showEff && S.mu1 !== S.mu0) {
+    const yE = ymax * 0.93, d = (S.mu1 - S.mu0) / S.sig;
+    ann.push({ x: S.mu1, y: yE, ax: S.mu0, ay: yE, xref: "x", yref: "y", axref: "x", ayref: "y", text: "",
+      showarrow: true, arrowhead: 2, startarrowhead: 2, arrowside: "end+start", arrowwidth: 1.6, arrowcolor: "#4a2a7a" });
+    ann.push({ x: (S.mu0 + S.mu1) / 2, y: yE, yref: "y", yanchor: "bottom", showarrow: false,
+      text: `<b>d = ${f2(d)}</b> · Δ = ${f1(S.mu1 - S.mu0)}`, font: { size: 11.5, color: "#4a2a7a" },
+      bgcolor: "rgba(255,255,255,0.85)", borderpad: 2 });
+  }
   aR.forEach(r => { if (r && areaMass(S.mu0, se, r.x[0], r.x[r.x.length - 1]) > 0.0008) lab(r, S.mu0, S.tail === "two" ? "α/2" : "α", COL.a); });
 
   // current sample: x̄ line + CI bar in the lower panel
@@ -475,7 +509,8 @@ function render() {
   $("s_cv").textContent = t === "two" ? `${f1(M.lo)} | ${f1(M.hi)}` : f1(t === "right" ? M.hi : M.lo);
   $("s_cvz").textContent = (t === "two" ? "z* = ±" : "z* = " + (t === "left" ? "−" : "")) + f2(M.zc);
   $("s_d").textContent = f2((S.mu1 - S.mu0) / S.sig);
-
+  $("st_pw").classList.toggle("on", S.showPw);
+  $("lg_pw").style.display = S.showPw ? "" : "none";
   // current sample follows the sliders (same random noise u, new parameters)
   let cur = null;
   if (S.u != null) cur = evalSample(trueMean() + S.u * se, M);
