@@ -1,0 +1,1106 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.9.38">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Evandro M. S. Gomes">
+<meta name="author" content="Solbee Kim">
+<meta name="author" content="John Vasconcelos">
+<meta name="dcterms.date" content="2026-11-20">
+
+<title>Assignment 09 (Maps) - Data Visualization EPPS 6356 – John Vasconcelos</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<script src="../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-daee3dbc31499a3618572225bd8afd09.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-cf1c33a087c0a85e603096bb70efc310.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script src="../site_libs/quarto-contrib/glightbox/glightbox.min.js"></script>
+<link href="../site_libs/quarto-contrib/glightbox/glightbox.min.css" rel="stylesheet">
+<link href="../site_libs/quarto-contrib/glightbox/lightbox.css" rel="stylesheet">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+
+<link rel="stylesheet" href="../styles.css">
+</head>
+
+<body class="nav-fixed quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top quarto-banner">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../index.html"> 
+<span class="menu-text">Home</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../pages/research.html"> 
+<span class="menu-text">Research</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../pages/teaching.html"> 
+<span class="menu-text">Teaching</span></a>
+  </li>  
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-statapps" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">StatApps</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-statapps">    
+        <li>
+    <a class="dropdown-item" href="../pages/w6_binomial_distribution.html">
+ <span class="dropdown-text">Binomial Distribution</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../pages/w6_hypergeometric_distribution.html">
+ <span class="dropdown-text">Hypergeometric Distribution</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../pages/w6_poisson_distribution.html">
+ <span class="dropdown-text">Poisson Distribution</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../pages/w8_sampling_distribution.html">
+ <span class="dropdown-text">Sampling Distributions</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../pages/w9_confidence_intervals.html">
+ <span class="dropdown-text">Confidence Intervals</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../pages/w9_t_distribution.html">
+ <span class="dropdown-text">Normal vs.&nbsp;t Distribution</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../pages/w10_hypothesis_testing.html">
+ <span class="dropdown-text">Hypothesis Testing</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../pages/w10_errors_power.html">
+ <span class="dropdown-text">Type I &amp; II Errors</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../pages/w11_anova.html">
+ <span class="dropdown-text">One-Way ANOVA</span></a>
+  </li>  
+    </ul>
+  </li>
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-stattables" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">StatTables</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-stattables">    
+        <li>
+    <a class="dropdown-item" href="../pages/z_table.html">
+ <span class="dropdown-text">Z-Table</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../pages/t_table.html">
+ <span class="dropdown-text">T-Table</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../pages/chi_square_table.html">
+ <span class="dropdown-text">Chi-Square Table</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../pages/f_table.html">
+ <span class="dropdown-text">F-Table</span></a>
+  </li>  
+    </ul>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link" href="../pages/cv.html"> 
+<span class="menu-text">CV</span></a>
+  </li>  
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-portfolio" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Portfolio</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-portfolio">    
+        <li>
+    <a class="dropdown-item" href="../pages/apps.html">
+ <span class="dropdown-text">Apps</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../pages/powerbi.html">
+ <span class="dropdown-text">Power BI</span></a>
+  </li>  
+    </ul>
+  </li>
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-epps-6356" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">EPPS 6356</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-epps-6356">    
+        <li>
+    <a class="dropdown-item" href="../pages_epps_6356/assign01_Data_Visualization.html">
+ <span class="dropdown-text">Assignment 01</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../pages_epps_6356/assign02_Data_Visualization.html">
+ <span class="dropdown-text">Assignment 02</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../pages_epps_6356/assign03_Data_Visualization.html">
+ <span class="dropdown-text">Assignment 03</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../pages_epps_6356/assign04_2_Data_Visualization.html">
+ <span class="dropdown-text">Note on Grammar of Graphics</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../pages_epps_6356/assign04_Hackathon1_Data_Visualization.html">
+ <span class="dropdown-text">Assignment 04 (Hackathon 1)</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../pages_epps_6356/assign05_Data_Visualization.html">
+ <span class="dropdown-text">Assignment 05</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../pages_epps_6356/assign06_Data_Visualization.html">
+ <span class="dropdown-text">Assignment 06</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../pages_epps_6356/assign07_Hackathon2_Data_Visualization.html">
+ <span class="dropdown-text">Assignment 07 (Hackathon 2)</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../pages_epps_6356/assign08_Dashboard_Data_Visualization.html">
+ <span class="dropdown-text">Assignment 08 (Dashboard)</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../pages_epps_6356/assign09_Maps_Data_Visualization.html">
+ <span class="dropdown-text">Assignment 09 (Maps)</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../pages_epps_6356/va_dashboard.html">
+ <span class="dropdown-text">VA Budget Dashboard</span></a>
+  </li>  
+    </ul>
+  </li>
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-epps-6302" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">EPPS 6302</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-epps-6302">    
+        <li>
+    <a class="dropdown-item" href="../pages_epps_6302/assign02_Data_Collection.html">
+ <span class="dropdown-text">Assignment 02</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../pages_epps_6302/assign03_Data_Collection.html">
+ <span class="dropdown-text">Assignment 03</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../pages_epps_6302/assign04_Data_Collection.html">
+ <span class="dropdown-text">Assignment 04</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../pages_epps_6302/assign05_Data_Collection.html">
+ <span class="dropdown-text">Assignment 05</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../pages_epps_6302/assign06_Data_Collection.html">
+ <span class="dropdown-text">Assignment 06</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../pages_epps_6302/assign07_Data_Collection.html">
+ <span class="dropdown-text">Assignment 07</span></a>
+  </li>  
+    </ul>
+  </li>
+</ul>
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/johnvasconcelos"> <i class="bi bi-github" role="img">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="mailto:john.vasconcelos@utdallas.edu"> <i class="bi bi-envelope" role="img">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<header id="title-block-header" class="quarto-title-block default page-columns page-full">
+  <div class="quarto-title-banner page-columns page-full">
+    <div class="quarto-title column-body">
+      <h1 class="title">Assignment 09 (Maps) - Data Visualization EPPS 6356</h1>
+            <p class="subtitle lead">Team Project: Where VA money goes, by state</p>
+                      </div>
+  </div>
+    
+  
+  <div class="quarto-title-meta">
+
+      <div>
+      <div class="quarto-title-meta-heading">Authors</div>
+      <div class="quarto-title-meta-contents">
+               <p>Evandro M. S. Gomes </p>
+               <p>Solbee Kim </p>
+               <p>John Vasconcelos </p>
+            </div>
+    </div>
+      
+      <div>
+      <div class="quarto-title-meta-heading">Published</div>
+      <div class="quarto-title-meta-contents">
+        <p class="date">November 20, 2026</p>
+      </div>
+    </div>
+    
+      
+    </div>
+    
+  
+  </header><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#a.-spatial-plan" id="toc-a.-spatial-plan" class="nav-link active" data-scroll-target="#a.-spatial-plan">A. Spatial plan</a></li>
+  <li><a href="#b.-static-maps" id="toc-b.-static-maps" class="nav-link" data-scroll-target="#b.-static-maps">B. Static maps</a>
+  <ul class="collapse">
+  <li><a href="#join-and-check" id="toc-join-and-check" class="nav-link" data-scroll-target="#join-and-check">1. Join and check</a></li>
+  <li><a href="#projection-comparison" id="toc-projection-comparison" class="nav-link" data-scroll-target="#projection-comparison">2. Projection comparison</a></li>
+  <li><a href="#choropleth" id="toc-choropleth" class="nav-link" data-scroll-target="#choropleth">3. Choropleth</a></li>
+  <li><a href="#classification-comparison" id="toc-classification-comparison" class="nav-link" data-scroll-target="#classification-comparison">4. Classification comparison</a></li>
+  <li><a href="#proportional-symbols" id="toc-proportional-symbols" class="nav-link" data-scroll-target="#proportional-symbols">5. Proportional symbols</a></li>
+  </ul></li>
+  <li><a href="#c.-reactive-map" id="toc-c.-reactive-map" class="nav-link" data-scroll-target="#c.-reactive-map">C. Reactive map</a></li>
+  <li><a href="#data-note" id="toc-data-note" class="nav-link" data-scroll-target="#data-note">Data note</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content quarto-banner-title-block" id="quarto-document-content">
+
+
+
+
+
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Open the reactive map
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>The interactive version is the <strong>Map</strong> page of the team dashboard: <a href="../pages_epps_6356/va_dashboard.html" class="btn btn-primary">VA Budget Dashboard → Map tab</a></p>
+</div>
+</div>
+<p>Our dashboard follows the VA budget at the national level: what the executive branch requests, what Congress enacts, and how mandatory funding has overtaken discretionary funding (RQ2). The budget volumes have no geography, so this assignment adds the <strong>Geographic Distribution of VA Expenditures (GDX)</strong>, the VA’s own annual breakdown of its spending by state. It lets us ask where RQ2 happens: <strong>in which states mandatory benefits, mostly disability compensation, have become the larger part of what VA spends.</strong></p>
+<section id="a.-spatial-plan" class="level1">
+<h1>A. Spatial plan</h1>
+<p>This section is also added to the team’s <code>PLAN.md</code> under “Assignment 9”.</p>
+<ol type="1">
+<li><strong>Units and boundaries.</strong> One row of the map is a <strong>state</strong>: the 50 states, the District of Columbia, Puerto Rico and Guam, which are the 53 units in GDX. Boundaries come from the U.S. Census Bureau cartographic boundary file of states (1:10m), as distributed in the <code>us-atlas</code> package. The join key is the <strong>state name</strong>; GDX has no FIPS code, so names are cleaned with <code>str_squish()</code> (the GDX file pads them with spaces) before joining.</li>
+<li><strong>Variables.</strong> (a) <strong>Compensation &amp; pension share</strong>: compensation and pension as a % of the state’s VA spending, a <strong>share</strong> shown as a choropleth. (b) <strong>Construction share</strong>, % of the state’s VA spending, and (c) <strong>medical care per unique patient</strong>, in dollars, a share and a rate shown as choropleths on the dashboard. (d) <strong>Total VA spending</strong>, in billions of dollars, a <strong>total</strong> shown with proportional symbols. GDX advises against dividing compensation, pension or total spending by the veteran population, because beneficiaries are a different population, so we use shares and per-patient rates instead of “per veteran” figures. Loan Guaranty is left out of state totals, because GDX books all of it in Travis County, Texas. The District of Columbia is shown as “not comparable”, because its totals include VA Central Office spending.</li>
+<li><strong>Coordinate reference systems.</strong> Data are stored in <strong>EPSG:4326</strong> (longitude/latitude), the format of the boundary file and the one Leaflet expects. Static maps use <strong>EPSG:5070</strong> (Albers equal-area for the contiguous U.S.), so that state areas are comparable, with Alaska, Hawaii and Puerto Rico moved and resized next to the lower 48 (a small function on this page does what <code>tigris::shift_geometry()</code> does, without downloading a reference file at render time). The interactive map draws in <strong>EPSG:3857</strong> (Web Mercator), which Leaflet uses for its tiles and reprojects to on its own.</li>
+<li><strong>Interaction.</strong> The dashboard map changes with the <strong>variable</strong>, the <strong>fiscal year</strong> (FY2015–FY2023) and the <strong>colour scale</strong> (quantile classes or continuous). With the map update two value boxes (states shown, median of the selected measure), a third box with the national value, and a companion chart of the ten states highest on the selected measure.</li>
+</ol>
+</section>
+<section id="b.-static-maps" class="level1">
+<h1>B. Static maps</h1>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse); <span class="fu">library</span>(readxl); <span class="fu">library</span>(sf); <span class="fu">library</span>(tmap); <span class="fu">library</span>(patchwork)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="co"># GDX: one workbook per fiscal year, state summary on the "State Level Expenditures" sheet ($000s)</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>read_gdx <span class="ot">&lt;-</span> <span class="cf">function</span>(path) {</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>  fy <span class="ot">&lt;-</span> <span class="dv">2000</span> <span class="sc">+</span> <span class="fu">as.integer</span>(<span class="fu">str_extract</span>(<span class="fu">basename</span>(path), <span class="st">"</span><span class="sc">\\</span><span class="st">d{2}"</span>))</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">read_excel</span>(path, <span class="at">sheet =</span> <span class="st">"State Level Expenditures"</span>, <span class="at">skip =</span> <span class="dv">2</span>, <span class="at">.name_repair =</span> <span class="st">"unique_quiet"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">select</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">11</span>) <span class="sc">|&gt;</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>    <span class="fu">set_names</span>(<span class="fu">c</span>(<span class="st">"state"</span>, <span class="st">"vet_pop"</span>, <span class="st">"total"</span>, <span class="st">"comp_pension"</span>, <span class="st">"construction"</span>, <span class="st">"edu_voc"</span>,</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>                <span class="st">"loan_guaranty"</span>, <span class="st">"gen_operating"</span>, <span class="st">"insurance"</span>, <span class="st">"medical_care"</span>, <span class="st">"unique_patients"</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">state =</span> <span class="fu">str_squish</span>(state)) <span class="sc">|&gt;</span>                 <span class="co"># names are padded with spaces</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>    <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(state), <span class="sc">!</span><span class="fu">is.na</span>(total), state <span class="sc">!=</span> <span class="st">"Totals"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="fu">across</span>(<span class="sc">-</span>state, as.numeric), <span class="at">fiscal_year =</span> fy, <span class="at">.before =</span> <span class="dv">1</span>)</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>va_states <span class="ot">&lt;-</span> <span class="fu">list.files</span>(here<span class="sc">::</span><span class="fu">here</span>(<span class="st">"files"</span>), <span class="at">pattern =</span> <span class="st">"^GDX_FY</span><span class="sc">\\</span><span class="st">d{2}</span><span class="sc">\\</span><span class="st">.xlsx$"</span>, <span class="at">full.names =</span> <span class="cn">TRUE</span>) <span class="sc">|&gt;</span></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">map</span>(read_gdx) <span class="sc">|&gt;</span> <span class="fu">list_rbind</span>() <span class="sc">|&gt;</span></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">total_ex_loan =</span> total <span class="sc">-</span> loan_guaranty,              <span class="co"># Loan Guaranty is all booked in Texas</span></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>         <span class="at">cp_share   =</span> <span class="dv">100</span> <span class="sc">*</span> comp_pension <span class="sc">/</span> total_ex_loan,     <span class="co"># % of state VA spending</span></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>         <span class="at">med_per_pt =</span> <span class="dv">1000</span> <span class="sc">*</span> medical_care <span class="sc">/</span> unique_patients,  <span class="co"># $ per unique patient</span></span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>         <span class="at">total_bn   =</span> total_ex_loan <span class="sc">/</span> <span class="fl">1e6</span>,                    <span class="co"># $ billions</span></span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>         <span class="fu">across</span>(<span class="fu">c</span>(cp_share, med_per_pt, total_bn),            <span class="co"># DC includes VA headquarters</span></span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>                \(x) <span class="fu">if_else</span>(state <span class="sc">==</span> <span class="st">"District of Columbia"</span>, <span class="cn">NA</span>, x)))</span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a><span class="fu">count</span>(va_states, fiscal_year)   <span class="co"># 53 units in every year</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 9 × 2
+  fiscal_year     n
+        &lt;dbl&gt; &lt;int&gt;
+1        2015    53
+2        2016    53
+3        2017    53
+4        2018    53
+5        2019    53
+6        2020    53
+7        2021    53
+8        2022    53
+9        2023    53</code></pre>
+</div>
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Boundaries: Census cartographic boundary file of states, 1:10m (us-atlas), EPSG:4326</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>states <span class="ot">&lt;-</span> <span class="fu">st_read</span>(here<span class="sc">::</span><span class="fu">here</span>(<span class="st">"files/states-10m.json"</span>), <span class="at">layer =</span> <span class="st">"states"</span>, <span class="at">quiet =</span> <span class="cn">TRUE</span>) <span class="sc">|&gt;</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">st_set_crs</span>(<span class="dv">4326</span>) <span class="sc">|&gt;</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">transmute</span>(<span class="at">state =</span> name, <span class="at">fips =</span> id)</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a><span class="co"># The westernmost Aleutian Islands lie across the 180th meridian; crop them so maps are not</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="co"># stretched around the globe (used only for drawing, after the join check)</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>crop_us <span class="ot">&lt;-</span> <span class="cf">function</span>(x) {</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>  old <span class="ot">&lt;-</span> <span class="fu">sf_use_s2</span>(<span class="cn">FALSE</span>); <span class="fu">on.exit</span>(<span class="fu">sf_use_s2</span>(old))</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">suppressMessages</span>(<span class="fu">suppressWarnings</span>(<span class="fu">st_crop</span>(x, <span class="fu">c</span>(<span class="at">xmin =</span> <span class="sc">-</span><span class="dv">180</span>, <span class="at">ymin =</span> <span class="dv">15</span>, <span class="at">xmax =</span> <span class="sc">-</span><span class="dv">60</span>, <span class="at">ymax =</span> <span class="dv">72</span>))))</span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a><span class="co"># Albers equal-area (EPSG:5070) with Alaska, Hawaii and Puerto Rico moved and resized next to the</span></span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a><span class="co"># lower 48 (like tigris::shift_geometry(), but without downloading a reference file at render time)</span></span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>move_inset <span class="ot">&lt;-</span> <span class="cf">function</span>(x, name, scale, lower_left) {</span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>  i <span class="ot">&lt;-</span> x<span class="sc">$</span>state <span class="sc">==</span> name</span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="sc">!</span><span class="fu">any</span>(i)) <span class="fu">return</span>(x)</span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>  g <span class="ot">&lt;-</span> <span class="fu">st_geometry</span>(x)[i]</span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a>  ctr <span class="ot">&lt;-</span> <span class="fu">st_centroid</span>(<span class="fu">st_union</span>(g))</span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a>  g <span class="ot">&lt;-</span> (g <span class="sc">-</span> ctr) <span class="sc">*</span> scale <span class="sc">+</span> ctr</span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a>  bb <span class="ot">&lt;-</span> <span class="fu">st_bbox</span>(g)</span>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a>  g <span class="ot">&lt;-</span> g <span class="sc">+</span> <span class="fu">c</span>(lower_left[<span class="dv">1</span>] <span class="sc">-</span> bb[[<span class="st">"xmin"</span>]], lower_left[<span class="dv">2</span>] <span class="sc">-</span> bb[[<span class="st">"ymin"</span>]])</span>
+<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a>  <span class="fu">st_geometry</span>(x)[i] <span class="ot">&lt;-</span> <span class="fu">st_set_crs</span>(g, <span class="fu">st_crs</span>(x))</span>
+<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a>  x</span>
+<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb3-26"><a href="#cb3-26" aria-hidden="true" tabindex="-1"></a>shift_us <span class="ot">&lt;-</span> <span class="cf">function</span>(x) {</span>
+<span id="cb3-27"><a href="#cb3-27" aria-hidden="true" tabindex="-1"></a>  x <span class="sc">|&gt;</span> <span class="fu">st_transform</span>(<span class="dv">5070</span>) <span class="sc">|&gt;</span></span>
+<span id="cb3-28"><a href="#cb3-28" aria-hidden="true" tabindex="-1"></a>    <span class="fu">move_inset</span>(<span class="st">"Alaska"</span>,      <span class="fl">0.45</span>, <span class="fu">c</span>(<span class="sc">-</span><span class="dv">2400000</span>, <span class="sc">-</span><span class="dv">150000</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb3-29"><a href="#cb3-29" aria-hidden="true" tabindex="-1"></a>    <span class="fu">move_inset</span>(<span class="st">"Hawaii"</span>,      <span class="fl">1.4</span>,  <span class="fu">c</span>(<span class="sc">-</span><span class="dv">1150000</span>, <span class="sc">-</span><span class="dv">100000</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb3-30"><a href="#cb3-30" aria-hidden="true" tabindex="-1"></a>    <span class="fu">move_inset</span>(<span class="st">"Puerto Rico"</span>, <span class="fl">2.5</span>,  <span class="fu">c</span>( <span class="dv">1700000</span>,  <span class="sc">-</span><span class="dv">50000</span>))</span>
+<span id="cb3-31"><a href="#cb3-31" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+<section id="join-and-check" class="level2">
+<h2 class="anchored" data-anchor-id="join-and-check">1. Join and check</h2>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>fy23 <span class="ot">&lt;-</span> <span class="fu">filter</span>(va_states, fiscal_year <span class="sc">==</span> <span class="dv">2023</span>)</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="co"># GDX rows with no matching boundary</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="fu">anti_join</span>(fy23, <span class="fu">st_drop_geometry</span>(states), <span class="at">by =</span> <span class="st">"state"</span>) <span class="sc">|&gt;</span> <span class="fu">select</span>(state)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 0 × 1
+# ℹ 1 variable: state &lt;chr&gt;</code></pre>
+</div>
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Boundaries with no GDX row</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="fu">anti_join</span>(<span class="fu">st_drop_geometry</span>(states), fy23, <span class="at">by =</span> <span class="st">"state"</span>) <span class="sc">|&gt;</span> <span class="fu">select</span>(state)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>                                         state
+1                               American Samoa
+2 Commonwealth of the Northern Mariana Islands
+3                 United States Virgin Islands</code></pre>
+</div>
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>va_map <span class="ot">&lt;-</span> states <span class="sc">|&gt;</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">inner_join</span>(fy23, <span class="at">by =</span> <span class="st">"state"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(state <span class="sc">!=</span> <span class="st">"Guam"</span>) <span class="sc">|&gt;</span>                       <span class="co"># see note below</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">crop_us</span>() <span class="sc">|&gt;</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">shift_us</span>()                                       <span class="co"># Albers (EPSG:5070), AK/HI/PR moved</span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a><span class="fu">nrow</span>(va_map)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 52</code></pre>
+</div>
+</div>
+<p>Once the padded names are cleaned, all 53 GDX units find a boundary; the only boundaries without data are American Samoa, the Northern Mariana Islands and the U.S. Virgin Islands, which GDX does not report. Guam is in the data but is left off the static maps, because placing it would stretch the frame across the Pacific; it is on the interactive map.</p>
+</section>
+<section id="projection-comparison" class="level2">
+<h2 class="anchored" data-anchor-id="projection-comparison">2. Projection comparison</h2>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>us <span class="ot">&lt;-</span> states <span class="sc">|&gt;</span> <span class="fu">filter</span>(state <span class="sc">%in%</span> fy23<span class="sc">$</span>state, state <span class="sc">!=</span> <span class="st">"Guam"</span>) <span class="sc">|&gt;</span> <span class="fu">crop_us</span>() <span class="sc">|&gt;</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">hl =</span> <span class="fu">case_when</span>(state <span class="sc">==</span> <span class="st">"Alaska"</span> <span class="sc">~</span> <span class="st">"Alaska"</span>, state <span class="sc">==</span> <span class="st">"Texas"</span> <span class="sc">~</span> <span class="st">"Texas"</span>, <span class="at">.default =</span> <span class="st">"Other"</span>))</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>panel <span class="ot">&lt;-</span> <span class="cf">function</span>(crs, title) <span class="fu">ggplot</span>(<span class="fu">st_transform</span>(us, crs)) <span class="sc">+</span></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_sf</span>(<span class="fu">aes</span>(<span class="at">fill =</span> hl), <span class="at">colour =</span> <span class="st">"white"</span>, <span class="at">linewidth =</span> <span class="fl">0.1</span>) <span class="sc">+</span></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_manual</span>(<span class="at">values =</span> <span class="fu">c</span>(<span class="at">Alaska =</span> <span class="st">"#0A3161"</span>, <span class="at">Texas =</span> <span class="st">"#B31942"</span>, <span class="at">Other =</span> <span class="st">"grey85"</span>), <span class="at">guide =</span> <span class="st">"none"</span>) <span class="sc">+</span></span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> title) <span class="sc">+</span> <span class="fu">theme_void</span>(<span class="at">base_size =</span> <span class="dv">11</span>)</span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a><span class="fu">panel</span>(<span class="dv">4326</span>, <span class="st">"EPSG:4326 (lon/lat)"</span>) <span class="sc">+</span> <span class="fu">panel</span>(<span class="dv">3857</span>, <span class="st">"EPSG:3857 (Web Mercator)"</span>) <span class="sc">+</span></span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">panel</span>(<span class="dv">5070</span>, <span class="st">"EPSG:5070 (Albers equal-area)"</span>) <span class="sc">+</span> <span class="fu">plot_layout</span>(<span class="at">nrow =</span> <span class="dv">1</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><a href="assign09_Maps_Data_Visualization_files/figure-html/projections-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-1"><img src="assign09_Maps_Data_Visualization_files/figure-html/projections-1.png" class="img-fluid figure-img" width="1152"></a></p>
+</figure>
+</div>
+</div>
+</div>
+<p>In longitude/latitude and above all in Web Mercator, Alaska (blue) looks larger than Texas (red) several times over and the northern states are stretched, while in Albers equal-area Alaska is about twice the size of Texas, as it really is. We publish Albers (EPSG:5070), with Alaska, Hawaii and Puerto Rico moved next to the lower 48 so the map is not mostly empty ocean.</p>
+</section>
+<section id="choropleth" class="level2">
+<h2 class="anchored" data-anchor-id="choropleth">3. Choropleth</h2>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">tm_shape</span>(va_map) <span class="sc">+</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_polygons</span>(</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">fill =</span> <span class="st">"cp_share"</span>,</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">fill.scale =</span> <span class="fu">tm_scale_intervals</span>(<span class="at">style =</span> <span class="st">"quantile"</span>, <span class="at">n =</span> <span class="dv">5</span>, <span class="at">values =</span> <span class="st">"brewer.blues"</span>,</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>                                    <span class="at">value.na =</span> <span class="st">"grey85"</span>, <span class="at">label.na =</span> <span class="st">"Not comparable (DC)"</span>,</span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>                                    <span class="at">label.format =</span> <span class="fu">list</span>(<span class="at">digits =</span> <span class="dv">0</span>, <span class="at">suffix =</span> <span class="st">"%"</span>)),</span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">fill.legend =</span> <span class="fu">tm_legend</span>(<span class="at">title =</span> <span class="st">"Compensation &amp; pension</span><span class="sc">\n</span><span class="st">(% of state VA spending)"</span>),</span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">col =</span> <span class="st">"white"</span>, <span class="at">lwd =</span> <span class="fl">0.4</span>) <span class="sc">+</span></span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_title</span>(<span class="st">"In FY2023, disability compensation and pensions were most of VA spending in the South"</span>) <span class="sc">+</span></span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_credits</span>(<span class="st">"Source: VA, Geographic Distribution of VA Expenditures (GDX), FY2023. Boundaries: U.S. Census Bureau (us-atlas).</span><span class="sc">\n</span><span class="st">Projection: Albers equal-area (EPSG:5070); Alaska, Hawaii and Puerto Rico moved and resized."</span>,</span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a>             <span class="at">position =</span> <span class="fu">tm_pos_out</span>(<span class="st">"center"</span>, <span class="st">"bottom"</span>), <span class="at">size =</span> <span class="fl">0.7</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><a href="assign09_Maps_Data_Visualization_files/figure-html/choropleth-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-2"><img src="assign09_Maps_Data_Visualization_files/figure-html/choropleth-1.png" class="img-fluid figure-img" width="864"></a></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="classification-comparison" class="level2">
+<h2 class="anchored" data-anchor-id="classification-comparison">4. Classification comparison</h2>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="st">"equal"</span>, <span class="st">"quantile"</span>, <span class="st">"jenks"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">map</span>(\(s) <span class="fu">tm_shape</span>(va_map) <span class="sc">+</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>        <span class="fu">tm_polygons</span>(<span class="at">fill =</span> <span class="st">"cp_share"</span>,</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>                    <span class="at">fill.scale =</span> <span class="fu">tm_scale_intervals</span>(<span class="at">style =</span> s, <span class="at">n =</span> <span class="dv">5</span>, <span class="at">values =</span> <span class="st">"brewer.blues"</span>,</span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>                                                    <span class="at">value.na =</span> <span class="st">"grey85"</span>, <span class="at">label.na =</span> <span class="st">"DC"</span>,</span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>                                                    <span class="at">label.format =</span> <span class="fu">list</span>(<span class="at">digits =</span> <span class="dv">0</span>)),</span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>                    <span class="at">fill.legend =</span> <span class="fu">tm_legend</span>(<span class="at">title =</span> <span class="fu">paste0</span>(s, <span class="st">" (%)"</span>)),</span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>                    <span class="at">col =</span> <span class="st">"white"</span>, <span class="at">lwd =</span> <span class="fl">0.2</span>) <span class="sc">+</span></span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>        <span class="fu">tm_layout</span>(<span class="at">legend.outside =</span> <span class="cn">TRUE</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tmap_arrange</span>(<span class="at">ncol =</span> <span class="dv">3</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><a href="assign09_Maps_Data_Visualization_files/figure-html/classes-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-3"><img src="assign09_Maps_Data_Visualization_files/figure-html/classes-1.png" class="img-fluid figure-img" width="1152"></a></p>
+</figure>
+</div>
+</div>
+</div>
+<p>The shares run from 40% to 63% and are spread fairly evenly, so the three maps agree on the broad pattern: the Southeast and Texas are darkest, the Upper Midwest and New England lightest. <strong>Equal intervals</strong> keep the darkest class for the states above 59% (Virginia, Georgia, Alabama, the Carolinas, Texas and Oklahoma), so the southern cluster looks smaller and most of the West falls in one middle class. <strong>Quantiles</strong> put about ten states in each class, so Washington, Tennessee and New Jersey join the top class and differences of two or three points look like full colour steps. <strong>Jenks</strong> places its breaks at the natural gaps and ends up close to the quantile map. We publish <strong>quantiles</strong>, because the question is <em>which</em> states depend relatively more on mandatory benefits, and the legend says the classes are quintiles so readers do not take each colour step as an equal amount.</p>
+</section>
+<section id="proportional-symbols" class="level2">
+<h2 class="anchored" data-anchor-id="proportional-symbols">5. Proportional symbols</h2>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="co"># one point per state, on its largest polygon (so Michigan's sits on the Lower Peninsula)</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>pts <span class="ot">&lt;-</span> va_map <span class="sc">|&gt;</span> <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(total_bn)) <span class="sc">|&gt;</span></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">st_cast</span>(<span class="st">"MULTIPOLYGON"</span>) <span class="sc">|&gt;</span> <span class="fu">st_cast</span>(<span class="st">"POLYGON"</span>, <span class="at">warn =</span> <span class="cn">FALSE</span>) <span class="sc">|&gt;</span>   <span class="co"># one row per polygon</span></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">area =</span> <span class="fu">as.numeric</span>(<span class="fu">st_area</span>(geometry))) <span class="sc">|&gt;</span></span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(<span class="fu">desc</span>(area)) <span class="sc">|&gt;</span> <span class="fu">distinct</span>(state, <span class="at">.keep_all =</span> <span class="cn">TRUE</span>) <span class="sc">|&gt;</span>   <span class="co"># largest polygon of each state</span></span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">st_point_on_surface</span>()</span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>() <span class="sc">+</span></span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_sf</span>(<span class="at">data =</span> va_map, <span class="at">fill =</span> <span class="st">"grey92"</span>, <span class="at">colour =</span> <span class="st">"white"</span>, <span class="at">linewidth =</span> <span class="fl">0.2</span>) <span class="sc">+</span></span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_sf</span>(<span class="at">data =</span> pts, <span class="fu">aes</span>(<span class="at">size =</span> total_bn), <span class="at">shape =</span> <span class="dv">21</span>, <span class="at">fill =</span> <span class="st">"#B31942"</span>, <span class="at">colour =</span> <span class="st">"white"</span>, <span class="at">alpha =</span> <span class="fl">0.75</span>) <span class="sc">+</span></span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_size_area</span>(<span class="at">max_size =</span> <span class="dv">16</span>, <span class="at">name =</span> <span class="st">"VA spending, FY2023 ($ billions)"</span>, <span class="at">breaks =</span> <span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">5</span>, <span class="dv">10</span>, <span class="dv">20</span>)) <span class="sc">+</span></span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Texas, California and Florida receive the most VA money"</span>,</span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a>       <span class="at">caption =</span> <span class="st">"Source: VA, GDX FY2023 (excludes Loan Guaranty and DC). Boundaries: U.S. Census Bureau (us-atlas).</span><span class="sc">\n</span><span class="st">Projection: Albers equal-area (EPSG:5070); Alaska, Hawaii and Puerto Rico moved and resized."</span>) <span class="sc">+</span></span>
+<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_void</span>() <span class="sc">+</span></span>
+<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">"bottom"</span>, <span class="at">plot.title =</span> <span class="fu">element_text</span>(<span class="at">face =</span> <span class="st">"bold"</span>),</span>
+<span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a>        <span class="at">plot.caption =</span> <span class="fu">element_text</span>(<span class="at">hjust =</span> <span class="dv">0</span>, <span class="at">size =</span> <span class="dv">8</span>, <span class="at">colour =</span> <span class="st">"grey30"</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><a href="assign09_Maps_Data_Visualization_files/figure-html/symbols-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-4"><img src="assign09_Maps_Data_Visualization_files/figure-html/symbols-1.png" class="img-fluid figure-img" width="864"></a></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Total spending is a count, so it is drawn with symbols sized by value rather than with colour: a choropleth of totals would mostly show where veterans live, and large, empty states would look important because of their area.</p>
+</section>
+</section>
+<section id="c.-reactive-map" class="level1">
+<h1>C. Reactive map</h1>
+<p>The reactive map is the <strong>Map</strong> page of the team dashboard, built the same way as the RQ1 and RQ2 pages (a bslib Shiny app that runs in the browser through Shinylive, so it needs no server). It reads <code>va_states.csv</code> and <code>us_states.geojson</code>, which <code>va_map_data.R</code> builds from the same GDX workbooks and boundary file used above (boundaries simplified to about 80 KB so the page loads quickly).</p>
+<ul>
+<li><strong>Map:</strong> a Leaflet choropleth built from an <code>sf</code> object in EPSG:4326, with a label for each state (name and value) and a legend titled with the variable and its units.</li>
+<li><strong>Inputs:</strong> the measure (compensation &amp; pension share, construction share, medical care per patient), the fiscal year (FY2015–FY2023) and the colour scale (quantile or continuous).</li>
+<li><strong>One shared <code>reactive()</code></strong> with the filtered <code>sf</code> data feeds the map, three value boxes and a top-10 chart.</li>
+<li>The data are read and joined once, at the top of <code>app.R</code>; the base map is drawn once and the polygons are redrawn with <code>leafletProxy()</code>.</li>
+</ul>
+<p><a href="../pages_epps_6356/va_dashboard.html">Open the dashboard and choose the <strong>Map</strong> tab →</a></p>
+</section>
+<section id="data-note" class="level1">
+<h1>Data note</h1>
+<ul>
+<li><strong>Data:</strong> U.S. Department of Veterans Affairs, National Center for Veterans Analysis and Statistics, <em>Geographic Distribution of VA Expenditures (GDX)</em>, FY2015–FY2023 (state summary sheets), downloaded from <a href="https://www.va.gov/vetdata/Expenditures.asp" class="uri">https://www.va.gov/vetdata/Expenditures.asp</a>. Expenditures in thousands of nominal dollars.</li>
+<li><strong>Boundaries:</strong> U.S. Census Bureau cartographic boundary file of states, 1:10m, from the <code>us-atlas</code> package (<code>states-10m.json</code>).</li>
+<li><strong>Choices:</strong> Loan Guaranty excluded from state totals (all booked in Texas); DC not compared (includes VA Central Office); no “per veteran” figures, following GDX’s own guidance; FY2024 and later left out, because GDX changed its method in FY2024.</li>
+<li><strong>Use of generative AI:</strong> Claude (Anthropic) helped write the code and draft the text on this page; the team checked the results against the GDX workbooks.</li>
+</ul>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+<script>var lightboxQuarto = GLightbox({"closeEffect":"zoom","descPosition":"bottom","loop":false,"openEffect":"zoom","selector":".lightbox"});
+(function() {
+  let previousOnload = window.onload;
+  window.onload = () => {
+    if (previousOnload) {
+      previousOnload();
+    }
+    lightboxQuarto.on('slide_before_load', (data) => {
+      const { slideIndex, slideNode, slideConfig, player, trigger } = data;
+      const href = trigger.getAttribute('href');
+      if (href !== null) {
+        const imgEl = window.document.querySelector(`a[href="${href}"] img`);
+        if (imgEl !== null) {
+          const srcAttr = imgEl.getAttribute("src");
+          if (srcAttr && srcAttr.startsWith("data:")) {
+            slideConfig.href = srcAttr;
+          }
+        }
+      } 
+    });
+  
+    lightboxQuarto.on('slide_after_load', (data) => {
+      const { slideIndex, slideNode, slideConfig, player, trigger } = data;
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(slideNode);
+      }
+    });
+  
+  };
+  
+})();
+          </script>
+
+
+
+
+</body></html>

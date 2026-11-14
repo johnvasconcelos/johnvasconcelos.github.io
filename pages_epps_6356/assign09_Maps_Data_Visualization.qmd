@@ -1,0 +1,226 @@
+---
+title: "Assignment 09 (Maps) - Data Visualization EPPS 6356"
+subtitle: "Team Project: Where VA money goes, by state"
+author:
+  - "Evandro M. S. Gomes"
+  - "Solbee Kim"
+  - "John Vasconcelos"
+date: "2026-11-20"
+format:
+  html:
+    code-fold: show
+    toc: true
+lightbox: true
+execute:
+  warning: false
+  message: false
+---
+
+::: callout-tip
+## Open the reactive map
+The interactive version is the **Map** page of the team dashboard: [VA Budget Dashboard → Map tab](va_dashboard.qmd){.btn .btn-primary}
+:::
+
+Our dashboard follows the VA budget at the national level: what the executive branch requests, what Congress enacts, and how mandatory funding has overtaken discretionary funding (RQ2). The budget volumes have no geography, so this assignment adds the **Geographic Distribution of VA Expenditures (GDX)**, the VA's own annual breakdown of its spending by state. It lets us ask where RQ2 happens: **in which states mandatory benefits, mostly disability compensation, have become the larger part of what VA spends.**
+
+# A. Spatial plan
+
+This section is also added to the team's `PLAN.md` under "Assignment 9".
+
+1. **Units and boundaries.** One row of the map is a **state**: the 50 states, the District of Columbia, Puerto Rico and Guam, which are the 53 units in GDX. Boundaries come from the U.S. Census Bureau cartographic boundary file of states (1:10m), as distributed in the `us-atlas` package. The join key is the **state name**; GDX has no FIPS code, so names are cleaned with `str_squish()` (the GDX file pads them with spaces) before joining.
+2. **Variables.** (a) **Compensation & pension share**: compensation and pension as a % of the state's VA spending, a **share** shown as a choropleth. (b) **Construction share**, % of the state's VA spending, and (c) **medical care per unique patient**, in dollars, a share and a rate shown as choropleths on the dashboard. (d) **Total VA spending**, in billions of dollars, a **total** shown with proportional symbols. GDX advises against dividing compensation, pension or total spending by the veteran population, because beneficiaries are a different population, so we use shares and per-patient rates instead of "per veteran" figures. Loan Guaranty is left out of state totals, because GDX books all of it in Travis County, Texas. The District of Columbia is shown as "not comparable", because its totals include VA Central Office spending.
+3. **Coordinate reference systems.** Data are stored in **EPSG:4326** (longitude/latitude), the format of the boundary file and the one Leaflet expects. Static maps use **EPSG:5070** (Albers equal-area for the contiguous U.S.), so that state areas are comparable, with Alaska, Hawaii and Puerto Rico moved and resized next to the lower 48 (a small function on this page does what `tigris::shift_geometry()` does, without downloading a reference file at render time). The interactive map draws in **EPSG:3857** (Web Mercator), which Leaflet uses for its tiles and reprojects to on its own.
+4. **Interaction.** The dashboard map changes with the **variable**, the **fiscal year** (FY2015–FY2023) and the **colour scale** (quantile classes or continuous). With the map update two value boxes (states shown, median of the selected measure), a third box with the national value, and a companion chart of the ten states highest on the selected measure.
+
+# B. Static maps
+
+```{r}
+#| label: setup
+library(tidyverse); library(readxl); library(sf); library(tmap); library(patchwork)
+
+# GDX: one workbook per fiscal year, state summary on the "State Level Expenditures" sheet ($000s)
+read_gdx <- function(path) {
+  fy <- 2000 + as.integer(str_extract(basename(path), "\\d{2}"))
+  read_excel(path, sheet = "State Level Expenditures", skip = 2, .name_repair = "unique_quiet") |>
+    select(1:11) |>
+    set_names(c("state", "vet_pop", "total", "comp_pension", "construction", "edu_voc",
+                "loan_guaranty", "gen_operating", "insurance", "medical_care", "unique_patients")) |>
+    mutate(state = str_squish(state)) |>                 # names are padded with spaces
+    filter(!is.na(state), !is.na(total), state != "Totals") |>
+    mutate(across(-state, as.numeric), fiscal_year = fy, .before = 1)
+}
+
+va_states <- list.files(here::here("files"), pattern = "^GDX_FY\\d{2}\\.xlsx$", full.names = TRUE) |>
+  map(read_gdx) |> list_rbind() |>
+  mutate(total_ex_loan = total - loan_guaranty,              # Loan Guaranty is all booked in Texas
+         cp_share   = 100 * comp_pension / total_ex_loan,     # % of state VA spending
+         med_per_pt = 1000 * medical_care / unique_patients,  # $ per unique patient
+         total_bn   = total_ex_loan / 1e6,                    # $ billions
+         across(c(cp_share, med_per_pt, total_bn),            # DC includes VA headquarters
+                \(x) if_else(state == "District of Columbia", NA, x)))
+
+count(va_states, fiscal_year)   # 53 units in every year
+
+# Boundaries: Census cartographic boundary file of states, 1:10m (us-atlas), EPSG:4326
+states <- st_read(here::here("files/states-10m.json"), layer = "states", quiet = TRUE) |>
+  st_set_crs(4326) |>
+  transmute(state = name, fips = id)
+
+# The westernmost Aleutian Islands lie across the 180th meridian; crop them so maps are not
+# stretched around the globe (used only for drawing, after the join check)
+crop_us <- function(x) {
+  old <- sf_use_s2(FALSE); on.exit(sf_use_s2(old))
+  suppressMessages(suppressWarnings(st_crop(x, c(xmin = -180, ymin = 15, xmax = -60, ymax = 72))))
+}
+
+# Albers equal-area (EPSG:5070) with Alaska, Hawaii and Puerto Rico moved and resized next to the
+# lower 48 (like tigris::shift_geometry(), but without downloading a reference file at render time)
+move_inset <- function(x, name, scale, lower_left) {
+  i <- x$state == name
+  if (!any(i)) return(x)
+  g <- st_geometry(x)[i]
+  ctr <- st_centroid(st_union(g))
+  g <- (g - ctr) * scale + ctr
+  bb <- st_bbox(g)
+  g <- g + c(lower_left[1] - bb[["xmin"]], lower_left[2] - bb[["ymin"]])
+  st_geometry(x)[i] <- st_set_crs(g, st_crs(x))
+  x
+}
+shift_us <- function(x) {
+  x |> st_transform(5070) |>
+    move_inset("Alaska",      0.45, c(-2400000, -150000)) |>
+    move_inset("Hawaii",      1.4,  c(-1150000, -100000)) |>
+    move_inset("Puerto Rico", 2.5,  c( 1700000,  -50000))
+}
+```
+
+## 1. Join and check
+
+```{r}
+#| label: join
+fy23 <- filter(va_states, fiscal_year == 2023)
+
+# GDX rows with no matching boundary
+anti_join(fy23, st_drop_geometry(states), by = "state") |> select(state)
+
+# Boundaries with no GDX row
+anti_join(st_drop_geometry(states), fy23, by = "state") |> select(state)
+
+va_map <- states |>
+  inner_join(fy23, by = "state") |>
+  filter(state != "Guam") |>                       # see note below
+  crop_us() |>
+  shift_us()                                       # Albers (EPSG:5070), AK/HI/PR moved
+nrow(va_map)
+```
+
+Once the padded names are cleaned, all 53 GDX units find a boundary; the only boundaries without data are American Samoa, the Northern Mariana Islands and the U.S. Virgin Islands, which GDX does not report. Guam is in the data but is left off the static maps, because placing it would stretch the frame across the Pacific; it is on the interactive map.
+
+## 2. Projection comparison
+
+```{r}
+#| label: projections
+#| fig-width: 12
+#| fig-height: 3.6
+us <- states |> filter(state %in% fy23$state, state != "Guam") |> crop_us() |>
+  mutate(hl = case_when(state == "Alaska" ~ "Alaska", state == "Texas" ~ "Texas", .default = "Other"))
+
+panel <- function(crs, title) ggplot(st_transform(us, crs)) +
+  geom_sf(aes(fill = hl), colour = "white", linewidth = 0.1) +
+  scale_fill_manual(values = c(Alaska = "#0A3161", Texas = "#B31942", Other = "grey85"), guide = "none") +
+  labs(title = title) + theme_void(base_size = 11)
+
+panel(4326, "EPSG:4326 (lon/lat)") + panel(3857, "EPSG:3857 (Web Mercator)") +
+  panel(5070, "EPSG:5070 (Albers equal-area)") + plot_layout(nrow = 1)
+```
+
+In longitude/latitude and above all in Web Mercator, Alaska (blue) looks larger than Texas (red) several times over and the northern states are stretched, while in Albers equal-area Alaska is about twice the size of Texas, as it really is. We publish Albers (EPSG:5070), with Alaska, Hawaii and Puerto Rico moved next to the lower 48 so the map is not mostly empty ocean.
+
+## 3. Choropleth
+
+```{r}
+#| label: choropleth
+#| fig-width: 9
+#| fig-height: 6
+tm_shape(va_map) +
+  tm_polygons(
+    fill = "cp_share",
+    fill.scale = tm_scale_intervals(style = "quantile", n = 5, values = "brewer.blues",
+                                    value.na = "grey85", label.na = "Not comparable (DC)",
+                                    label.format = list(digits = 0, suffix = "%")),
+    fill.legend = tm_legend(title = "Compensation & pension\n(% of state VA spending)"),
+    col = "white", lwd = 0.4) +
+  tm_title("In FY2023, disability compensation and pensions were most of VA spending in the South") +
+  tm_credits("Source: VA, Geographic Distribution of VA Expenditures (GDX), FY2023. Boundaries: U.S. Census Bureau (us-atlas).\nProjection: Albers equal-area (EPSG:5070); Alaska, Hawaii and Puerto Rico moved and resized.",
+             position = tm_pos_out("center", "bottom"), size = 0.7)
+```
+
+## 4. Classification comparison
+
+```{r}
+#| label: classes
+#| fig-width: 12
+#| fig-height: 3.4
+c("equal", "quantile", "jenks") |>
+  map(\(s) tm_shape(va_map) +
+        tm_polygons(fill = "cp_share",
+                    fill.scale = tm_scale_intervals(style = s, n = 5, values = "brewer.blues",
+                                                    value.na = "grey85", label.na = "DC",
+                                                    label.format = list(digits = 0)),
+                    fill.legend = tm_legend(title = paste0(s, " (%)")),
+                    col = "white", lwd = 0.2) +
+        tm_layout(legend.outside = TRUE)) |>
+  tmap_arrange(ncol = 3)
+```
+
+```{r}
+#| label: class-breaks
+#| echo: false
+x <- va_map$cp_share[!is.na(va_map$cp_share)]
+```
+
+The shares run from `r round(min(x))`% to `r round(max(x))`% and are spread fairly evenly, so the three maps agree on the broad pattern: the Southeast and Texas are darkest, the Upper Midwest and New England lightest. **Equal intervals** keep the darkest class for the states above 59% (Virginia, Georgia, Alabama, the Carolinas, Texas and Oklahoma), so the southern cluster looks smaller and most of the West falls in one middle class. **Quantiles** put about ten states in each class, so Washington, Tennessee and New Jersey join the top class and differences of two or three points look like full colour steps. **Jenks** places its breaks at the natural gaps and ends up close to the quantile map. We publish **quantiles**, because the question is *which* states depend relatively more on mandatory benefits, and the legend says the classes are quintiles so readers do not take each colour step as an equal amount.
+
+## 5. Proportional symbols
+
+```{r}
+#| label: symbols
+#| fig-width: 9
+#| fig-height: 6
+# one point per state, on its largest polygon (so Michigan's sits on the Lower Peninsula)
+pts <- va_map |> filter(!is.na(total_bn)) |>
+  st_cast("MULTIPOLYGON") |> st_cast("POLYGON", warn = FALSE) |>   # one row per polygon
+  mutate(area = as.numeric(st_area(geometry))) |>
+  arrange(desc(area)) |> distinct(state, .keep_all = TRUE) |>   # largest polygon of each state
+  st_point_on_surface()
+
+ggplot() +
+  geom_sf(data = va_map, fill = "grey92", colour = "white", linewidth = 0.2) +
+  geom_sf(data = pts, aes(size = total_bn), shape = 21, fill = "#B31942", colour = "white", alpha = 0.75) +
+  scale_size_area(max_size = 16, name = "VA spending, FY2023 ($ billions)", breaks = c(2, 5, 10, 20)) +
+  labs(title = "Texas, California and Florida receive the most VA money",
+       caption = "Source: VA, GDX FY2023 (excludes Loan Guaranty and DC). Boundaries: U.S. Census Bureau (us-atlas).\nProjection: Albers equal-area (EPSG:5070); Alaska, Hawaii and Puerto Rico moved and resized.") +
+  theme_void() +
+  theme(legend.position = "bottom", plot.title = element_text(face = "bold"),
+        plot.caption = element_text(hjust = 0, size = 8, colour = "grey30"))
+```
+
+Total spending is a count, so it is drawn with symbols sized by value rather than with colour: a choropleth of totals would mostly show where veterans live, and large, empty states would look important because of their area.
+
+# C. Reactive map
+
+The reactive map is the **Map** page of the team dashboard, built the same way as the RQ1 and RQ2 pages (a bslib Shiny app that runs in the browser through Shinylive, so it needs no server). It reads `va_states.csv` and `us_states.geojson`, which `va_map_data.R` builds from the same GDX workbooks and boundary file used above (boundaries simplified to about 80 KB so the page loads quickly).
+
+- **Map:** a Leaflet choropleth built from an `sf` object in EPSG:4326, with a label for each state (name and value) and a legend titled with the variable and its units.
+- **Inputs:** the measure (compensation & pension share, construction share, medical care per patient), the fiscal year (FY2015–FY2023) and the colour scale (quantile or continuous).
+- **One shared `reactive()`** with the filtered `sf` data feeds the map, three value boxes and a top-10 chart.
+- The data are read and joined once, at the top of `app.R`; the base map is drawn once and the polygons are redrawn with `leafletProxy()`.
+
+[Open the dashboard and choose the **Map** tab →](va_dashboard.qmd)
+
+# Data note
+
+- **Data:** U.S. Department of Veterans Affairs, National Center for Veterans Analysis and Statistics, *Geographic Distribution of VA Expenditures (GDX)*, FY2015–FY2023 (state summary sheets), downloaded from <https://www.va.gov/vetdata/Expenditures.asp>. Expenditures in thousands of nominal dollars.
+- **Boundaries:** U.S. Census Bureau cartographic boundary file of states, 1:10m, from the `us-atlas` package (`states-10m.json`).
+- **Choices:** Loan Guaranty excluded from state totals (all booked in Texas); DC not compared (includes VA Central Office); no "per veteran" figures, following GDX's own guidance; FY2024 and later left out, because GDX changed its method in FY2024.
+- **Use of generative AI:** Claude (Anthropic) helped write the code and draft the text on this page; the team checked the results against the GDX workbooks.
