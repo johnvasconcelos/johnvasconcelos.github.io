@@ -317,11 +317,17 @@ const ROWS = []; for (let d = 2; d <= 30; d++) ROWS.push(d);
 const WINDOW = 14;
 const tabQ = (a, i, j) => QTAB[AKEY[a]][i][j];
 
-function fmtP(p) {
-  if (p === 0) return "0";
-  if (p < 5e-5) return p.toExponential(3);
-  if (1 - p < 5e-5 && p < 1) return "1 − " + (1 - p).toExponential(3);
+function fmtP(p) {               // no scientific notation: tiny/huge areas shown as < 0.001 / > 0.999
+  if (p <= 0) return "0";
+  if (p >= 1) return "1";
+  if (p < 0.001) return "< 0.001";
+  if (p > 0.999) return "> 0.999";
   return p.toFixed(4);
+}
+// "= value", or just "< 0.001" / "> 0.999" when the value is a bound (avoids "= < 0.001")
+function eqP(p, bold) {
+  const s = fmtP(p), v = bold ? `<b>${s}</b>` : s;
+  return /^[<>]/.test(s) ? v : "= " + v;
 }
 const fmtX = (x, d = 4) => x === Infinity ? "∞" : x.toFixed(d);
 const fmtA = a => String(a).replace(/^0/, "");
@@ -395,10 +401,10 @@ function renderResult() {
   let main, extra;
   if (dir === "x2p") {
     const dd = Math.max(2, decimalsOf($("val").value));
-    main = `p = P(${X} ≥ ${fmtX(x, dd)}) = <b>${fmtP(p)}</b>`;
+    main = `p = P(${X} ≥ ${fmtX(x, dd)}) ${eqP(p, true)}`;
     extra = `${p < 0.05 ? "Significant" : "Not significant"} at α = .05 (critical q = ${qtukey(0.05, k, df).toFixed(3)})`;
   } else {
-    main = `<b>q = ${fmtX(x)}</b> &nbsp;so that P(${X} ≥ q) = ${fmtP(p)}`;
+    main = `<b>q = ${fmtX(x)}</b> &nbsp;so that P(${X} ≥ q) ${eqP(p)}`;
     extra = `Two means differ when |ȳᵢ − ȳⱼ| / √(MSE/n) ≥ ${x.toFixed(3)}`;
   }
   const c = (x / Math.SQRT2);
@@ -467,7 +473,7 @@ function renderPlot() {
     }
     const imax = ys.indexOf(Math.max(...ys)), mode = xs[imax];
     const lx = Math.min(xmax * 0.84, Math.max(state.x + xmax * 0.14, mode));
-    ann.push({ x: lx, y: ymax * 0.5, text: `<b>${state.dir === "x2p" ? "p" : "α"} = ${fmtP(state.p)}</b>`, showarrow: false,
+    ann.push({ x: lx, y: ymax * 0.5, text: `<b>${state.dir === "x2p" ? "p" : "α"} ${eqP(state.p)}</b>`, showarrow: false,
       font: { size: 14, color: "#1f2933" }, bgcolor: "rgba(255,255,255,0.85)", borderpad: 3 });
   }
   if (showInf) {

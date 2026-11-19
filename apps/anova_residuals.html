@@ -1,0 +1,361 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ANOVA Residuals: Why Pool Them?</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/plotly.js-dist-min@2.35.2/plotly.min.js"></script>
+<style>
+  :root {
+    --bg: #f5f6f8; --card: #ffffff; --ink: #1f2933; --muted: #5f6b7a;
+    --line: #e2e6ea; --accent: #08519c; --accent-soft: #e8f0f9;
+    --pcol: #e6550d; --p-soft: #fdeee4; --p-dark: #a63603;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: var(--bg); color: var(--ink);
+    font: 13px/1.4 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  header { padding: 10px 16px 6px; }
+  header h1 { margin: 0; font-size: 18px; font-weight: 650; }
+  header p { margin: 2px 0 0; color: var(--muted); font-size: 12px; max-width: 1050px; }
+
+  .app { display: grid; grid-template-columns: 300px minmax(0, 1fr) minmax(0, 1fr); gap: 12px; padding: 6px 16px 16px;
+    grid-template-areas: "ctl hist hist" "ctl dots qq"; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 8px 10px; min-width: 0; }
+  .card h3 { margin: 0 0 1px; font-size: 13px; font-weight: 650; }
+  .card .sub { color: var(--muted); font-size: 11.5px; margin: 0; }
+  #c_ctl { grid-area: ctl; } #c_hist { grid-area: hist; } #c_dots { grid-area: dots; } #c_qq { grid-area: qq; }
+  .plot { height: 250px; }
+  .plot.tall { height: 300px; }
+
+  .ctl { display: grid; gap: 10px; margin-top: 8px; }
+  .lab { display: block; font-weight: 600; margin-bottom: 4px; font-size: 11px;
+    text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
+  .lab .sym { text-transform: none; letter-spacing: 0; font-size: 12.5px; }
+  .lab output { float: right; font-weight: 650; font-variant-numeric: tabular-nums; font-size: 14px;
+    text-transform: none; letter-spacing: 0; }
+  input[type=range] { width: 100%; margin: 0; }
+  .g0 output { color: #08519c; } .g0 input { accent-color: #08519c; }
+  .g1 output { color: #e6550d; } .g1 input { accent-color: #e6550d; }
+  .g2 output { color: #6a51a3; } .g2 input { accent-color: #6a51a3; }
+  .g1.off, .g2.off { opacity: .35; }
+  .common output { color: var(--ink); } .common input { accent-color: #5f6b7a; }
+  .means { background: #f5f7f9; border-radius: 8px; padding: 7px 9px; display: grid; gap: 8px; }
+
+  .btn { font: inherit; font-size: 12.5px; font-weight: 650; border: 1px solid #c9d0d7; background: #fff; color: var(--ink);
+    border-radius: 8px; padding: 8px 8px; cursor: pointer; width: 100%; }
+  .btn:hover { background: #f0f2f4; }
+  .btn.primary { background: var(--pcol); border-color: var(--pcol); color: #fff; }
+  .btn.primary:hover { background: #cf4a08; }
+  .btn.primary[aria-pressed="true"] { background: #fff; color: var(--p-dark); border-color: var(--pcol); }
+  .btn[aria-pressed="true"]:not(.primary) { background: var(--accent); color: #fff; border-color: var(--accent); }
+  .seg { display: flex; width: 100%; border: 1px solid #c9d0d7; border-radius: 8px; overflow: hidden; }
+  .seg button { flex: 1; min-width: 0; font: inherit; font-size: 12px; font-weight: 600; border: 0; background: #fff; color: var(--ink);
+    padding: 6px 4px; cursor: pointer; }
+  .seg button + button { border-left: 1px solid #c9d0d7; }
+  .seg button:hover { background: #f0f2f4; }
+  .seg button[aria-pressed="true"] { background: var(--accent); color: #fff; }
+  .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+
+  .eq { background: #f5f7f9; border-radius: 6px; padding: 6px 8px; text-align: center; }
+  .status { border-radius: 8px; padding: 8px 10px; font-size: 12.5px; background: var(--accent-soft); border-left: 3px solid var(--accent); }
+  .status.res { background: var(--p-soft); border-left-color: var(--pcol); }
+  .status b { font-weight: 650; }
+  .help { color: var(--muted); font-size: 11.5px; margin: 0; background: #f5f7f9; border-radius: 6px; padding: 6px 8px; }
+
+  @media (max-width: 900px) {
+    .app { grid-template-columns: 1fr; grid-template-areas: "ctl" "hist" "dots" "qq"; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1>ANOVA Residuals: Why Do We Pool Them?</h1>
+  <p>Three groups, each drawn from a normal population with the same &sigma;. Pooled together, the raw values of <i>y</i> can look nothing like a normal.
+     Subtract each group's mean and every group slides to zero &mdash; the three curves land on top of each other and the pooled residuals form a single normal.</p>
+</header>
+
+<div class="app">
+  <!-- ================= controls ================= -->
+  <div class="card" id="c_ctl">
+    <h3>Controls</h3>
+    <div class="ctl">
+      <div class="means">
+        <div class="g0"><label class="lab">Group 1 mean <span class="sym">&mu;<sub>1</sub></span> <output id="o_m0"></output></label>
+          <input type="range" id="m0" min="0" max="100" step="1" value="10"></div>
+        <div class="g1" id="w_m1"><label class="lab">Group 2 mean <span class="sym">&mu;<sub>2</sub></span> <output id="o_m1"></output></label>
+          <input type="range" id="m1" min="0" max="100" step="1" value="50"></div>
+        <div class="g2" id="w_m2"><label class="lab">Group 3 mean <span class="sym">&mu;<sub>3</sub></span> <output id="o_m2"></output></label>
+          <input type="range" id="m2" min="0" max="100" step="1" value="90"></div>
+      </div>
+      <div class="common"><label class="lab">Common <span class="sym">&sigma;</span> (all groups) <output id="o_sd"></output></label>
+        <input type="range" id="sd" min="2" max="20" step="1" value="8"></div>
+      <div class="common"><label class="lab">n per group <output id="o_n"></output></label>
+        <input type="range" id="n" min="20" max="300" step="10" value="150"></div>
+
+      <button class="btn primary" id="b_sub" aria-pressed="false">Subtract group means &rarr;</button>
+      <div class="row2">
+        <button class="btn" id="b_one" aria-pressed="false">Show group 1 only</button>
+        <button class="btn" id="b_new">New samples</button>
+      </div>
+
+      <div class="eq" id="eq"></div>
+      <div class="status" id="status"></div>
+      <p class="help">Dotted colored curves: each group's normal population, shifted along with its data. Black line: all groups together (the mixture).</p>
+    </div>
+  </div>
+
+  <!-- ================= plots ================= -->
+  <div class="card" id="c_hist">
+    <h3 id="h_hist">Pooled histogram</h3>
+    <p class="sub" id="s_hist"></p>
+    <div class="plot tall" id="p_hist"></div>
+  </div>
+  <div class="card" id="c_dots">
+    <h3>Each observation, by group</h3>
+    <p class="sub">Every point moves by the same amount as the rest of its group: &minus;x&#772;<sub>j</sub>.</p>
+    <div class="plot" id="p_dots"></div>
+  </div>
+  <div class="card" id="c_qq">
+    <h3>Normal QQ-plot of the pooled values</h3>
+    <p class="sub">Points on the line &rArr; consistent with a single normal.</p>
+    <div class="plot" id="p_qq"></div>
+  </div>
+</div>
+
+<script>
+// ---------- seeded random numbers ----------
+function mulberry32(a) { return function () { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+
+// inverse standard-normal CDF (Acklam)
+function qnorm(p) {
+  const a = [-3.969683028665376e+01, 2.209460984245205e+02, -2.759285104469687e+02, 1.383577518672690e+02, -3.066479806614716e+01, 2.506628277459239e+00];
+  const b = [-5.447609879822406e+01, 1.615858368580409e+02, -1.556989798598866e+02, 6.680131188771972e+01, -1.328068155288572e+01];
+  const c = [-7.784894002430293e-03, -3.223964580411365e-01, -2.400758277161838e+00, -2.549732539343734e+00, 4.374664141464968e+00, 2.938163982698783e+00];
+  const d = [7.784695709041462e-03, 3.224671290700398e-01, 2.445134137142996e+00, 3.754408661907416e+00];
+  const pl = 0.02425;
+  if (p < pl) { const q = Math.sqrt(-2 * Math.log(p)); return (((((c[0]*q+c[1])*q+c[2])*q+c[3])*q+c[4])*q+c[5]) / ((((d[0]*q+d[1])*q+d[2])*q+d[3])*q+1); }
+  if (p > 1 - pl) { const q = Math.sqrt(-2 * Math.log(1 - p)); return -(((((c[0]*q+c[1])*q+c[2])*q+c[3])*q+c[4])*q+c[5]) / ((((d[0]*q+d[1])*q+d[2])*q+d[3])*q+1); }
+  const q = p - 0.5, r = q * q;
+  return (((((a[0]*r+a[1])*r+a[2])*r+a[3])*r+a[4])*r+a[5])*q / (((((b[0]*r+b[1])*r+b[2])*r+b[3])*r+b[4])*r+1);
+}
+const dnorm = (x, m, s) => Math.exp(-0.5 * ((x - m) / s) ** 2) / (s * Math.sqrt(2 * Math.PI));
+</script>
+
+<script>
+const $ = id => document.getElementById(id);
+const K = 3, NMAX = 300;
+const GCOL = ["#08519c", "#e6550d", "#6a51a3"];
+const GFILL = ["rgba(8,81,156,.55)", "rgba(230,85,13,.55)", "rgba(106,81,163,.55)"];
+const SUB = ["₁", "₂", "₃"];
+const FONT = { family: "system-ui, -apple-system, Segoe UI, Roboto, sans-serif", size: 11, color: "#1f2933" };
+const CFG = { displayModeBar: false, responsive: true };
+
+const S = { mu: [10, 50, 90], sd: 8, n: 150, seed: 11, sub: false, one: false };
+let t = 0;            // 0 = raw data, 1 = residuals (animated in between)
+let Z = [], J = [];   // standard-normal draws and vertical jitter
+
+function drawBase() {
+  const r = mulberry32(S.seed * 7919 + 13);
+  const norm = () => { let u = 0; while (u === 0) u = r(); const v = r(); return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v); };
+  Z = []; J = [];
+  for (let g = 0; g < K; g++) { const z = [], j = []; for (let i = 0; i < NMAX; i++) { z.push(norm()); j.push((r() - 0.5) * 0.5); } Z.push(z); J.push(j); }
+}
+
+const fx = (x, d) => Number(x).toFixed(d);
+const groups = () => S.one ? [0] : [0, 1, 2];
+
+// ---------- current data ----------
+function compute() {
+  const R = { y: [], xbar: [], shift: [], v: [] };
+  for (let g = 0; g < K; g++) {
+    const y = Z[g].slice(0, S.n).map(z => S.mu[g] + S.sd * z);
+    const xb = y.reduce((a, b) => a + b, 0) / y.length;
+    R.y.push(y); R.xbar.push(xb); R.shift.push(t * xb);
+    R.v.push(y.map(v => v - t * xb));           // what is displayed
+  }
+  return R;
+}
+
+// fixed x-range for the current settings (does not move during the animation)
+function xRange() {
+  const gs = groups();
+  const lo = Math.min(-4 * S.sd, ...gs.map(g => S.mu[g] - 4 * S.sd));
+  const hi = Math.max(4 * S.sd, ...gs.map(g => S.mu[g] + 4 * S.sd));
+  return [lo, hi];
+}
+
+// ---------- histogram ----------
+function drawHist(R) {
+  const xr = xRange(), gs = groups();
+  const bw = Math.max(1, S.sd / 2.5);
+  const start = Math.floor(xr[0] / bw) * bw, nb = Math.ceil((xr[1] - start) / bw);
+  const centers = Array.from({ length: nb }, (_, i) => start + (i + 0.5) * bw);
+  const tr = [];
+  const counts = gs.map(g => {
+    const cnt = new Array(nb).fill(0);
+    R.v[g].forEach(v => { const k = Math.floor((v - start) / bw); if (k >= 0 && k < nb) cnt[k]++; });
+    return cnt;
+  });
+  const pooled = gs.length > 1;
+  const tot = centers.map((_, k) => counts.reduce((a, c) => a + c[k], 0));
+  // each group overlaid, starting at zero
+  gs.forEach((g, i) => {
+    tr.push({ type: "bar", x: centers, y: counts[i], width: bw, name: "Group " + (g + 1),
+      marker: { color: GFILL[g].replace(".55", ".28"), line: { color: GCOL[g], width: 1 } },
+      hovertemplate: "Group " + (g + 1) + ": %{y}<extra></extra>" });
+  });
+  // population curves (scaled to counts) and their sum (the mixture)
+  const xs = [], M = 400;
+  for (let i = 0; i <= M; i++) xs.push(xr[0] + (xr[1] - xr[0]) * i / M);
+  const mix = new Array(xs.length).fill(0);
+  gs.forEach(g => {
+    const c = S.mu[g] - R.shift[g];
+    const ys = xs.map(x => S.n * bw * dnorm(x, c, S.sd));
+    ys.forEach((v, i) => mix[i] += v);
+    tr.push({ type: "scatter", mode: "lines", x: xs, y: ys, line: { color: GCOL[g], width: 1.6, dash: "dot" }, hoverinfo: "skip", showlegend: false });
+  });
+  tr.push({ type: "scatter", mode: "lines", x: xs, y: mix, name: gs.length > 1 ? "All groups together" : "Population",
+    line: { color: "#1f2933", width: 1.8 }, hoverinfo: "skip" });
+
+  const ymax = Math.max(...mix, ...counts.flat()) * 1.12;
+  Plotly.react($("p_hist"), tr, {
+    barmode: "overlay", bargap: 0, margin: { l: 36, r: 8, t: 6, b: 30 }, font: FONT, paper_bgcolor: "#fff", plot_bgcolor: "#fff",
+    showlegend: true, legend: { orientation: "h", x: 1, xanchor: "right", y: 1, yanchor: "top", bgcolor: "rgba(255,255,255,.75)" },
+    xaxis: { range: xr, showgrid: false, zeroline: true, zerolinecolor: "#c9d0d7", showline: true, linecolor: "#c9d0d7", fixedrange: true,
+      title: { text: t > 0.5 ? "residual  e = y − x̄ⱼ" : "y", font: { size: 11 } } },
+    yaxis: { range: [0, Math.max(ymax, 1)], fixedrange: true, gridcolor: "#eef0f2", title: { text: "count", font: { size: 11 } } }
+  }, CFG);
+}
+
+// ---------- dot plot ----------
+function drawDots(R) {
+  const xr = xRange(), gs = groups(), tr = [], shapes = [], ann = [];
+  gs.forEach(g => {
+    const row = K - g;   // group 1 on top
+    tr.push({ type: "scatter", mode: "markers", x: R.v[g], y: R.v[g].map((_, i) => row + J[g][i]),
+      marker: { size: 5, color: GFILL[g], line: { color: GCOL[g], width: 0.6 } }, hovertemplate: "%{x:.1f}<extra></extra>", showlegend: false });
+    const m = R.xbar[g] - R.shift[g];
+    shapes.push({ type: "line", x0: m, x1: m, y0: row - 0.38, y1: row + 0.38, line: { color: GCOL[g], width: 3 } });
+    ann.push({ x: xr[1], y: row + 0.3, xanchor: "right", showarrow: false, font: { size: 11, color: GCOL[g] },
+      text: t > 0.01 ? `<b>shift −${fx(R.xbar[g] * t, 1)}</b>` : `<b>x̄${SUB[g]} = ${fx(R.xbar[g], 1)}</b>` });
+  });
+  shapes.push({ type: "line", x0: 0, x1: 0, y0: 0.4, y1: 3.6, line: { color: "#5f6b7a", width: 1, dash: "dash" } });
+  Plotly.react($("p_dots"), tr, {
+    margin: { l: 60, r: 8, t: 6, b: 30 }, font: FONT, paper_bgcolor: "#fff", plot_bgcolor: "#fff", hovermode: "closest",
+    xaxis: { range: xr, showgrid: false, zeroline: false, showline: true, linecolor: "#c9d0d7", fixedrange: true },
+    yaxis: { range: [0.4, 3.6], fixedrange: true, tickvals: [3, 2, 1], ticktext: ["Group 1", "Group 2", "Group 3"], showgrid: false, zeroline: false },
+    shapes, annotations: ann
+  }, CFG);
+}
+
+// ---------- QQ-plot ----------
+function drawQQ(R) {
+  const gs = groups(), pts = [];
+  gs.forEach(g => R.v[g].forEach(v => pts.push({ v, g })));
+  pts.sort((a, b) => a.v - b.v);
+  const N = pts.length;
+  pts.forEach((p, i) => p.q = qnorm((i + 0.5) / N));
+  const tr = gs.map(g => {
+    const s = pts.filter(p => p.g === g);
+    return { type: "scatter", mode: "markers", x: s.map(p => p.q), y: s.map(p => p.v),
+      marker: { size: 4.5, color: GFILL[g], line: { color: GCOL[g], width: 0.5 } }, hovertemplate: "%{y:.1f}<extra></extra>", showlegend: false };
+  });
+  // reference line through the quartiles
+  const q1 = pts[Math.floor(0.25 * (N - 1))].v, q3 = pts[Math.floor(0.75 * (N - 1))].v;
+  const z1 = qnorm(0.25), z3 = qnorm(0.75), slope = (q3 - q1) / (z3 - z1), icpt = q1 - slope * z1;
+  tr.push({ type: "scatter", mode: "lines", x: [-3.5, 3.5], y: [icpt - 3.5 * slope, icpt + 3.5 * slope], line: { color: "#1f2933", width: 1.5 }, hoverinfo: "skip", showlegend: false });
+  const ys = pts.map(p => p.v), pad = (ys[N - 1] - ys[0]) * 0.06 + 1;
+  Plotly.react($("p_qq"), tr, {
+    margin: { l: 40, r: 8, t: 6, b: 34 }, font: FONT, paper_bgcolor: "#fff", plot_bgcolor: "#fff", hovermode: "closest",
+    xaxis: { range: [-3.4, 3.4], fixedrange: true, gridcolor: "#eef0f2", zeroline: false, title: { text: "theoretical quantiles", font: { size: 11 } } },
+    yaxis: { range: [ys[0] - pad, ys[N - 1] + pad], fixedrange: true, gridcolor: "#eef0f2", zeroline: false, title: { text: "sample", font: { size: 11 } } }
+  }, CFG);
+}
+
+// ---------- text ----------
+function drawText() {
+  const gs = groups();
+  katex.render(t > 0.5 ? String.raw`e_{ij} = y_{ij} - \bar{y}_j` : String.raw`y_{ij} = \mu_j + \varepsilon_{ij},\;\; \varepsilon_{ij} \sim N(0,\sigma^2)`,
+    $("eq"), { throwOnError: false });
+  const st = $("status");
+  const spread = Math.max(...gs.map(g => S.mu[g])) - Math.min(...gs.map(g => S.mu[g]));
+  let html;
+  if (S.one) {
+    html = t > 0.5
+      ? "<b>One group:</b> subtracting x̄₁ only <b>slides</b> the distribution to zero. The shape is exactly the same — with one group, checking the residuals is the same as checking y."
+      : "<b>One group:</b> the histogram of y already shows the population's shape. Press <i>Subtract</i> and watch it slide without changing.";
+  } else if (t > 0.5) {
+    html = "<b>Residuals:</b> each group moved by a <b>different</b> amount (its own x̄ⱼ) and they all landed at zero. Same shape, same σ ⇒ the three curves overlap and the pooled residuals form <b>one normal</b>.";
+  } else if (spread < 1.5 * S.sd) {
+    html = "<b>Raw y:</b> the means are close relative to σ, so the pooled y still looks roughly normal (just wider). Pull the means apart to see the peaks appear.";
+  } else {
+    html = "<b>Raw y:</b> each group is normal, but they sit in <b>different places</b>. Pooled, y is a mixture of three normals ⇒ several peaks, and the QQ-plot bends away from the line.";
+  }
+  st.innerHTML = html;
+  st.classList.toggle("res", t > 0.5);
+  $("h_hist").textContent = t > 0.5 ? "Pooled residuals" : (S.one ? "Group 1: y" : "Pooled y (all groups together)");
+  const bt = S.one ? "" : "Colored bars: each group on its own, all starting at zero. Black line: all groups together.";
+  $("s_hist").textContent = (t > 0.5 ? "Each group shifted by its own mean. " : "") + bt;
+}
+
+function render() {
+  const R = compute();
+  drawHist(R); drawDots(R); drawQQ(R); drawText();
+}
+
+// ---------- animation ----------
+let anim = null;
+function animateTo(target) {
+  if (anim) cancelAnimationFrame(anim);
+  const t0 = t, start = performance.now(), dur = 900;
+  const ease = u => u < 0.5 ? 2 * u * u : 1 - Math.pow(-2 * u + 2, 2) / 2;
+  const step = now => {
+    const u = Math.min(1, (now - start) / dur);
+    t = t0 + (target - t0) * ease(u);
+    render();
+    if (u < 1) anim = requestAnimationFrame(step); else { t = target; anim = null; render(); }
+  };
+  anim = requestAnimationFrame(step);
+}
+
+// ---------- controls ----------
+function syncLabels() {
+  for (let g = 0; g < K; g++) $("o_m" + g).textContent = S.mu[g];
+  $("o_sd").textContent = S.sd; $("o_n").textContent = S.n;
+  $("w_m1").classList.toggle("off", S.one); $("w_m2").classList.toggle("off", S.one);
+}
+for (let g = 0; g < K; g++) $("m" + g).addEventListener("input", e => { S.mu[g] = +e.target.value; syncLabels(); render(); });
+$("sd").addEventListener("input", e => { S.sd = +e.target.value; syncLabels(); render(); });
+$("n").addEventListener("input", e => { S.n = +e.target.value; syncLabels(); render(); });
+$("b_sub").addEventListener("click", () => {
+  S.sub = !S.sub;
+  $("b_sub").setAttribute("aria-pressed", S.sub);
+  $("b_sub").innerHTML = S.sub ? "&larr; Add the means back" : "Subtract group means &rarr;";
+  animateTo(S.sub ? 1 : 0);
+});
+$("b_one").addEventListener("click", () => {
+  S.one = !S.one;
+  $("b_one").setAttribute("aria-pressed", S.one);
+  $("b_one").textContent = S.one ? "Show all 3 groups" : "Show group 1 only";
+  syncLabels(); render();
+});
+$("b_new").addEventListener("click", () => { S.seed++; drawBase(); render(); });
+
+// ---------------- embedding ----------------
+if (window.self !== window.top) {
+  document.documentElement.classList.add("embedded");
+  let lastH = 0;
+  const reportHeight = () => {
+    const h = Math.ceil(document.body.getBoundingClientRect().height);
+    if (h > 0 && h !== lastH) { lastH = h; window.parent.postMessage({ type: "app-height", height: h }, "*"); }
+  };
+  new ResizeObserver(reportHeight).observe(document.body);
+  window.addEventListener("load", () => { reportHeight(); setTimeout(reportHeight, 500); setTimeout(reportHeight, 1500); });
+}
+
+drawBase(); syncLabels(); render();
+</script>
+</body>
+</html>

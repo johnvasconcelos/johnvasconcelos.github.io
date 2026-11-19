@@ -294,23 +294,23 @@
     "text": "Publications\nComing soon…"
   },
   {
-    "objectID": "pages/powerbi/us_elections.html",
-    "href": "pages/powerbi/us_elections.html",
-    "title": "US Elections",
+    "objectID": "pages/powerbi.html",
+    "href": "pages/powerbi.html",
+    "title": "Power BI",
     "section": "",
-    "text": "Final data for 2024 to be updated.\n\n  \n    \n  \n\n← All Power BI dashboards"
+    "text": "Interactive Power BI dashboards. Each one opens on its own page.\n\n\n  \n    \n    Financial Statements and Index Analysis: Multiple Companies\n    Open dashboard →\n  \n  \n    \n    Financial Indicators Dashboard\n    Open dashboard →\n  \n  \n    \n    HR & Payroll Analysis\n    Open dashboard →\n  \n  \n    \n    US Elections\n    Open dashboard →\n  \n  \n    \n    Summarized Financial Reports\n    Open dashboard →"
   },
   {
-    "objectID": "pages/powerbi/financial_statements.html",
-    "href": "pages/powerbi/financial_statements.html",
-    "title": "Financial Statements and Index Analysis: Multiple Companies",
+    "objectID": "pages/powerbi/hr_payroll.html",
+    "href": "pages/powerbi/hr_payroll.html",
+    "title": "HR & Payroll Analysis",
     "section": "",
     "text": "← All Power BI dashboards"
   },
   {
-    "objectID": "pages/powerbi/financial_indicators.html",
-    "href": "pages/powerbi/financial_indicators.html",
-    "title": "Financial Indicators Dashboard",
+    "objectID": "pages/powerbi/financial_reports.html",
+    "href": "pages/powerbi/financial_reports.html",
+    "title": "Summarized Financial Reports",
     "section": "",
     "text": "← All Power BI dashboards"
   },
@@ -329,25 +329,25 @@
     "text": "Usage Notice\nAll content on this website is freely available for anyone to use, share, modify, or build upon in any way — no permission needed, no attribution required. This is my fourth personal academic website, and I believe in open access to knowledge and resources.\nIf you find something here useful, feel free to take it."
   },
   {
-    "objectID": "pages/powerbi/financial_reports.html",
-    "href": "pages/powerbi/financial_reports.html",
-    "title": "Summarized Financial Reports",
+    "objectID": "pages/powerbi/financial_indicators.html",
+    "href": "pages/powerbi/financial_indicators.html",
+    "title": "Financial Indicators Dashboard",
     "section": "",
     "text": "← All Power BI dashboards"
   },
   {
-    "objectID": "pages/powerbi/hr_payroll.html",
-    "href": "pages/powerbi/hr_payroll.html",
-    "title": "HR & Payroll Analysis",
+    "objectID": "pages/powerbi/financial_statements.html",
+    "href": "pages/powerbi/financial_statements.html",
+    "title": "Financial Statements and Index Analysis: Multiple Companies",
     "section": "",
     "text": "← All Power BI dashboards"
   },
   {
-    "objectID": "pages/powerbi.html",
-    "href": "pages/powerbi.html",
-    "title": "Power BI",
+    "objectID": "pages/powerbi/us_elections.html",
+    "href": "pages/powerbi/us_elections.html",
+    "title": "US Elections",
     "section": "",
-    "text": "Interactive Power BI dashboards. Each one opens on its own page.\n\n\n  \n    \n    Financial Statements and Index Analysis: Multiple Companies\n    Open dashboard →\n  \n  \n    \n    Financial Indicators Dashboard\n    Open dashboard →\n  \n  \n    \n    HR & Payroll Analysis\n    Open dashboard →\n  \n  \n    \n    US Elections\n    Open dashboard →\n  \n  \n    \n    Summarized Financial Reports\n    Open dashboard →"
+    "text": "Final data for 2024 to be updated.\n\n  \n    \n  \n\n← All Power BI dashboards"
   },
   {
     "objectID": "pages/teaching.html",

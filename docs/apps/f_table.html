@@ -329,11 +329,17 @@ for (let d = 1; d <= 30; d++) ROWS.push(d);
 [40, 60, 120, Infinity].forEach(d => ROWS.push(d));
 const WINDOW = 14;
 
-function fmtP(p) {
-  if (p === 0) return "0";
-  if (p < 5e-5) return p.toExponential(3);
-  if (1 - p < 5e-5 && p < 1) return "1 − " + (1 - p).toExponential(3);
+function fmtP(p) {               // no scientific notation: tiny/huge areas shown as < 0.001 / > 0.999
+  if (p <= 0) return "0";
+  if (p >= 1) return "1";
+  if (p < 0.001) return "< 0.001";
+  if (p > 0.999) return "> 0.999";
   return p.toFixed(4);
+}
+// "= value", or just "< 0.001" / "> 0.999" when the value is a bound (avoids "= < 0.001")
+function eqP(p, bold) {
+  const s = fmtP(p), v = bold ? `<b>${s}</b>` : s;
+  return /^[<>]/.test(s) ? v : "= " + v;
 }
 const fmtX = (x, d = 4) => x === Infinity ? "∞" : x < 1e-3 && x > 0 ? x.toExponential(3) : x >= 1e5 ? x.toExponential(3) : x.toFixed(d);
 const fmtA = a => String(a).replace(/^0/, "");
@@ -449,22 +455,22 @@ function renderResult() {
     const [L, U] = bounds(), t = (1 - p) / 2;
     if (isAlpha()) {
       main = dir === "x2p"
-        ? `α = P(${X} ≤ ${fmtX(L, dd)} or ${X} ≥ ${fmtX(U, dd)}) = <b>${fmtP(1 - p)}</b>`
-        : `<b>${fmtX(L)}</b> and <b>${fmtX(U)}</b> &nbsp;leave α = ${fmtP(1 - p)} in the two tails`;
-      extra = `Each tail = ${fmtP(t)} · central area = ${fmtP(p)}`;
+        ? `α = P(${X} ≤ ${fmtX(L, dd)} or ${X} ≥ ${fmtX(U, dd)}) ${eqP(1 - p, true)}`
+        : `<b>${fmtX(L)}</b> and <b>${fmtX(U)}</b> &nbsp;leave α ${eqP(1 - p)} in the two tails`;
+      extra = `Each tail ${eqP(t)} · central area ${eqP(p)}`;
     } else {
       main = dir === "x2p"
-        ? `P(${fmtX(L, dd)} ≤ ${X} ≤ ${fmtX(U, dd)}) = <b>${fmtP(p)}</b>`
+        ? `P(${fmtX(L, dd)} ≤ ${X} ≤ ${fmtX(U, dd)}) ${eqP(p, true)}`
         : `<b>${fmtX(L)}</b> and <b>${fmtX(U)}</b> &nbsp;hold the middle ${fmtP(p)}`;
-      extra = `Each tail = ${fmtP(t)} · both tails (α) = ${fmtP(1 - p)}`;
+      extra = `Each tail ${eqP(t)} · both tails (α) ${eqP(1 - p)}`;
     }
     extra += dir === "x2p"
       ? ` · the matching cut-off on the other side is ${fmtX(state.x2)}`
       : ` · lower = 1 / F<sub>${fmtA(+t.toFixed(4))}</sub>(${fmtD(d2)}, ${fmtD(d1)}) = 1 / ${fmtX(1 / L)}`;
   } else {
     const sym = tail === "left" ? "≤" : "≥";
-    main = dir === "x2p" ? `P(${X} ${sym} ${fmtX(x, dd)}) = <b>${fmtP(p)}</b>` : `<b>F = ${fmtX(x)}</b> &nbsp;so that P(${X} ${sym} F) = ${fmtP(p)}`;
-    extra = `Complement: P(F ${tail === "left" ? "≥" : "≤"} x) = ${fmtP(1 - p)}`;
+    main = dir === "x2p" ? `P(${X} ${sym} ${fmtX(x, dd)}) ${eqP(p, true)}` : `<b>F = ${fmtX(x)}</b> &nbsp;so that P(${X} ${sym} F) ${eqP(p)}`;
+    extra = `Complement: P(F ${tail === "left" ? "≥" : "≤"} x) ${eqP(1 - p)}`;
     if (tail === "left" && dir === "p2x" && x > 0) extra += ` · F = 1 / ${fmtX(1 / x)}, where ${fmtX(1 / x)} is the right-tail value with df swapped (${fmtD(d2)}, ${fmtD(d1)})`;
   }
   extra += ` · ${moments(d1, d2)}`;
@@ -514,7 +520,7 @@ function renderPlot() {
     else if (state.tail === "right") lx = Math.min(xmax * 0.84, Math.max(state.x + xmax * 0.14, mode));
     else if (isAlpha()) lx = Math.min(xmax * 0.84, bounds()[1] + xmax * 0.14);
     else lx = Math.max(mode, (bounds()[0] + Math.min(bounds()[1], xmax)) / 2 * 0.9);
-    ann.push({ x: lx, y: ymax * 0.5, text: isAlpha() ? `<b>α = ${fmtP(1 - state.p)}</b> (both tails)` : `<b>area = ${fmtP(state.p)}</b>`, showarrow: false,
+    ann.push({ x: lx, y: ymax * 0.5, text: isAlpha() ? `<b>α ${eqP(1 - state.p)}</b> (both tails)` : `<b>area ${eqP(state.p)}</b>`, showarrow: false,
       font: { size: 14, color: "#1f2933" }, bgcolor: "rgba(255,255,255,0.85)", borderpad: 3 });
   }
   if (showC) {

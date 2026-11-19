@@ -1,0 +1,457 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Regression: True Line vs. Sample Lines</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/plotly.js-dist-min@2.35.2/plotly.min.js"></script>
+<style>
+  :root {
+    --bg: #f5f6f8; --card: #ffffff; --ink: #1f2933; --muted: #5f6b7a;
+    --line: #e2e6ea; --accent: #08519c; --accent-soft: #e8f0f9;
+    --pcol: #e6550d; --p-soft: #fdeee4; --p-dark: #a63603;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: var(--bg); color: var(--ink);
+    font: 13px/1.4 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  header { padding: 10px 16px 6px; }
+  header h1 { margin: 0; font-size: 18px; font-weight: 650; }
+  header p { margin: 2px 0 0; color: var(--muted); font-size: 12px; max-width: 1100px; }
+
+  .app { display: grid; grid-template-columns: 300px minmax(0, 1.1fr) minmax(0, 1fr); gap: 12px; padding: 6px 16px 16px;
+    grid-template-areas: "ctl main main" "ctl eq dist"; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 8px 10px; min-width: 0; }
+  .card h3 { margin: 0 0 1px; font-size: 13px; font-weight: 650; }
+  .card .sub { color: var(--muted); font-size: 11.5px; margin: 0; }
+  .tag { display: inline-block; font-size: 10.5px; font-weight: 650; text-transform: uppercase; letter-spacing: .05em;
+    border-radius: 999px; padding: 1px 7px; margin-left: 6px; vertical-align: 1px; }
+  .tag.d { background: var(--p-soft); color: var(--p-dark); }
+  .tag.a { background: var(--accent-soft); color: var(--accent); }
+  .tag.k { background: #eceff2; color: var(--ink); }
+
+  #c_ctl { grid-area: ctl; align-self: start; } #c_main { grid-area: main; } #c_eq { grid-area: eq; } #c_dist { grid-area: dist; }
+
+  .ctl { display: grid; grid-template-columns: 1fr; gap: 10px; margin-top: 8px; }
+  .grp { border-top: 1px dashed #d5dae0; padding-top: 8px; display: grid; gap: 10px; }
+  .grp-t { font-size: 11px; font-weight: 700; color: var(--ink); text-transform: uppercase; letter-spacing: .06em; }
+  .lab { display: block; font-weight: 600; margin-bottom: 4px; font-size: 11px;
+    text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
+  .lab .sym { text-transform: none; font-size: 12.5px; letter-spacing: 0; }
+  .lab output { float: right; font-weight: 650; color: var(--accent); font-variant-numeric: tabular-nums; font-size: 14px;
+    text-transform: none; letter-spacing: 0; }
+  input[type=range] { width: 100%; margin: 0; accent-color: var(--accent); }
+  .pop input[type=range] { accent-color: var(--ink); }
+  .pop .lab output { color: var(--ink); }
+  .range-ends { display: flex; justify-content: space-between; font-size: 10.5px; color: var(--muted); font-variant-numeric: tabular-nums; }
+  .seg { display: flex; width: 100%; border: 1px solid #c9d0d7; border-radius: 8px; overflow: hidden; }
+  .seg button { flex: 1; min-width: 0; font: inherit; font-size: 12px; font-weight: 600; border: 0; background: #fff; color: var(--ink);
+    padding: 6px 4px; cursor: pointer; font-variant-numeric: tabular-nums; }
+  .seg button + button { border-left: 1px solid #c9d0d7; }
+  .seg button:hover { background: #f0f2f4; }
+  .seg button[aria-pressed="true"] { background: var(--accent); color: #fff; }
+  .btns { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+  .btn { font: inherit; font-size: 12px; font-weight: 600; border: 1px solid #c9d0d7; background: #fff; color: var(--ink);
+    border-radius: 8px; padding: 6px 8px; cursor: pointer; width: 100%; }
+  .btn:hover { background: #f0f2f4; }
+  .btn.main { background: var(--accent); color: #fff; border-color: var(--accent); }
+  .btn.main:hover { background: #063f7a; }
+  .help { color: var(--muted); font-size: 11.5px; margin: 0; background: #f5f7f9; border-radius: 6px; padding: 6px 8px; }
+
+  #p_main { height: 400px; }
+  #p_dist { height: 230px; }
+  .plothead { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; flex-wrap: wrap; }
+  .legend { display: flex; gap: 14px; flex-wrap: wrap; font-size: 11.5px; color: var(--muted); margin-top: 4px; }
+  .legend span { display: inline-flex; align-items: center; gap: 5px; }
+  .legend i { display: inline-block; width: 18px; height: 0; border-top: 3px solid; }
+  .legend i.dot { width: 9px; height: 9px; border: 0; border-radius: 50%; }
+
+  .eqs { display: grid; gap: 6px; margin-top: 6px; }
+  .eqb { border-radius: 6px; padding: 5px 8px; background: #f5f7f9; border-left: 3px solid #c9d0d7; }
+  .eqb.t { border-left-color: var(--ink); }
+  .eqb.i { border-left-color: var(--pcol); }
+  .eqb.s { border-left-color: var(--accent); }
+  .eqb .h { display: flex; justify-content: space-between; align-items: center; font-size: 11px; font-weight: 650; color: var(--muted);
+    text-transform: uppercase; letter-spacing: .05em; }
+  .eqb .m { margin-top: 2px; overflow-x: auto; overflow-y: hidden; }
+  .eqb .m .katex { font-size: 1.0em; }
+  .eqb .n { font-size: 11.5px; color: var(--muted); margin-top: 1px; }
+  .errbox { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 6px; }
+  .errbox div { background: var(--accent-soft); border-radius: 6px; padding: 5px 8px; text-align: center; font-variant-numeric: tabular-nums; }
+  .errbox .t { font-size: 10.5px; font-weight: 650; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; }
+  .errbox .v { font-size: 15px; font-weight: 700; color: var(--accent); }
+  .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-top: 6px; }
+  .stats div { background: #f5f7f9; border-radius: 6px; padding: 4px 6px; text-align: center; font-variant-numeric: tabular-nums; }
+  .stats .t { font-size: 10.5px; color: var(--muted); font-weight: 600; }
+  .stats .v { font-size: 14px; font-weight: 700; }
+  .seg.small { width: auto; }
+  .seg.small button { padding: 3px 10px; font-size: 11.5px; }
+
+  html.embedded body { background: transparent; }
+  @media (max-width: 1100px) {
+    .app { grid-template-columns: 280px minmax(0, 1fr); grid-template-areas: "ctl main" "ctl eq" "ctl dist"; }
+  }
+  @media (max-width: 760px) {
+    .app { grid-template-columns: 1fr; grid-template-areas: "ctl" "main" "eq" "dist"; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Regression: the True Line vs. the Sample Lines</h1>
+  <p>A population is generated by the model Y<sub>i</sub> = β<sub>0</sub> + β<sub>1</sub>X<sub>i</sub> + ε<sub>i</sub> (here X = years of schooling and Y = salary in $1,000s). The <b>true line</b> E[Y | X] = β<sub>0</sub> + β<sub>1</sub>X passes through the <i>means</i> of Y for each X, not through the points. In practice nobody sees it: we only see a sample, fit OLS, and get an <b>estimated line</b> Ŷ = β̂<sub>0</sub> + β̂<sub>1</sub>X. Draw many samples: every line misses the true one a little, but on average they hit it.</p>
+</header>
+
+<div class="app">
+  <!-- ================= CONTROLS ================= -->
+  <aside class="card" id="c_ctl">
+    <h3>Population <span class="tag k">only “God” knows</span></h3>
+    <p class="sub">The parameters of the true model. Moving them keeps the same random draws.</p>
+    <div class="ctl pop">
+      <div>
+        <label class="lab" for="b0">Intercept <span class="sym">β₀</span> <output id="b0_out"></output></label>
+        <input type="range" id="b0" min="-20" max="40" step="1" value="10">
+        <div class="range-ends"><span>−20</span><span>40</span></div>
+      </div>
+      <div>
+        <label class="lab" for="b1">Slope <span class="sym">β₁</span> <output id="b1_out"></output></label>
+        <input type="range" id="b1" min="-2" max="6" step="0.1" value="3">
+        <div class="range-ends"><span>−2</span><span>6</span></div>
+      </div>
+      <div>
+        <label class="lab" for="sg">Error SD <span class="sym">σ</span> <output id="sg_out"></output></label>
+        <input type="range" id="sg" min="1" max="30" step="0.5" value="12">
+        <div class="range-ends"><span>1</span><span>30</span></div>
+      </div>
+      <button class="btn" id="btn_pop">↻ New population</button>
+    </div>
+    <div class="ctl grp">
+      <div class="grp-t">Samples <span class="tag a">what we see</span></div>
+      <div>
+        <label class="lab" for="nn">Sample size <span class="sym">n</span> <output id="nn_out"></output></label>
+        <input type="range" id="nn" min="5" max="200" step="1" value="20">
+        <div class="range-ends"><span>5</span><span>200</span></div>
+      </div>
+      <div class="btns">
+        <button class="btn main" id="btn_one">Draw 1 sample</button>
+        <button class="btn" id="btn_many">Draw 50 samples</button>
+      </div>
+      <button class="btn" id="btn_clear">Clear all samples</button>
+      <div>
+        <span class="lab">Show distances for the current sample</span>
+        <div class="seg" id="seg_seg">
+          <button data-v="none">None</button>
+          <button data-v="err">Errors ε</button>
+          <button data-v="res">Residuals e</button>
+        </div>
+      </div>
+      <p class="help">Click any blue point to inspect it in the equations. <b style="color:#e6550d">Error ε</b> = distance (with sign) to the <b>true</b> line; <b style="color:#08519c">residual e</b> = distance to the <b>estimated</b> line.</p>
+    </div>
+  </aside>
+
+  <!-- ================= MAIN PLOT ================= -->
+  <section class="card" id="c_main">
+    <div class="plothead">
+      <div>
+        <h3>Population, true line and sample lines</h3>
+        <p class="sub" id="main_sub"></p>
+      </div>
+    </div>
+    <div class="legend">
+      <span><i class="dot" style="background:#c3c9d1"></i>population</span>
+      <span><i style="border-color:#1f2933"></i>true line E[Y | X]</span>
+      <span><i class="dot" style="background:#08519c"></i>current sample</span>
+      <span><i style="border-color:#08519c"></i>current estimated line</span>
+      <span><i style="border-color:rgba(8,81,156,.3)"></i>earlier sample lines</span>
+    </div>
+    <div id="p_main"></div>
+  </section>
+
+  <!-- ================= EQUATIONS ================= -->
+  <section class="card" id="c_eq">
+    <h3>The three equations, with numbers</h3>
+    <p class="sub" id="eq_sub"></p>
+    <div class="eqs">
+      <div class="eqb t">
+        <div class="h"><span>1 · True line (“law of nature”)</span><span class="tag k">population</span></div>
+        <div class="m" id="tex1"></div>
+        <div class="n" id="n1"></div>
+      </div>
+      <div class="eqb i">
+        <div class="h"><span>2 · The individual (the real chaos)</span><span class="tag k">population model</span></div>
+        <div class="m" id="tex2"></div>
+        <div class="n" id="n2"></div>
+      </div>
+      <div class="eqb s">
+        <div class="h"><span>3 · The scientist (estimated line)</span><span class="tag a">sample</span></div>
+        <div class="m" id="tex3"></div>
+        <div class="n" id="n3"></div>
+      </div>
+    </div>
+    <div class="errbox">
+      <div><div class="t">Estimation error in β̂₀</div><div class="v" id="err0">—</div></div>
+      <div><div class="t">Estimation error in β̂₁</div><div class="v" id="err1">—</div></div>
+    </div>
+  </section>
+
+  <!-- ================= SAMPLING DISTRIBUTION ================= -->
+  <section class="card" id="c_dist">
+    <div class="plothead">
+      <div>
+        <h3 id="dist_title">Every sample gives a different estimate</h3>
+        <p class="sub" id="dist_sub"></p>
+      </div>
+      <div class="seg small" id="seg_par">
+        <button data-v="b1" aria-pressed="true">β̂₁ slope</button>
+        <button data-v="b0">β̂₀ intercept</button>
+      </div>
+    </div>
+    <div id="p_dist"></div>
+    <div class="stats">
+      <div><div class="t">samples drawn</div><div class="v" id="st_k">0</div></div>
+      <div><div class="t" id="st_mean_t">mean of β̂₁</div><div class="v" id="st_mean">—</div></div>
+      <div><div class="t" id="st_sd_t">SD of β̂₁ (theory)</div><div class="v" id="st_sd">—</div></div>
+    </div>
+  </section>
+</div>
+
+<script>
+// ---------- seeded random numbers ----------
+function mulberry32(a) { return function () { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+const $ = id => document.getElementById(id);
+const N = 4000, XMIN = 8, XMAX = 20, MAXHIST = 1000, SHOWLINES = 150;
+const C = { ink: "#1f2933", acc: "#08519c", err: "#e6550d", pop: "#c3c9d1", past: "rgba(8,81,156,0.22)" };
+const FONT = { family: "system-ui, -apple-system, Segoe UI, Roboto, sans-serif", size: 11, color: "#1f2933" };
+const CFG = { displayModeBar: false, responsive: true };
+const S = { b0: 10, b1: 3, sigma: 12, n: 20, popSeed: 11, sampSeed: 1, segMode: "none", par: "b1", sel: 0 };
+let U = [], Z = [], X = [], Y = [];
+let rs = mulberry32(1);
+let hist = [];   // each entry: array of population indices; the last one is the current sample
+
+function makeDraws() {
+  const r = mulberry32(S.popSeed * 7919 + 3);
+  const norm = () => { let u = 0; while (u === 0) u = r(); const v = r(); return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v); };
+  U = []; Z = [];
+  for (let i = 0; i < N; i++) { U.push(r()); Z.push(norm()); }
+}
+function buildPop() {
+  X = U.map(u => +(XMIN + (XMAX - XMIN) * u).toFixed(2));
+  Y = X.map((x, i) => S.b0 + S.b1 * x + S.sigma * Z[i]);
+}
+function drawSample() {
+  // simple random sample without replacement (partial Fisher–Yates)
+  const idx = Array.from({ length: N }, (_, i) => i);
+  for (let i = 0; i < S.n; i++) { const j = i + Math.floor(rs() * (N - i)); [idx[i], idx[j]] = [idx[j], idx[i]]; }
+  hist.push(idx.slice(0, S.n));
+  if (hist.length > MAXHIST) hist.shift();
+}
+function ols(ids) {
+  const n = ids.length; let sx = 0, sy = 0;
+  ids.forEach(i => { sx += X[i]; sy += Y[i]; });
+  const mx = sx / n, my = sy / n; let sxx = 0, sxy = 0;
+  ids.forEach(i => { const d = X[i] - mx; sxx += d * d; sxy += d * (Y[i] - my); });
+  const b1 = sxx > 0 ? sxy / sxx : 0, b0 = my - b1 * mx;
+  return { b0, b1, mx, sxx };
+}
+
+// ---------- helpers ----------
+const tex = (el, s) => katex.render(s, $(el), { throwOnError: false, displayMode: false });
+const f = (x, d = 2) => (x < 0 ? "-" : "") + Math.abs(x).toFixed(d);
+const sgn = (x, d = 2) => (x < 0 ? " - " : " + ") + Math.abs(x).toFixed(d);
+const sgnS = (x, d = 2) => (x < 0 ? "−" : "+") + Math.abs(x).toFixed(d);
+function setSeg(id, v) { document.querySelectorAll(`#${id} button`).forEach(b => b.setAttribute("aria-pressed", String(b.dataset.v === v))); }
+function mean(a) { return a.reduce((s, v) => s + v, 0) / a.length; }
+function sd(a) { const m = mean(a); return Math.sqrt(a.reduce((s, v) => s + (v - m) ** 2, 0) / (a.length - 1)); }
+// population moments of X, used for the theoretical standard errors
+// (they depend only on which X values get sampled, so they are found once by simulation for each n)
+let mcCache = {};
+function xMoments() {
+  const key = S.popSeed + "|" + S.n;
+  if (!mcCache[key]) {
+    const r = mulberry32(S.popSeed * 31 + S.n), R = 4000, idx = Array.from({ length: N }, (_, i) => i);
+    let a = 0, c = 0;
+    for (let k = 0; k < R; k++) {
+      for (let i = 0; i < S.n; i++) { const j = i + Math.floor(r() * (N - i)); [idx[i], idx[j]] = [idx[j], idx[i]]; }
+      let sx = 0; for (let i = 0; i < S.n; i++) sx += X[idx[i]];
+      const mx = sx / S.n; let sxx = 0; for (let i = 0; i < S.n; i++) sxx += (X[idx[i]] - mx) ** 2;
+      a += 1 / sxx; c += mx * mx / sxx;
+    }
+    mcCache = { [key]: { invS: a / R, xbar2S: c / R } };
+  }
+  return mcCache[key];
+}
+
+// ---------- controls ----------
+function syncOut() {
+  $("b0_out").textContent = S.b0; $("b1_out").textContent = S.b1.toFixed(1);
+  $("sg_out").textContent = S.sigma.toFixed(1); $("nn_out").textContent = S.n;
+}
+$("b0").addEventListener("input", () => { S.b0 = +$("b0").value; buildPop(); render(); });
+$("b1").addEventListener("input", () => { S.b1 = +$("b1").value; buildPop(); render(); });
+$("sg").addEventListener("input", () => { S.sigma = +$("sg").value; buildPop(); render(); });
+$("nn").addEventListener("input", () => { S.n = +$("nn").value; syncOut(); });
+$("nn").addEventListener("change", () => { hist = []; drawSample(); S.sel = 0; render(); });
+$("btn_one").addEventListener("click", () => { drawSample(); S.sel = 0; render(); });
+$("btn_many").addEventListener("click", () => { for (let k = 0; k < 50; k++) drawSample(); S.sel = 0; render(); });
+$("btn_clear").addEventListener("click", () => { hist = []; drawSample(); S.sel = 0; render(); });
+$("btn_pop").addEventListener("click", () => { S.popSeed += 1; makeDraws(); buildPop(); hist = []; drawSample(); S.sel = 0; render(); });
+document.querySelectorAll("#seg_seg button").forEach(b => b.addEventListener("click", () => { S.segMode = b.dataset.v; setSeg("seg_seg", S.segMode); renderMain(); }));
+document.querySelectorAll("#seg_par button").forEach(b => b.addEventListener("click", () => { S.par = b.dataset.v; setSeg("seg_par", S.par); renderDist(); }));
+
+// ---------- main plot ----------
+let fits = [];
+function yRange() {
+  let lo = Infinity, hi = -Infinity;
+  Y.forEach(y => { if (y < lo) lo = y; if (y > hi) hi = y; });
+  const pad = (hi - lo) * 0.05 || 1; return [lo - pad, hi + pad];
+}
+function renderMain() {
+  const cur = hist[hist.length - 1], fit = fits[fits.length - 1];
+  const xr = [XMIN - 0.5, XMAX + 0.5];
+  const T = [];
+  T.push({ type: "scattergl", mode: "markers", x: X, y: Y, marker: { size: 3.5, color: C.pop, opacity: 0.55 }, hoverinfo: "skip", name: "population" });
+  // earlier sample lines, drawn as one trace with gaps
+  const lx = [], ly = [];
+  fits.slice(Math.max(0, fits.length - 1 - SHOWLINES), fits.length - 1).forEach(ft => {
+    lx.push(xr[0], xr[1], null); ly.push(ft.b0 + ft.b1 * xr[0], ft.b0 + ft.b1 * xr[1], null);
+  });
+  if (lx.length) T.push({ type: "scatter", mode: "lines", x: lx, y: ly, line: { color: C.past, width: 1.2 }, hoverinfo: "skip" });
+  // distance segments for the current sample
+  if (S.segMode !== "none") {
+    const sx = [], sy = [];
+    cur.forEach(i => {
+      const base = S.segMode === "err" ? S.b0 + S.b1 * X[i] : fit.b0 + fit.b1 * X[i];
+      sx.push(X[i], X[i], null); sy.push(base, Y[i], null);
+    });
+    T.push({ type: "scatter", mode: "lines", x: sx, y: sy, line: { color: S.segMode === "err" ? C.err : C.acc, width: 1.4, dash: S.segMode === "err" ? "solid" : "dot" }, hoverinfo: "skip" });
+  }
+  // selected point: both distances
+  const si = cur[S.sel];
+  const yTrue = S.b0 + S.b1 * X[si], yHat = fit.b0 + fit.b1 * X[si];
+  T.push({ type: "scatter", mode: "lines", x: [X[si] - 0.07, X[si] - 0.07], y: [yTrue, Y[si]], line: { color: C.err, width: 3.5 }, hoverinfo: "skip" });
+  T.push({ type: "scatter", mode: "lines", x: [X[si] + 0.07, X[si] + 0.07], y: [yHat, Y[si]], line: { color: C.acc, width: 3.5, dash: "dot" }, hoverinfo: "skip" });
+  // true line and current estimated line
+  T.push({ type: "scatter", mode: "lines", x: xr, y: xr.map(x => S.b0 + S.b1 * x), line: { color: C.ink, width: 3.5 },
+    hovertemplate: "True line<br>E[Y | X = %{x:.1f}] = %{y:.2f}<extra></extra>" });
+  T.push({ type: "scatter", mode: "lines", x: xr, y: xr.map(x => fit.b0 + fit.b1 * x), line: { color: C.acc, width: 2.5 },
+    hovertemplate: "Estimated line<br>Ŷ = %{y:.2f} at X = %{x:.1f}<extra></extra>" });
+  // current sample points
+  T.push({ type: "scatter", mode: "markers", x: cur.map(i => X[i]), y: cur.map(i => Y[i]),
+    marker: { size: cur.map((_, k) => k === S.sel ? 13 : 8), color: C.acc, line: { color: cur.map((_, k) => k === S.sel ? C.err : "#fff"), width: cur.map((_, k) => k === S.sel ? 2.5 : 1) } },
+    customdata: cur.map(i => [S.b0 + S.b1 * X[i], fit.b0 + fit.b1 * X[i]]),
+    hovertemplate: "X = %{x:.2f}, Y = %{y:.2f}<br>ε = Y − true line = %{customdata[0]:.2f} → see equations<extra>click to inspect</extra>", name: "sample" });
+  const sampleTrace = T.length - 1;
+  T[sampleTrace].hovertemplate = "X = %{x:.2f}, Y = %{y:.2f}<extra>click to inspect</extra>";
+  const ann = [{ x: X[si], y: Y[si], text: "<b>i</b>", showarrow: true, arrowhead: 0, ax: 18, ay: -18, font: { color: C.err, size: 12 }, arrowcolor: C.err }];
+  Plotly.react($("p_main"), T, {
+    margin: { l: 52, r: 10, t: 6, b: 40 }, font: FONT, paper_bgcolor: "#fff", plot_bgcolor: "#fff", showlegend: false,
+    xaxis: { title: { text: "X (years of schooling)", standoff: 8 }, range: xr, gridcolor: "#eef0f2", zeroline: false },
+    yaxis: { title: { text: "Y (salary, $1,000s)", standoff: 6 }, range: yRange(), gridcolor: "#eef0f2", zeroline: false },
+    annotations: ann, hovermode: "closest"
+  }, CFG);
+  $("main_sub").textContent = `${N.toLocaleString("en-US")} people in the population · current sample n = ${cur.length} · ${fits.length} sample line${fits.length === 1 ? "" : "s"} drawn so far` + (fits.length - 1 > SHOWLINES ? ` (the last ${SHOWLINES} are shown)` : "");
+}
+let clickBound = false;
+function bindClick() {
+  if (clickBound) return; clickBound = true;
+  $("p_main").on("plotly_click", ev => {
+    const p = ev.points.find(q => q.data.name === "sample");
+    if (!p) return;
+    S.sel = p.pointIndex; renderMain(); renderEq();
+  });
+}
+
+// ---------- equations ----------
+function renderEq() {
+  const cur = hist[hist.length - 1], fit = fits[fits.length - 1];
+  const i = cur[S.sel], x = X[i], y = Y[i];
+  const yTrue = S.b0 + S.b1 * x, eps = y - yTrue, yHat = fit.b0 + fit.b1 * x, e = y - yHat;
+  const O = "\\color{#e6550d}", B = "\\color{#08519c}";
+  tex("tex1", `E[Y \\mid X] = ${f(S.b0, 0)}${sgn(S.b1, 1)}X \\quad\\Rightarrow\\quad E[Y \\mid X=${x.toFixed(2)}] = ${yTrue.toFixed(2)}`);
+  $("n1").textContent = `The average salary of everyone with ${x.toFixed(2)} years of schooling. No ε: errors cancel out on average.`;
+  tex("tex2", `Y_i = \\underbrace{${f(S.b0, 0)}${sgn(S.b1, 1)}(${x.toFixed(2)})}_{${yTrue.toFixed(2)}} + {${O}\\varepsilon_i} = ${yTrue.toFixed(2)} ${O}${sgn(eps)} = ${y.toFixed(2)}`);
+  $("n2").innerHTML = `Point <b style="color:#e6550d">i</b> lies <b style="color:#e6550d">${Math.abs(eps).toFixed(2)} ${eps >= 0 ? "above" : "below"}</b> the true line. In real life ε is never observed, because β₀ and β₁ are unknown.`;
+  tex("tex3", `\\hat Y_i = ${B}${f(fit.b0)}${sgn(fit.b1)}X_i = ${yHat.toFixed(2)}, \\quad {${B}e_i} = Y_i - \\hat Y_i = ${B}${f(e)}`);
+  $("n3").innerHTML = `Computed from the ${cur.length} sample points only. The residual e<sub>i</sub> (<b style="color:#08519c">${f(e)}</b>) estimates the error ε<sub>i</sub> (<b style="color:#e6550d">${f(eps)}</b>); they differ because the estimated line is not the true one.`;
+  const d0 = fit.b0 - S.b0, d1 = fit.b1 - S.b1;
+  $("err0").textContent = `β̂₀ − β₀ = ${sgnS(d0)}`;
+  $("err1").textContent = `β̂₁ − β₁ = ${sgnS(d1, 3)}`;
+  $("eq_sub").textContent = `Inspecting point i: X = ${x.toFixed(2)}, Y = ${y.toFixed(2)}. Click another blue point to change it.`;
+}
+
+// ---------- sampling distribution ----------
+function renderDist() {
+  const isB1 = S.par === "b1";
+  const vals = fits.map(ft => isB1 ? ft.b1 : ft.b0);
+  const truth = isB1 ? S.b1 : S.b0;
+  // exact standard errors over repeated samples: Var(β̂₁) = σ²·E[1/Sxx], Var(β̂₀) = σ²·E[1/n + x̄²/Sxx]
+  const mc = xMoments();
+  const se = isB1 ? S.sigma * Math.sqrt(mc.invS) : S.sigma * Math.sqrt(1 / S.n + mc.xbar2S);
+  const lo = truth - 4.2 * se, hi = truth + 4.2 * se;
+  const nb = Math.max(12, Math.min(40, Math.round(Math.sqrt(vals.length) * 2.2)));
+  const w = (hi - lo) / nb;
+  const counts = new Array(nb).fill(0);
+  vals.forEach(v => { const k = Math.floor((v - lo) / w); if (k >= 0 && k < nb) counts[k]++; });
+  const K = vals.length;
+  const dens = counts.map(c => c / (K * w));
+  const mids = counts.map((_, k) => lo + (k + 0.5) * w);
+  const cx = [], cy = [];
+  for (let j = 0; j <= 200; j++) { const t = lo + (hi - lo) * j / 200; cx.push(t); cy.push(Math.exp(-0.5 * ((t - truth) / se) ** 2) / (se * Math.sqrt(2 * Math.PI))); }
+  const ymax = Math.max(...cy, ...dens) * 1.15;
+  const cur = vals[vals.length - 1];
+  const T = [
+    { type: "bar", x: mids, y: dens, width: w * 0.92, marker: { color: "rgba(8,81,156,0.45)" }, customdata: counts,
+      hovertemplate: "%{x:.3f}: %{customdata} sample(s)<extra></extra>" },
+    { type: "scatter", mode: "lines", x: cx, y: cy, line: { color: "#5f6b7a", width: 1.5, dash: "dash" }, hoverinfo: "skip" }
+  ];
+  const shapes = [
+    { type: "line", x0: truth, x1: truth, y0: 0, y1: ymax, line: { color: C.ink, width: 3 } },
+    { type: "line", x0: cur, x1: cur, y0: 0, y1: ymax * 0.8, line: { color: C.acc, width: 2, dash: "dot" } }
+  ];
+  const sym = isB1 ? "β₁" : "β₀", hsym = isB1 ? "β̂₁" : "β̂₀";
+  const ann = [
+    { x: truth, y: ymax, yanchor: "bottom", text: `<b>true ${sym} = ${truth.toFixed(isB1 ? 1 : 0)}</b>`, showarrow: false, font: { color: C.ink, size: 11 } },
+    { x: cur, y: ymax * 0.8, yanchor: "bottom", text: `current ${hsym}`, showarrow: false, font: { color: C.acc, size: 10.5 }, xshift: cur > truth ? 30 : -30 }
+  ];
+  Plotly.react($("p_dist"), T, {
+    margin: { l: 40, r: 10, t: 14, b: 34 }, font: FONT, paper_bgcolor: "#fff", plot_bgcolor: "#fff", showlegend: false, bargap: 0,
+    xaxis: { title: { text: `${hsym} from each sample`, standoff: 4 }, range: [lo, hi], gridcolor: "#eef0f2", zeroline: false },
+    yaxis: { title: { text: "Density", standoff: 2 }, range: [0, ymax], gridcolor: "#eef0f2", zeroline: false, showticklabels: false },
+    shapes, annotations: ann
+  }, CFG);
+  $("dist_sub").textContent = `Each bar counts sample lines whose ${hsym} fell there. Dashed curve: the theoretical sampling distribution for n = ${S.n}.`;
+  $("st_k").textContent = K;
+  $("st_mean_t").textContent = `mean of ${hsym} (true ${truth.toFixed(isB1 ? 1 : 0)})`;
+  $("st_mean").textContent = K ? mean(vals).toFixed(3) : "—";
+  $("st_sd_t").textContent = `SD of ${hsym}: observed (theory)`;
+  $("st_sd").textContent = (K > 1 ? sd(vals).toFixed(3) : "—") + ` (${se.toFixed(3)})`;
+}
+
+function render() {
+  syncOut();
+  if (!hist.length) drawSample();
+  fits = hist.map(ols);
+  if (S.sel >= hist[hist.length - 1].length) S.sel = 0;
+  renderMain(); renderEq(); renderDist(); bindClick();
+}
+
+// ---------------- embedding: report height to the parent page ----------------
+if (window.self !== window.top) {
+  document.documentElement.classList.add("embedded");
+  let lastH = 0;
+  const reportHeight = () => {
+    const h = Math.ceil(document.body.getBoundingClientRect().height);
+    if (h > 0 && h !== lastH) { lastH = h; window.parent.postMessage({ type: "app-height", height: h }, "*"); }
+  };
+  new ResizeObserver(reportHeight).observe(document.body);
+  window.addEventListener("load", () => { reportHeight(); setTimeout(reportHeight, 500); setTimeout(reportHeight, 1500); });
+}
+
+setSeg("seg_seg", S.segMode);
+makeDraws(); buildPop();
+window.addEventListener("load", () => { drawSample(); render(); });
+</script>
+</body>
+</html>

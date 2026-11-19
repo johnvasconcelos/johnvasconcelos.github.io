@@ -254,11 +254,17 @@ const CHIPS = {
 const ALPHA_CHIPS = ["0.20", "0.10", "0.05", "0.02", "0.01"];
 const SHADE = "#fd8d3c", CURVE = "#08519c";
 
-function fmtP(p) {
-  if (p === 0) return "0";
-  if (p < 5e-5) return p.toExponential(3);
-  if (1 - p < 5e-5 && p < 1) return "1 − " + (1 - p).toExponential(3);
+function fmtP(p) {               // no scientific notation: tiny/huge areas shown as < 0.001 / > 0.999
+  if (p <= 0) return "0";
+  if (p >= 1) return "1";
+  if (p < 0.001) return "< 0.001";
+  if (p > 0.999) return "> 0.999";
   return p.toFixed(4);
+}
+// "= value", or just "< 0.001" / "> 0.999" when the value is a bound (avoids "= < 0.001")
+function eqP(p, bold) {
+  const s = fmtP(p), v = bold ? `<b>${s}</b>` : s;
+  return /^[<>]/.test(s) ? v : "= " + v;
 }
 const fmtZ = (z, d = 4) => (z < 0 ? "−" : "") + Math.abs(z).toFixed(d);
 
@@ -332,26 +338,26 @@ function renderResult() {
   const za = dir === "z2p" ? fmtZ(Math.abs(z), Math.max(2, decimalsOf($("val").value))) : fmtZ(Math.abs(z));
   let main, extra;
   if (dir === "z2p") {
-    if (tail === "left")  main = `P(Z ≤ ${zs}) = <b>${fmtP(p)}</b>`;
-    if (tail === "right") main = `P(Z ≥ ${zs}) = <b>${fmtP(p)}</b>`;
+    if (tail === "left")  main = `P(Z ≤ ${zs}) ${eqP(p, true)}`;
+    if (tail === "right") main = `P(Z ≥ ${zs}) ${eqP(p, true)}`;
     if (tail === "central") main = isAlpha()
-      ? `α = P(|Z| ≥ ${za}) = <b>${fmtP(1 - p)}</b>`
-      : `P(−${za} ≤ Z ≤ ${za}) = <b>${fmtP(p)}</b>`;
+      ? `α = P(|Z| ≥ ${za}) ${eqP(1 - p, true)}`
+      : `P(−${za} ≤ Z ≤ ${za}) ${eqP(p, true)}`;
   } else {
-    if (tail === "left")  main = `<b>z = ${zs}</b> &nbsp;so that P(Z ≤ z) = ${fmtP(p)}`;
-    if (tail === "right") main = `<b>z = ${zs}</b> &nbsp;so that P(Z ≥ z) = ${fmtP(p)}`;
+    if (tail === "left")  main = `<b>z = ${zs}</b> &nbsp;so that P(Z ≤ z) ${eqP(p)}`;
+    if (tail === "right") main = `<b>z = ${zs}</b> &nbsp;so that P(Z ≥ z) ${eqP(p)}`;
     if (tail === "central") main = isAlpha()
-      ? `<b>z* = ±${za}</b> &nbsp;so that α = P(|Z| ≥ z*) = ${fmtP(1 - p)}`
-      : `<b>z = ±${za}</b> &nbsp;so that P(−z ≤ Z ≤ z) = ${fmtP(p)}`;
+      ? `<b>z* = ±${za}</b> &nbsp;so that α = P(|Z| ≥ z*) ${eqP(1 - p)}`
+      : `<b>z = ±${za}</b> &nbsp;so that P(−z ≤ Z ≤ z) ${eqP(p)}`;
   }
   if (tail === "central") {
     const t = pnormUpper(Math.abs(z));
     extra = isAlpha()
-      ? `Each tail = ${fmtP(t)} &nbsp;·&nbsp; central area = ${fmtP(1 - 2 * t)}`
-      : `Each tail = ${fmtP(t)} &nbsp;·&nbsp; both tails (α) = ${fmtP(2 * t)}`;
+      ? `Each tail ${eqP(t)} &nbsp;·&nbsp; central area ${eqP(1 - 2 * t)}`
+      : `Each tail ${eqP(t)} &nbsp;·&nbsp; both tails (α) ${eqP(2 * t)}`;
     if (dir === "z2p" && z < 0) extra += " &nbsp;·&nbsp; central area uses |z|";
   } else {
-    extra = `Complement: ${tail === "left" ? "P(Z ≥ z)" : "P(Z ≤ z)"} = ${fmtP(1 - p)}`;
+    extra = `Complement: ${tail === "left" ? "P(Z ≥ z)" : "P(Z ≤ z)"} ${eqP(1 - p)}`;
   }
   $("res_main").innerHTML = main;
   $("res_extra").innerHTML = extra;
@@ -397,7 +403,7 @@ function renderPlot() {
     else if (isAlpha()) lx = Math.min(lim - 0.9, az + 0.9);
     else lx = 0;
     const ly = state.tail === "central" && !isAlpha() ? Math.min(dnorm(0) * 0.45, dnorm(Math.min(az, 1)) * 0.6) : Math.max(0.05, dnorm(lx) * 0.45);
-    ann.push({ x: lx, y: Math.max(0.04, ly), text: isAlpha() ? `<b>α = ${fmtP(1 - state.p)}</b> (both tails)` : `<b>area = ${fmtP(state.p)}</b>`, showarrow: false,
+    ann.push({ x: lx, y: Math.max(0.04, ly), text: isAlpha() ? `<b>α ${eqP(1 - state.p)}</b> (both tails)` : `<b>area ${eqP(state.p)}</b>`, showarrow: false,
       font: { size: 14, color: "#1f2933" }, bgcolor: "rgba(255,255,255,0.85)", borderpad: 3 });
   }
   traces.push({ type: "scatter", mode: "lines", x: xs, y: xs.map(dnorm), line: { color: CURVE, width: 2.5 },
@@ -475,7 +481,7 @@ function renderTable() {
   $("table_title").textContent = isAlpha() ? "Two-tailed α table: P(|Z| ≥ z)" : titles[state.tail];
   let note = "Row = z to one decimal; column = second decimal. Click any cell to use that z.";
   if (!state.error && hr < 0) note = `z = ${fmtZ(state.z, 2)} is outside the table range (|z| ≤ 3.49); the result above is still exact.`;
-  else if (state.dir === "p2z" && !state.error) note = `Closest table entry to ${isAlpha() ? "α" : "p"} = ${fmtP(isAlpha() ? 1 - state.p : state.p)} is highlighted (z rounded to 2 decimals). Click any cell to use that z.`;
+  else if (state.dir === "p2z" && !state.error) note = `Closest table entry to ${isAlpha() ? "α" : "p"} ${eqP(isAlpha() ? 1 - state.p : state.p)} is highlighted (z rounded to 2 decimals). Click any cell to use that z.`;
   $("table_note").textContent = note;
   $("table_sub").textContent = "";
 }

@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Homoscedasticity: Why the Residuals Become One Normal</title>
+<style>
+  :root{
+    --bg:#f5f6f8; --panel:#ffffff; --ink:#1f2933; --muted:#5f6b7a; --line:#e2e6ea;
+    --accent:#e6550d; --blue:#08519c;
+  }
+  html.embedded body{background:transparent}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+  .wrap{max-width:1100px;margin:0 auto;padding:20px 16px 40px}
+  h1{font-size:22px;margin:0 0 4px;font-weight:650;letter-spacing:-.01em;color:var(--blue)}
+  .sub{color:var(--muted);margin:0 0 16px}
+  .grid{display:grid;grid-template-columns:1fr 300px;gap:16px}
+  @media (max-width:860px){.grid{grid-template-columns:1fr}}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:12px}
+  #stage{position:relative;padding:6px}
+  canvas{display:block;width:100%;height:540px}
+  .caption{position:absolute;left:16px;top:12px;right:16px;font-size:13px;color:var(--muted);pointer-events:none}
+  .caption b{color:var(--ink)}
+  .controls{padding:16px;display:flex;flex-direction:column;gap:16px}
+  .ctl label{display:flex;justify-content:space-between;font-weight:600;font-size:14px;margin-bottom:4px}
+  .ctl label span{font-weight:500;color:var(--muted);font-variant-numeric:tabular-nums}
+  .ctl small{display:block;color:var(--muted);font-size:12.5px;margin-top:2px}
+  input[type=range]{width:100%;accent-color:var(--blue)}
+  .big input[type=range]{height:22px}
+  .seg{display:flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+  .seg button{flex:1;border:0;background:transparent;color:var(--ink);padding:7px 6px;font:inherit;font-size:13px;cursor:pointer}
+  .seg button.on{background:var(--blue);color:#fff}
+  .row{display:flex;gap:8px}
+  .btn{flex:1;border:1px solid var(--line);background:transparent;color:var(--ink);border-radius:8px;padding:8px;font:inherit;font-size:13.5px;cursor:pointer}
+  .btn.primary{background:var(--blue);border-color:var(--blue);color:#fff;font-weight:600}
+  hr{border:0;border-top:1px solid var(--line);margin:0}
+  .legend{font-size:12.5px;color:var(--muted);display:flex;flex-direction:column;gap:4px}
+  .sw{display:inline-block;width:18px;height:0;border-top:3px solid;vertical-align:middle;margin-right:6px}
+  .notes{margin-top:16px;padding:16px 20px;font-size:14.5px}
+  .notes h2{font-size:16px;margin:0 0 6px}
+  .notes ol{margin:6px 0 0;padding-left:20px}
+  .notes li{margin:4px 0}
+  .stat{font-variant-numeric:tabular-nums}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Homoscedasticity: why the residuals become <em>one</em> normal</h1>
+  <p class="sub">Model: Y<sub>i</sub> = β<sub>0</sub> + β<sub>1</sub>x<sub>i</sub> + ε<sub>i</sub>, with ε<sub>i</sub> ~ N(0, σ²). Each observation has its own normal distribution standing upright around the line.</p>
+
+  <div class="grid">
+    <div class="card" id="stage">
+      <canvas id="cv"></canvas>
+      <div class="caption" id="caption"></div>
+    </div>
+
+    <div class="card controls">
+      <div class="ctl big">
+        <label>1 · Bring the line down to zero <span id="tVal">0%</span></label>
+        <input type="range" id="t" min="0" max="100" value="0">
+        <small>Subtracts ŷ from each point: Y − ŷ = residual.</small>
+      </div>
+      <div class="ctl big">
+        <label>2 · Rotate the plot <span id="phiVal">30°</span></label>
+        <input type="range" id="phi" min="0" max="90" value="30">
+        <small>At 90° you look straight at the curves, along the x axis.</small>
+      </div>
+      <div class="row">
+        <button class="btn primary" id="play">▶ Animate</button>
+        <button class="btn" id="reset">Reset</button>
+      </div>
+      <hr>
+      <div class="ctl">
+        <label>Error variance</label>
+        <div class="seg" id="mode">
+          <button data-m="homo" class="on">Constant</button>
+          <button data-m="hetero">Grows with x</button>
+        </div>
+        <small id="modeNote">Homoscedastic: same σ for every x.</small>
+      </div>
+      <div class="ctl">
+        <label>Observations <span id="nVal">12</span></label>
+        <input type="range" id="n" min="5" max="60" value="12">
+      </div>
+      <div class="ctl">
+        <label>σ (standard deviation) <span id="sVal">2.0</span></label>
+        <input type="range" id="s" min="5" max="40" value="20">
+      </div>
+      <button class="btn" id="resample">🎲 New sample</button>
+      <hr>
+      <div class="legend">
+        <div><span class="sw" style="border-color:var(--blue)"></span>regression line (OLS)</div>
+        <div><span class="sw" style="border-color:var(--accent)"></span>sum (average) of all the normals</div>
+        <div><span class="sw" style="border-color:var(--muted);border-top-style:dashed"></span>reference normal N(0, σ²)</div>
+        <div class="stat" id="fit"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card notes">
+    <h2>How to use it in class</h2>
+    <ol>
+      <li><b>Starting view.</b> Each point has a normal centered on its fitted value ŷ<sub>i</sub>. Under homoscedasticity they all have the same width: only the center moves along the line.</li>
+      <li><b>Slider 1.</b> Subtracting ŷ brings every normal down to zero. What is left are the residuals e<sub>i</sub> = Y<sub>i</sub> − ŷ<sub>i</sub>, all centered on 0.</li>
+      <li><b>Slider 2.</b> Rotating to 90° makes the x axis vanish into depth, and the curves fall on top of each other. If σ is constant they match exactly: <b>a single N(0, σ²)</b>. The residual histogram appears behind them for comparison.</li>
+      <li><b>Contrast.</b> Switch to "Grows with x" and repeat. Now the stacked curves have different widths; their sum (orange) is more peaked with heavier tails than the reference normal (dashed). The stacked residuals do <b>not</b> form a single normal with variance σ².</li>
+    </ol>
+  </div>
+</div>
+
+<script>
+(function(){
+  const cv = document.getElementById('cv');
+  const ctx = cv.getContext('2d');
+  const $ = id => document.getElementById(id);
+
+  const state = { t:0, phi:30, mode:'homo', n:12, sigma:2.0, data:null };
+  const B0 = 3, B1 = 1.6, XMIN = 0, XMAX = 10, XC = 5, XH = 11.2;
+
+  // ---------- random ----------
+  let seed = 7;
+  function rnd(){ seed = (seed*16807) % 2147483647; return (seed-1)/2147483646; }
+  function gauss(){ let u=0,v=0; while(!u) u=rnd(); while(!v) v=rnd(); return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v); }
+
+  function sigmaAt(x){
+    return state.mode==='homo' ? state.sigma : state.sigma*(0.25 + 1.5*(x-XMIN)/(XMAX-XMIN));
+  }
+
+  let baseNoise = [], baseX = [];
+  function newSample(){
+    seed = Math.floor(Math.random()*2e9)+1;
+    baseNoise = []; baseX = [];
+    for(let i=0;i<60;i++){ baseNoise.push(gauss()); baseX.push(rnd()); }
+    build();
+  }
+
+  function build(){
+    const n = state.n, xs=[], ys=[];
+    for(let i=0;i<n;i++){
+      // spread x evenly with jitter so every curve is visible
+      const x = XMIN + 0.4 + (XMAX-XMIN-0.8)*( (i + 0.5*baseX[i]) / n );
+      xs.push(x);
+      ys.push(B0 + B1*x + sigmaAt(x)*baseNoise[i]);
+    }
+    const mx = xs.reduce((a,b)=>a+b)/n, my = ys.reduce((a,b)=>a+b)/n;
+    let sxy=0, sxx=0;
+    for(let i=0;i<n;i++){ sxy+=(xs[i]-mx)*(ys[i]-my); sxx+=(xs[i]-mx)**2; }
+    const b1 = sxy/sxx, b0 = my - b1*mx;
+    const res = ys.map((y,i)=> y - (b0+b1*xs[i]));
+    const sig = xs.map(sigmaAt);
+    const pooled = Math.sqrt(sig.reduce((a,s)=>a+s*s,0)/n);
+    const s = Math.sqrt(res.reduce((a,r)=>a+r*r,0)/(n-2));
+    state.data = { xs, ys, b0, b1, res, sig, pooled, my, s };
+    $('fit').innerHTML = `ŷ = ${b0.toFixed(2)} + ${b1.toFixed(2)}·x &nbsp;·&nbsp; s = ${s.toFixed(2)}`;
+    draw();
+  }
+
+  // ---------- projection ----------
+  let W=0,H=0,DPR=1, kx, ky, kz;
+  function resize(){
+    DPR = window.devicePixelRatio||1;
+    const r = cv.getBoundingClientRect();
+    W = r.width; H = r.height;
+    cv.width = W*DPR; cv.height = H*DPR;
+    ctx.setTransform(DPR,0,0,DPR,0,0);
+    draw();
+  }
+
+  function cam(){
+    const phi = state.phi*Math.PI/180;
+    const f = state.phi/90;
+    const el = (16*(1-f))*Math.PI/180;
+    kx = Math.min(W*0.062, 70);
+    const yRange = 30;
+    ky = H*0.8/yRange;
+    kz = Math.min(W*0.85, 520) * (state.sigma/2) * 0.55; // keeps peak width roughly stable
+    const zoom = f*state.t;            // zoom in on the overlapped view
+    ky *= 1 + 0.6*zoom; kz *= 1 + 1.3*zoom;
+    const d = state.data;
+    const yc = (1-state.t)*(d.my) + state.t*0;
+    const ox = W*0.5 - f*W*0.22;
+    const oy = H*0.55;
+    return {phi, el, yc, ox, oy, c:Math.cos(phi), s:Math.sin(phi), ce:Math.cos(el), se:Math.sin(el)};
+  }
+
+  function P(C, X, Y, Z){
+    const px=(X-XC)*kx, py=(Y-C.yc)*ky, pz=Z*kz;
+    const sx = px*C.c + pz*C.s;
+    const dep = -px*C.s + pz*C.c;
+    const sy = py*C.ce + dep*C.se;
+    return [C.ox + sx, C.oy - sy, dep];
+  }
+
+  function dnorm(y, m, s){ return Math.exp(-0.5*((y-m)/s)**2)/(s*Math.sqrt(2*Math.PI)); }
+
+  function css(name){ return getComputedStyle(document.documentElement).getPropertyValue(name).trim(); }
+
+  // ---------- draw ----------
+  function draw(){
+    if(!state.data || !W) return;
+    const d = state.data, t = state.t, C = cam(), f = state.phi/90;
+    const ink=css('--ink'), muted=css('--muted'), line=css('--line'), accent=css('--accent'), blue=css('--blue');
+    ctx.clearRect(0,0,W,H);
+    const fitY = x => d.b0 + d.b1*x;
+    const shift = x => t*fitY(x);
+
+    // axes
+    ctx.lineWidth=1; ctx.strokeStyle=line; ctx.fillStyle=muted; ctx.font='12px system-ui';
+    // zero line along x
+    let a=P(C,XMIN,0,0), b=P(C,XMAX+0.4,0,0);
+    ctx.setLineDash([4,4]); ctx.beginPath(); ctx.moveTo(a[0],a[1]); ctx.lineTo(b[0],b[1]); ctx.stroke(); ctx.setLineDash([]);
+    if(f<0.85){ ctx.globalAlpha=1-f/0.85; ctx.fillText('x', b[0]+6, b[1]+4); ctx.fillText('y = 0', a[0]-38, a[1]+4); ctx.globalAlpha=1; }
+    // y axis
+    a=P(C,XMIN,C.yc-14,0); b=P(C,XMIN,C.yc+14,0);
+    ctx.beginPath(); ctx.moveTo(a[0],a[1]); ctx.lineTo(b[0],b[1]); ctx.stroke();
+    ctx.fillText(t>0.5?'residual (Y − ŷ)':'Y', b[0]-6, b[1]-6);
+    // density axis
+    a=P(C,XMIN,C.yc-14,0); b=P(C,XMIN,C.yc-14,0.25);
+    ctx.beginPath(); ctx.moveTo(a[0],a[1]); ctx.lineTo(b[0],b[1]); ctx.stroke();
+    if(state.phi>12) ctx.fillText('density', b[0]+4, b[1]+14);
+
+    // regression line
+    a=P(C,XMIN,fitY(XMIN)-shift(XMIN),0); b=P(C,XMAX,fitY(XMAX)-shift(XMAX),0);
+    ctx.strokeStyle=blue; ctx.lineWidth=2.5; ctx.globalAlpha = 1 - 0.6*f;
+    ctx.beginPath(); ctx.moveTo(a[0],a[1]); ctx.lineTo(b[0],b[1]); ctx.stroke(); ctx.globalAlpha=1;
+
+    // build curve objects
+    const n=d.xs.length, items=[];
+    for(let i=0;i<n;i++){
+      const x=d.xs[i], mu=fitY(x)-shift(x), s=d.sig[i];
+      const dep = P(C,x,mu,0.05)[2];
+      items.push({i,x,mu,s,dep});
+    }
+    items.sort((p,q)=>q.dep-p.dep);
+    const alphaFill = Math.max(0.06, Math.min(0.22, 2.2/n));
+    for(const it of items){
+      const hue = 200 + 140*(it.i/(Math.max(1,n-1)));
+      const pts=[];
+      const N=60;
+      for(let k=0;k<=N;k++){
+        const y = it.mu - 3.5*it.s + 7*it.s*k/N;
+        pts.push(P(C,it.x,y,dnorm(y,it.mu,it.s)));
+      }
+      const b0p=P(C,it.x,it.mu-3.5*it.s,0), b1p=P(C,it.x,it.mu+3.5*it.s,0);
+      ctx.beginPath(); ctx.moveTo(b0p[0],b0p[1]);
+      for(const p of pts) ctx.lineTo(p[0],p[1]);
+      ctx.lineTo(b1p[0],b1p[1]); ctx.closePath();
+      ctx.fillStyle=`hsla(${hue},70%,55%,${alphaFill})`; ctx.fill();
+      ctx.strokeStyle=`hsla(${hue},70%,45%,${n>30?0.45:0.85})`; ctx.lineWidth=1.3;
+      ctx.beginPath(); pts.forEach((p,k)=>k?ctx.lineTo(p[0],p[1]):ctx.moveTo(p[0],p[1])); ctx.stroke();
+      // base line
+      ctx.strokeStyle=`hsla(${hue},40%,50%,0.35)`; ctx.lineWidth=1;
+      ctx.beginPath(); ctx.moveTo(b0p[0],b0p[1]); ctx.lineTo(b1p[0],b1p[1]); ctx.stroke();
+      // observation + projection to curve center
+      const yo = d.ys[it.i]-shift(it.x);
+      const po=P(C,it.x,yo,0), pc=P(C,it.x,it.mu,0);
+      ctx.strokeStyle=muted; ctx.globalAlpha=0.5*(1-f); ctx.setLineDash([2,3]);
+      ctx.beginPath(); ctx.moveTo(po[0],po[1]); ctx.lineTo(pc[0],pc[1]); ctx.stroke(); ctx.setLineDash([]); ctx.globalAlpha=1;
+      ctx.fillStyle=ink; ctx.beginPath(); ctx.arc(po[0],po[1],3.2,0,7); ctx.fill();
+    }
+
+    // overlap panel: histogram + mixture + reference normal (only when centered and rotated)
+    const show = Math.pow(t,3) * Math.max(0,Math.min(1,(state.phi-40)/45));
+    if(show>0.01){
+      ctx.globalAlpha=show;
+      // histogram of residuals
+      const res=d.res, sd=d.pooled, w=Math.max(0.25, sd*0.5);
+      const lo=-4*sd, nb=Math.ceil(8*sd/w), counts=new Array(nb).fill(0);
+      res.forEach(r=>{ const k=Math.floor((r-lo)/w); if(k>=0&&k<nb) counts[k]++; });
+      for(let k=0;k<nb;k++){
+        if(!counts[k]) continue;
+        const h=counts[k]/(n*w), y0=lo+k*w, y1=y0+w;
+        const q=[P(C,XH,y0,0),P(C,XH,y1,0),P(C,XH,y1,h),P(C,XH,y0,h)];
+        ctx.beginPath(); q.forEach((p,j)=>j?ctx.lineTo(p[0],p[1]):ctx.moveTo(p[0],p[1])); ctx.closePath();
+        ctx.fillStyle=muted; ctx.globalAlpha=show*0.18; ctx.fill();
+        ctx.globalAlpha=show*0.5; ctx.strokeStyle=muted; ctx.lineWidth=1; ctx.stroke();
+      }
+      ctx.globalAlpha=show;
+      // reference normal
+      ctx.setLineDash([6,5]); ctx.strokeStyle=muted; ctx.lineWidth=1.8; ctx.beginPath();
+      for(let k=0;k<=120;k++){ const y=-4*sd+8*sd*k/120; const p=P(C,XH,y,dnorm(y,0,sd)); k?ctx.lineTo(p[0],p[1]):ctx.moveTo(p[0],p[1]); }
+      ctx.stroke(); ctx.setLineDash([]);
+      // mixture (average of all normals)
+      ctx.strokeStyle=accent; ctx.lineWidth=3; ctx.beginPath();
+      for(let k=0;k<=160;k++){
+        const y=-4.5*sd+9*sd*k/160; let m=0;
+        for(let i=0;i<n;i++) m+=dnorm(y, (1-t)*0 + 0, d.sig[i]);
+        m/=n; const p=P(C,XH,y,m); k?ctx.lineTo(p[0],p[1]):ctx.moveTo(p[0],p[1]);
+      }
+      ctx.stroke();
+      ctx.globalAlpha=1;
+    }
+
+    // caption
+    let cap;
+    if(t<0.05 && state.phi<60) cap='<b>One normal per observation</b>, centered on ŷ<sub>i</sub> along the line.';
+    else if(t<0.95) cap='<b>Subtracting ŷ…</b> the normals move down with the line to zero.';
+    else if(state.phi<85) cap='<b>Everything centered at zero.</b> Now rotate to 90° to look along the x axis.';
+    else cap = state.mode==='homo'
+      ? '<b>Head-on view:</b> with constant σ, every curve coincides in a single N(0, σ²).'
+      : '<b>Head-on view:</b> the widths differ, so the stack is <i>not</i> a single N(0, σ²): higher peak, heavier tails.';
+    $('caption').innerHTML = cap;
+  }
+
+  // ---------- controls ----------
+  function sync(){
+    $('tVal').textContent = Math.round(state.t*100)+'%';
+    $('phiVal').textContent = Math.round(state.phi)+'°';
+    $('t').value = Math.round(state.t*100);
+    $('phi').value = Math.round(state.phi);
+  }
+  $('t').oninput = e => { stopAnim(); state.t = e.target.value/100; sync(); draw(); };
+  $('phi').oninput = e => { stopAnim(); state.phi = +e.target.value; sync(); draw(); };
+  $('n').oninput = e => { state.n = +e.target.value; $('nVal').textContent=state.n; build(); };
+  $('s').oninput = e => { state.sigma = e.target.value/10; $('sVal').textContent=state.sigma.toFixed(1); build(); };
+  $('resample').onclick = newSample;
+  document.querySelectorAll('#mode button').forEach(bt => bt.onclick = () => {
+    document.querySelectorAll('#mode button').forEach(x=>x.classList.toggle('on', x===bt));
+    state.mode = bt.dataset.m;
+    $('modeNote').textContent = state.mode==='homo' ? 'Homoscedastic: same σ for every x.' : 'Heteroscedastic: σ grows with x (funnel shape).';
+    build();
+  });
+  $('reset').onclick = () => { stopAnim(); state.t=0; state.phi=30; sync(); draw(); };
+
+  let raf=null;
+  function stopAnim(){ if(raf){ cancelAnimationFrame(raf); raf=null; } }
+  const ease = u => u<0.5 ? 2*u*u : 1-Math.pow(-2*u+2,2)/2;
+  $('play').onclick = () => {
+    stopAnim();
+    state.t=0; state.phi=30; sync(); draw();
+    const t0=performance.now(), D1=2200, P=500, D2=2600;
+    const step = now => {
+      const e = now - t0;
+      if(e < P){ }
+      else if(e < P+D1){ state.t = ease((e-P)/D1); }
+      else if(e < 2*P+D1){ state.t = 1; }
+      else if(e < 2*P+D1+D2){ state.t=1; state.phi = 30 + 60*ease((e-2*P-D1)/D2); }
+      else { state.t=1; state.phi=90; sync(); draw(); raf=null; return; }
+      sync(); draw(); raf = requestAnimationFrame(step);
+    };
+    raf = requestAnimationFrame(step);
+  };
+
+
+  // ---------- embedding: report height to the parent page ----------
+  if (window.self !== window.top) {
+    document.documentElement.classList.add("embedded");
+    let lastH = 0;
+    const reportHeight = () => {
+      const h = Math.ceil(document.body.getBoundingClientRect().height);
+      if (h > 0 && h !== lastH) { lastH = h; window.parent.postMessage({ type: "app-height", height: h }, "*"); }
+    };
+    new ResizeObserver(reportHeight).observe(document.body);
+    window.addEventListener("load", () => { reportHeight(); setTimeout(reportHeight, 500); setTimeout(reportHeight, 1500); });
+  }
+  window.addEventListener('resize', resize);
+  newSample();
+  resize();
+})();
+</script>
+</body>
+</html>

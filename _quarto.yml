@@ -14,6 +14,9 @@ project:
     - apps/w10_hypothesis_testing.html
     - apps/w10_errors_power.html
     - apps/w11_anova.html
+    - apps/anova_residuals.html
+    - apps/regression_lines.html
+    - apps/homoscedasticity.html
     - apps/t_table.html
     - apps/chi_square_table.html
     - apps/f_table.html
@@ -51,6 +54,12 @@ website:
             text: "Type I & II Errors"
           - href: pages/w11_anova.qmd
             text: "One-Way ANOVA"
+          - href: pages/anova_residuals.qmd
+            text: "ANOVA Residuals: Why Pool Them?"
+          - href: pages/regression_lines.qmd
+            text: "Regression: True vs. Sample Lines"
+          - href: pages/homoscedasticity.qmd
+            text: "Homoscedasticity: Why One Normal?"
       - text: StatTables
         menu:
           - href: pages/z_table.qmd
