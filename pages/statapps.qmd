@@ -1,0 +1,108 @@
+---
+title: "StatApps"
+title-block-banner: false
+page-layout: full
+toc: false
+---
+
+Interactive apps that make the core ideas of introductory statistics visible. Change the inputs, draw samples and watch the distributions, intervals and tests respond. Each app opens on its own page.
+
+## Probability distributions
+
+```{=html}
+<div class="app-grid">
+  <a class="app-card" href="w6_binomial_distribution.html">
+    <i class="bi bi-bar-chart"></i>
+    <h3>Binomial Distribution</h3>
+    <p>Number of successes in n independent trials, each with the same probability of success p.</p>
+    <span>Open app →</span>
+  </a>
+  <a class="app-card" href="w6_hypergeometric_distribution.html">
+    <i class="bi bi-bar-chart"></i>
+    <h3>Hypergeometric Distribution</h3>
+    <p>Number of successes when sampling without replacement from a finite population.</p>
+    <span>Open app →</span>
+  </a>
+  <a class="app-card" href="w6_poisson_distribution.html">
+    <i class="bi bi-bar-chart"></i>
+    <h3>Poisson Distribution</h3>
+    <p>Number of events in a fixed interval of time or space, given an average rate λ.</p>
+    <span>Open app →</span>
+  </a>
+</div>
+```
+
+## Sampling and estimation
+
+```{=html}
+<div class="app-grid">
+  <a class="app-card" href="w8_sampling_distribution.html">
+    <i class="bi bi-diagram-3"></i>
+    <h3>Sampling Distributions</h3>
+    <p>Draw repeated samples from a population and see why x̄ and p̂ are unbiased estimators of μ and p.</p>
+    <span>Open app →</span>
+  </a>
+  <a class="app-card" href="w9_confidence_intervals.html">
+    <i class="bi bi-arrows-expand"></i>
+    <h3>Confidence Intervals</h3>
+    <p>Build intervals x̄ ± ME from many samples and see when, and how often, they miss μ.</p>
+    <span>Open app →</span>
+  </a>
+  <a class="app-card" href="w9_t_distribution.html">
+    <i class="bi bi-activity"></i>
+    <h3>Normal vs. t Distribution</h3>
+    <p>Compare the standard normal with Student's t and watch the heavier tails shrink as df grows.</p>
+    <span>Open app →</span>
+  </a>
+</div>
+```
+
+## Hypothesis testing
+
+```{=html}
+<div class="app-grid">
+  <a class="app-card" href="w10_hypothesis_testing.html">
+    <i class="bi bi-signpost-split"></i>
+    <h3>Hypothesis Testing</h3>
+    <p>Two routes to the same decision: compare the test statistic with the critical value, or the p-value with α.</p>
+    <span>Open app →</span>
+  </a>
+  <a class="app-card" href="w10_errors_power.html">
+    <i class="bi bi-exclamation-triangle"></i>
+    <h3>Type I &amp; II Errors</h3>
+    <p>See how α, β and power trade off, and how they relate to the confidence interval.</p>
+    <span>Open app →</span>
+  </a>
+</div>
+```
+
+## ANOVA and regression
+
+```{=html}
+<div class="app-grid">
+  <a class="app-card" href="w11_anova.html">
+    <i class="bi bi-bar-chart-steps"></i>
+    <h3>One-Way ANOVA</h3>
+    <p>Test equality of means by comparing two estimates of σ²: between groups and within groups.</p>
+    <span>Open app →</span>
+  </a>
+  <a class="app-card" href="anova_residuals.html">
+    <i class="bi bi-layers"></i>
+    <h3>ANOVA Residuals: Why Pool Them?</h3>
+    <p>Raw values from several groups may not look normal, but their residuals do. See why we pool them.</p>
+    <span>Open app →</span>
+  </a>
+  <a class="app-card" href="regression_lines.html">
+    <i class="bi bi-graph-up"></i>
+    <h3>Regression: True vs. Sample Lines</h3>
+    <p>Compare the population regression line with the lines estimated from different samples.</p>
+    <span>Open app →</span>
+  </a>
+  <a class="app-card" href="homoscedasticity.html">
+    <i class="bi bi-distribute-vertical"></i>
+    <h3>Homoscedasticity: Why One Normal?</h3>
+    <p>See why constant variance lets the residuals at every value of x combine into a single normal distribution.</p>
+    <span>Open app →</span>
+  </a>
+</div>
+```

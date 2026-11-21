@@ -4,6 +4,7 @@ project:
   execute-dir: project
   resources:
     - files/cv.pdf
+    - files/Syllabus_EPPS_2302.pdf
     - apps/w6_binomial_distribution.html
     - apps/w6_hypergeometric_distribution.html
     - apps/w6_poisson_distribution.html
@@ -30,12 +31,14 @@ website:
     left:
       - href: index.qmd
         text: Home
-      - href: pages/research.qmd
-        text: Research
       - href: pages/teaching.qmd
         text: Teaching
+      - href: pages/research.qmd
+        text: Research
       - text: StatApps
         menu:
+          - href: pages/statapps.qmd
+            text: "All apps"
           - href: pages/w6_binomial_distribution.qmd
             text: "Binomial Distribution"
           - href: pages/w6_hypergeometric_distribution.qmd
@@ -62,6 +65,8 @@ website:
             text: "Homoscedasticity: Why One Normal?"
       - text: StatTables
         menu:
+          - href: pages/stattables.qmd
+            text: "All tables"
           - href: pages/z_table.qmd
             text: "Z-Table"
           - href: pages/t_table.qmd
@@ -72,8 +77,6 @@ website:
             text: "F-Table"
           - href: pages/tukey_table.qmd
             text: "Tukey q-Table"
-      - href: pages/cv.qmd
-        text: CV
       - text: Power BI
         menu:
           - href: pages/powerbi.qmd
@@ -88,6 +91,8 @@ website:
             text: "US Elections"
           - href: pages/powerbi/financial_reports.qmd
             text: "Summarized Financial Reports"
+      - href: pages/cv.qmd
+        text: CV
       - text: EPPS 6356
         menu:
           - href: pages_epps_6356/assign01_Data_Visualization.qmd
@@ -136,7 +141,7 @@ format:
   html:
     theme: [default, custom.scss]   # tema dos StatApps (azul, laranja, fonte do sistema)
     css: styles.css
-    title-block-banner: true        # faixa azul com o título de cada página
+    title-block-banner: false       # sem faixa azul: título simples, igual em todas as páginas
     toc: true
 
 execute:

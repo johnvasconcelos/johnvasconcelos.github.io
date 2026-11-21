@@ -47,3 +47,33 @@ table.dataTable.display > tbody > tr:hover > * {
   color: #FFFFFF !important;
   border-color: #08519c !important;
 }
+
+/* ---------- Teaching: course list (image left, title + summary right) ---------- */
+.course-list { margin-top: 0; }
+.course { padding: 1.25rem 0; border-bottom: 1px solid #e2e6ea; }
+.course:first-child { padding-top: .25rem; }
+.course::after { content: ""; display: table; clear: both; }  /* the block ends below the image */
+.course:last-child { border-bottom: 0; padding-bottom: 0; }
+.course-list { margin-bottom: 0; }
+/* Image floats left: text starts beside it and runs full width once the image ends */
+.course__img { float: left; width: 180px; aspect-ratio: 1 / 1; object-fit: cover; margin: .3rem 1.75rem .6rem 0; }
+.course__body > p:first-child { margin-top: 0; }
+.course__title { margin: 0 0 .8rem !important; color: #08519c !important; font-size: 1.15rem; font-weight: 600;
+  text-transform: uppercase; letter-spacing: .12em; line-height: 1.5; }
+.course__body p { color: #323f4b; line-height: 1.65; }
+.course__body p:last-child { margin-bottom: 0; }
+.course__links { clear: both; display: flex; flex-wrap: wrap; gap: 1.2rem; font-weight: 600; margin-bottom: 0; }
+.course__links a { text-decoration: none; }
+@media (max-width: 767px) {
+  .course__img { width: 120px; margin-right: 1.2rem; }
+}
+
+/* ---------- StatApps / StatTables overview cards ---------- */
+.app-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 16px; margin: 12px 0 8px; }
+.app-card { display: flex; flex-direction: column; gap: 6px; padding: 18px; border: 1px solid #e2e6ea; border-radius: 10px;
+  background: #fff; color: inherit !important; text-decoration: none; transition: box-shadow .15s, transform .15s; }
+.app-card:hover { box-shadow: 0 6px 18px rgba(8, 81, 156, .12); transform: translateY(-2px); }
+.app-card i { font-size: 24px; color: #08519c; }
+.app-card h3 { margin: 0; font-size: 16px; font-weight: 650; color: #c4540d; }
+.app-card p { margin: 0; color: #5f6b7a; font-size: 14px; line-height: 1.5; }
+.app-card span { margin-top: auto; padding-top: 6px; color: #08519c; font-size: 13px; font-weight: 600; }

@@ -1,15 +1,52 @@
 ---
 title: "Research"
+title-block-banner: false
+toc: false
 ---
 
 ## Working Papers
 
-**Machine Learning applied to Public Sector Auditing: A case study with data from the department of health of the state of São Paulo, Brazil**
+```{=html}
+<div class="course-list">
 
-> Abstract:
->
-> Machine Learning (ML), as a field of Artificial Intelligence (AI), has become increasingly popular due to its ease of learning, scalability, and low cost. Both industry and academia have researched useful and feasible ways to apply ML algorithms for practical use in multiple fields, both academic and professional, taking advantage of their ability to learn patterns to predict future variables, classify or group data, and detect anomalous observations. Although the private sector has quickly evolved in studying the application of ML to financial fraud, stock market modeling and financial distress prediction, the application of these techniques in the public sector, namely in public audit, still demands further research for practical use. In this paper, I conduct a review of the current literature on machine learning applications for management-related fields and propose a case study to advance its application to public audit. I identified the Isolation Forest (iForest) algorithm as one of the most effective, scalable, and recognized for detecting anomalies. I applied it to a dataset with expenditure data from the Department of Health of the city of São Paulo, Brazil, and found that the algorithm can be of practical use for anomalous transaction value detection, but ineffective in identifying expenditure misclassification. The paper contributes to the scarce literature on the application of ML to public audit and seeks to promote further investigation for public oversight and improved management.
+  <!-- To add a paper: copy one <div class="course"> ... </div> block,
+       paste it above or below, and change the image, title and text. -->
+  <div class="course">
+    <h3 class="course__title">Machine Learning applied to Public Sector Auditing: A case study with data from the department of health of the state of São Paulo, Brazil</h3>
+    <img class="course__img" src="../images/mlpaper.jpg" alt="Machine learning applied to public sector auditing">
+    <div class="course__body">
+      <p>Machine learning (ML) is widely used in the private sector to detect financial fraud and predict financial distress, but its use in public audit remains largely unexplored. In this paper, I review the literature on ML applications in management-related fields and apply the Isolation Forest (iForest), one of the most effective and scalable anomaly-detection algorithms, to expenditure data from the Department of Health of the city of São Paulo, Brazil. The algorithm proved useful for flagging anomalous transaction values but ineffective at identifying expenditure misclassification. The paper adds to the scarce literature on ML in public audit and encourages further research to strengthen public oversight.</p>
+    </div>
+  </div>
 
-## Publications
+  <div class="course">
+    <h3 class="course__title">Artificial Intelligence in Public Sector Auditing: A Systematic Literature Review</h3>
+    <img class="course__img" src="../images/sistreviewia.jpg" alt="Systematic review on AI in public sector auditing">
+    <div class="course__body">
+      <p>This systematic literature review updates earlier mappings of Public Sector Auditing (PSAU) scholarship, which were written before artificial intelligence became an accessible professional and academic tool. Far from a mere financial compliance check, PSAU is one of the most powerful instruments of public management and oversight, and Supreme Audit Institutions such as the GAO, the UK National Audit Office and Brazil's TCU, along with smaller, isolated initiatives, have rapidly brought big data and AI into audit practice. Previous reviews by Mattei et al. (2021) and Rana et al. (2022) already flagged technology-based auditing as an emerging trend and research gap. Building on them, and following PRISMA guidelines, this review screens 664 articles to assess the impact of these technologies on the field, whether academic research has kept pace with institutional momentum, where the geographic centers of this research are, and how earlier trends and gaps have shifted because of AI. The analysis is underway, and the full methods and results will be presented at an upcoming conference.</p>
+    </div>
+  </div>
 
-Coming soon...
+</div>
+```
+
+## Collaborations
+
+```{=html}
+<div class="course-list">
+
+  <!-- To add a collaboration: copy one <div class="course"> ... </div> block.
+       An image is optional: add <img class="course__img" src="../images/NAME.jpg" alt="...">
+       right below the title to show one on the left. -->
+  <div class="course">
+    <h3 class="course__title">Effects of SB2 on Texas County Revenues and Spending</h3>
+    <div class="course__body">
+      <p>A project led by Dr. Evgenia Gorina, Associate Professor of Public and Nonprofit Management at the University of Texas at Dallas, within her Applied Government Finance Lab. Using data for all Texas counties in 2017 and 2022, the project compares how county revenue structures and spending allocations responded to Senate Bill 2 (SB2), the property tax reform enacted by the Texas Legislature in 2019. Own-source revenue collections remained relatively stable, while state funding declined in real terms. A subset of larger counties is also followed from 2017 to 2024 to track their fiscal trajectories. I assist Dr. Gorina on this project.</p>
+      <p class="course__links">
+        <a href="https://www.evgorina.com/applied-government-finance-lab"><i class="bi bi-box-arrow-up-right"></i> Project page</a>
+      </p>
+    </div>
+  </div>
+
+</div>
+```

@@ -1,0 +1,43 @@
+---
+title: "StatTables"
+title-block-banner: false
+page-layout: full
+toc: false
+---
+
+Interactive versions of the statistical tables used in introductory statistics. Instead of reading a printed table, enter a value to get the area under the curve, or enter an area to get the critical value, in one or both tails. Each table opens on its own page.
+
+```{=html}
+<div class="app-grid">
+  <a class="app-card" href="z_table.html">
+    <i class="bi bi-table"></i>
+    <h3>Z-Table</h3>
+    <p>Standard normal distribution, Z ~ N(0, 1): areas for a z-score, or the z-score for a chosen area.</p>
+    <span>Open table →</span>
+  </a>
+  <a class="app-card" href="t_table.html">
+    <i class="bi bi-table"></i>
+    <h3>T-Table</h3>
+    <p>Student's t distribution with df = n − 1: areas for a t-score, or the critical value t*.</p>
+    <span>Open table →</span>
+  </a>
+  <a class="app-card" href="chi_square_table.html">
+    <i class="bi bi-table"></i>
+    <h3>Chi-Square Table</h3>
+    <p>Right-skewed χ² distribution: areas and the left and right critical values, which are not symmetric.</p>
+    <span>Open table →</span>
+  </a>
+  <a class="app-card" href="f_table.html">
+    <i class="bi bi-table"></i>
+    <h3>F-Table</h3>
+    <p>F distribution with two degrees of freedom, used to compare variances and in ANOVA.</p>
+    <span>Open table →</span>
+  </a>
+  <a class="app-card" href="tukey_table.html">
+    <i class="bi bi-table"></i>
+    <h3>Tukey q-Table</h3>
+    <p>Studentized range distribution Q(k, df): critical values and p-values for comparing k means after ANOVA.</p>
+    <span>Open table →</span>
+  </a>
+</div>
+```

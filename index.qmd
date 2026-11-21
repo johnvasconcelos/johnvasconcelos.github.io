@@ -131,6 +131,7 @@ toc: false
         <div class="jv-buttons">
           <a class="jv-btn jv-btn--solid" href="#contact"><i class="bi bi-envelope"></i> Contact</a>
           <a class="jv-btn jv-btn--ghost" href="pages/research.html">Research</a>
+          <a class="jv-btn jv-btn--ghost" href="files/cv.pdf" download="John_Vasconcelos_CV.pdf"><i class="bi bi-download"></i> Download CV</a>
         </div>
         <div class="jv-social">
           <a href="https://www.linkedin.com/in/johnvasconcelos" aria-label="LinkedIn" title="LinkedIn"><i class="bi bi-linkedin"></i></a>
@@ -197,13 +198,13 @@ toc: false
           <p>Teaching assistant for EPPS 2302, Quantitative Analysis in the Social and Policy Sciences.</p>
           <span class="jv-more">Courses →</span>
         </a>
-        <a class="jv-card jv-reveal" href="pages/w6_binomial_distribution.html">
+        <a class="jv-card jv-reveal" href="pages/statapps.html">
           <i class="bi bi-graph-up"></i>
           <h3>StatApps</h3>
           <p>Interactive apps for probability distributions, sampling, confidence intervals and hypothesis testing.</p>
           <span class="jv-more">Open the apps →</span>
         </a>
-        <a class="jv-card jv-reveal" href="pages/z_table.html">
+        <a class="jv-card jv-reveal" href="pages/stattables.html">
           <i class="bi bi-table"></i>
           <h3>StatTables</h3>
           <p>Interactive z, t and chi-square tables that find areas, critical values and alpha in one or both tails.</p>

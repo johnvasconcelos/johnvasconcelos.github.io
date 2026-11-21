@@ -1,9 +1,28 @@
 ---
 title: "Teaching"
+title-block-banner: false
+toc: false
 ---
 
-## Teaching Assistant
+```{=html}
+<div class="course-list">
 
-> **EPPS 2302 - Quantitative Analysis in the Social and Policy Sciences**
->
-> Fall, 2026 - T/TH 2:30–3:45, GR 4.204
+  <!-- ===== EPPS 2302 =====
+       To add a course: copy this whole <div class="course"> ... </div> block,
+       paste it above or below, and change the image, title, text and links. -->
+  <div class="course">
+    <h3 class="course__title">EPPS 2302 - Methods of Quantitative Analysis in the Social and Policy Sciences, Fall 2026</h3>
+    <img class="course__img" src="../images/epps2302.jpg" alt="EPPS 2302">
+    <div class="course__body">
+      <p>This course introduces the basic concepts and methods of statistical analysis used across the social and policy sciences to understand human relationships and the impacts of government action on them. Topics include describing and visualizing data, using probability to assess claims about the world based on sample data, hypothesis testing, and exploring cause-and-effect relationships through regression models, with software to ease visualization and calculation.</p>
+      <p>Interactive course resources: <a href="statapps.html">StatApps</a>, apps that make each topic visible, and <a href="stattables.html">StatTables</a>, interactive z, t, χ², F and Tukey tables.</p>
+      <p class="course__links">
+        <a href="../files/Syllabus_EPPS_2302.pdf"><i class="bi bi-file-earmark-pdf"></i> Syllabus</a>
+        <a href="statapps.html"><i class="bi bi-graph-up"></i> StatApps</a>
+        <a href="stattables.html"><i class="bi bi-table"></i> StatTables</a>
+      </p>
+    </div>
+  </div>
+
+</div>
+```
